@@ -2,698 +2,622 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>PORTOEX – Dashboard Mão de Obra</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PORTOEX — Mão de Obra 3º</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;overflow:hidden;background:#0a1228;font-family:Arial,sans-serif;color:#fff;}
-.app{display:flex;flex-direction:column;height:100vh;}
+:root {
+  --navy: #0D1B3E;
+  --yellow: #F5C518;
+  --white: #FFFFFF;
+  --gray-400: #9BA3AF;
+}
 
-/* ─── TOPBAR ─── */
-.topbar{background:#1B2B6B;border-bottom:3px solid #F07020;padding:8px 18px;
-  display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10;}
-.logo{width:42px;height:42px;background:#F07020;border-radius:50%;display:flex;
-  align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0;}
-.brand-name{font-size:18px;font-weight:800;letter-spacing:.5px;}
-.brand-sub{font-size:9px;color:#F07020;letter-spacing:2px;margin-top:2px;}
-.topbar-mid{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;}
-.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:.2s;}
-.dot.on{background:#F07020;transform:scale(1.3);}
-.topbar-r{display:flex;align-items:center;gap:8px;}
-.upd{font-size:10px;color:#8898cc;}
-.sel-mes{background:#0f1c45;color:#fff;border:1px solid rgba(240,112,32,.5);
-  padding:3px 8px;border-radius:4px;font-size:11px;}
-.btn{background:#F07020;border:none;color:#fff;padding:4px 12px;border-radius:4px;
-  cursor:pointer;font-weight:700;font-size:11px;}
-.btn:hover{background:#d05e10;}
-.btn.sec{background:#1B2B6B;border:1px solid rgba(240,112,32,.4);}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ─── STATUS ─── */
-.sbar{background:#060e25;padding:4px 18px;display:flex;align-items:center;gap:6px;
-  font-size:10px;color:#4a5a7a;flex-shrink:0;}
-.sdot{width:6px;height:6px;border-radius:50%;background:#4caf50;}
-.sdot.ld{background:#F07020;animation:pulse 1s infinite;}
-.sdot.err{background:#ef5350;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.dbgbtn{margin-left:auto;background:none;border:1px solid #1a2540;color:#334;
-  padding:1px 8px;border-radius:3px;cursor:pointer;font-size:9px;}
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
 
-/* ─── LOADING ─── */
-.ldov{position:fixed;inset:0;background:rgba(10,18,40,.93);
-  display:flex;align-items:center;justify-content:center;z-index:200;}
-.ldov.hidden{display:none;}
-.ldbox{background:#1B2B6B;border:2px solid #F07020;border-radius:10px;
-  padding:32px 50px;text-align:center;}
-.spin{width:40px;height:40px;border:4px solid rgba(240,112,32,.25);
-  border-top-color:#F07020;border-radius:50%;margin:0 auto 14px;
-  animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
+body {
+  background: #111;
+  font-family: 'Barlow Condensed', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
 
-/* ─── SLIDES ─── */
-.sw{flex:1;position:relative;overflow:hidden;}
-.slide{position:absolute;inset:0;opacity:0;pointer-events:none;
-  transition:opacity .3s;overflow-y:auto;overflow-x:hidden;padding:14px 18px;}
-.slide.on{opacity:1;pointer-events:all;}
-.narr{position:absolute;top:50%;transform:translateY(-50%);
-  background:rgba(27,43,107,.7);border:1px solid rgba(240,112,32,.3);
-  color:#F07020;font-size:26px;width:36px;height:52px;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;z-index:20;border-radius:4px;user-select:none;}
-.narr:hover{background:#1B2B6B;}
-.nl{left:3px;} .nr{right:3px;}
+/* ===== LOGIN OVERLAY ===== */
+#login-overlay {
+  position: fixed;
+  inset: 0;
+  background: #0a0f1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.login-box {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-top: 4px solid var(--yellow);
+  border-radius: 8px;
+  padding: 40px 48px;
+  width: 380px;
+  text-align: center;
+}
+.login-logo {
+  background: var(--yellow);
+  color: var(--navy);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+.login-title {
+  color: var(--white);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.login-sub {
+  color: var(--gray-400);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.login-field {
+  margin-bottom: 14px;
+  text-align: left;
+}
+.login-field label {
+  display: block;
+  color: var(--gray-400);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.login-field input {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+.login-field input:focus { border-color: var(--yellow); }
+.login-btn {
+  width: 100%;
+  margin-top: 8px;
+  background: var(--yellow);
+  color: var(--navy);
+  border: none;
+  border-radius: 4px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.login-btn:hover { opacity: .85; }
+.login-error {
+  margin-top: 12px;
+  color: #e74c3c;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  min-height: 18px;
+}
 
-/* ─── DEBUG ─── */
-.dbg{position:fixed;bottom:0;left:0;right:0;background:#020810;
-  border-top:1px solid #1a2540;padding:8px 12px;max-height:200px;
-  overflow:auto;font-size:10px;color:#4a6;z-index:100;display:none;}
+/* HEADER */
+.tv-header {
+  background: var(--navy);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  border-bottom: 4px solid var(--yellow);
+  flex-shrink: 0;
+}
+.tv-logo { display: flex; align-items: center; gap: 14px; }
+.tv-logo-box {
+  background: var(--yellow);
+  color: var(--navy);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  padding: 5px 12px;
+  border-radius: 4px;
+}
+.tv-title  { color: var(--white); font-size: 24px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+.tv-subtitle { color: var(--yellow); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+.tv-header-right { text-align: right; }
+.tv-date { color: var(--white); font-size: 18px; font-weight: 700; }
+.tv-time { color: var(--yellow); font-size: 30px; font-weight: 900; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
+.tv-empresa-tag {
+  margin-left: 16px;
+  background: rgba(245,197,24,.15);
+  color: var(--yellow);
+  border: 1px solid rgba(245,197,24,.3);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
 
-/* ─── SLIDE HEADER ─── */
-.slhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.sltitle{font-size:14px;font-weight:800;color:#F07020;
-  text-transform:uppercase;letter-spacing:1px;}
-.slbadge{background:rgba(240,112,32,.15);border:1px solid rgba(240,112,32,.3);
-  padding:3px 10px;border-radius:3px;font-size:10px;color:#F07020;font-weight:700;}
+/* STATS BAR */
+.stats-bar {
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 48px;
+}
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 24px;
+  margin-right: 24px;
+  border-right: 1px solid #333;
+}
+.stat-label { font-size: 10px; font-weight: 700; color: var(--gray-400); letter-spacing: 2px; text-transform: uppercase; }
+.stat-val   { font-size: 24px; font-weight: 900; color: var(--white); line-height: 1; }
+.stat-val.yellow { color: var(--yellow); }
+.stat-val.green  { color: #2ecc71; }
+.stat-val.blue   { color: #60a5fa; }
+.stat-val.purple { color: #a78bfa; }
+.tv-live {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10px; font-weight: 700; color: var(--gray-400); letter-spacing: 2px; text-transform: uppercase;
+}
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #2ecc71;
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-/* ─── KPI ─── */
-.krow{display:flex;gap:12px;margin-bottom:13px;}
-.kpi{flex:1;background:#1B2B6B;border-radius:8px;padding:12px 16px;border-left:4px solid #F07020;}
-.kpi.rt{border-left-color:#4fc3f7;} .kpi.ex{border-left-color:#F07020;}
-.kpi.tt{border-left-color:#a5d6a7;} .kpi.me{border-left-color:#ce93d8;}
-.klbl{font-size:9px;color:#7788aa;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-.kval{font-size:36px;font-weight:900;line-height:1;}
-.ksub{font-size:9px;color:#556;margin-top:3px;}
+/* CONTENT */
+.tv-content {
+  flex: 1;
+  min-height: 0;
+  padding: 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
 
-/* ─── CARDS ─── */
-.card{background:#1B2B6B;border-radius:8px;padding:12px;}
-.ctitle{font-size:10px;font-weight:700;color:#F07020;text-transform:uppercase;
-  letter-spacing:1px;margin-bottom:8px;
-  border-bottom:1px solid rgba(240,112,32,.2);padding-bottom:6px;}
-.ch{position:relative;}
-.ch.h280{height:280px;} .ch.h240{height:240px;}
-.ch.h200{height:200px;} .ch.h180{height:180px;} .ch.h160{height:160px;}
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+.two-col.single { grid-template-columns: 1fr; }
 
-/* ─── GRIDS ─── */
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.r1{margin-bottom:12px;}
-.opgrid{display:grid;gap:12px;}
-.opgrid.c1{grid-template-columns:1fr;}
-.opgrid.c2{grid-template-columns:1fr 1fr;}
-.opgrid.c3{grid-template-columns:1fr 1fr 1fr;}
+.extra-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-/* ─── SOURCE TAG ─── */
-.srctag{position:fixed;bottom:4px;right:8px;font-size:9px;color:#1e2c4a;z-index:50;}
+/* SECTION */
+.cc-section {
+  background: #1a1a1a;
+  border-radius: 6px;
+  border: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.cc-header { padding: 8px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.cc-rota      { background: var(--navy);  border-bottom: 2px solid var(--yellow); }
+.cc-expedicao { background: #1a2a1a; border-bottom: 2px solid #2ecc71; }
+.cc-title { font-size: 17px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
+.cc-rota .cc-title      { color: var(--yellow); }
+.cc-expedicao .cc-title { color: #2ecc71; }
+.cc-count { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 10px; letter-spacing: 1px; }
+.cc-rota .cc-count      { background: rgba(245,197,24,.15); color: var(--yellow); }
+.cc-expedicao .cc-count { background: rgba(46,204,113,.15); color: #2ecc71; }
+
+/* TABLE */
+.table-scroll { flex: 1; overflow-y: auto; min-height: 0; }
+.tv-table { width: 100%; border-collapse: collapse; }
+.tv-table thead tr { background: #111; position: sticky; top: 0; z-index: 1; }
+.tv-table thead th {
+  padding: 7px 10px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gray-400);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #333;
+  white-space: nowrap;
+}
+.tv-table thead th.center { text-align: center; }
+.tv-table tbody tr { border-bottom: 1px solid #1e1e1e; }
+.tv-table tbody tr:nth-child(even) { background: rgba(255,255,255,.025); }
+.tv-table tbody tr:last-child { border-bottom: none; }
+.tv-table tbody td { padding: 7px 10px; vertical-align: middle; }
+
+.td-num  { color: var(--gray-400); font-size: 12px; font-weight: 600; width: 30px; text-align: center; }
+.td-nome { font-size: 16px; font-weight: 700; color: var(--white); }
+.td-empresa { font-size: 11px; color: var(--gray-400); }
+.td-op   { font-size: 13px; font-weight: 700; color: var(--yellow); }
+.td-func { font-size: 11px; color: var(--gray-400); }
+.td-time { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; }
+.td-time.entrada    { color: #3498db; }
+.td-time.saida-prev { color: var(--gray-400); }
+.td-time.saida-real { color: #2ecc71; }
+.td-motorista { font-size: 13px; font-weight: 600; color: #a78bfa; }
+.md-input {
+  background: transparent; border: 1px solid #444; border-radius: 4px;
+  color: var(--yellow); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700; width: 80px; padding: 3px 6px;
+  text-align: center; outline: none;
+}
+.md-input:focus { border-color: var(--yellow); background: rgba(245,197,24,.05); }
+.md-input::placeholder { color: #444; font-size: 11px; }
+
+/* STATUS */
+.status-pill {
+  display: inline-flex; align-items: center;
+  padding: 3px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap;
+}
+.s-escolha  { background: rgba(180,83,9,.2);   color: #f59e0b; border: 1px solid #f59e0b40; }
+.s-validada { background: rgba(21,101,192,.2);  color: #60a5fa; border: 1px solid #60a5fa40; }
+.s-presente { background: rgba(26,127,75,.2);   color: #4ade80; border: 1px solid #4ade8040; }
+.s-ausente  { background: rgba(192,57,43,.2);   color: #f87171; border: 1px solid #f8717140; }
+.s-encerrado{ background: rgba(100,100,100,.2); color: #9ca3af; border: 1px solid #9ca3af40; }
+
+.tv-empty { text-align: center; padding: 40px; color: #333; font-size: 18px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+
+/* ATRASO */
+.td-nome-atraso { font-size: 16px; font-weight: 700; color: #e74c3c !important; }
+.badge-atraso {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(231,76,60,.2); color: #e74c3c;
+  border: 1px solid #e74c3c60;
+  padding: 2px 7px; border-radius: 4px;
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+  animation: pulse-red 1.5s infinite;
+}
+@keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
 </style>
 </head>
 <body>
 
-<div id="ld" class="ldov">
-  <div class="ldbox">
-    <div class="spin"></div>
-    <div style="font-size:13px;color:#8898cc;">Carregando dados…</div>
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">PORTOEX</div>
+    <div class="login-title">Painel TV</div>
+    <div class="login-sub">Mão de Obra Terceirizada</div>
+    <div class="login-field">
+      <label>Usuário</label>
+      <input type="text" id="login-user" placeholder="Login" autocomplete="off" autocapitalize="off">
+    </div>
+    <div class="login-field">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="Senha">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
-<div class="app">
-
-  <!-- Top bar -->
-  <div class="topbar">
-    <div class="logo">PX</div>
+<header class="tv-header">
+  <div class="tv-logo">
+    <div class="tv-logo-box">PORTOEX</div>
     <div>
-      <div class="brand-name">PORTOEX</div>
-      <div class="brand-sub">MÃO DE OBRA · MAODEOBRA · TEMPO REAL</div>
+      <div class="tv-title">Mão de Obra — 3°</div>
+      <div class="tv-subtitle">Colaboradores Terceirizados</div>
     </div>
-    <div class="topbar-mid" id="nav-dots"></div>
-    <div class="topbar-r">
-      <span class="upd" id="upd">–</span>
-      <label style="font-size:10px;color:#8898cc;">Mês:</label>
-      <select class="sel-mes" id="selmes" onchange="onMes()">
-        <option value="0">JAN</option><option value="1">FEV</option>
-        <option value="2">MAR</option><option value="3">ABR</option>
-        <option value="4">MAI</option><option value="5">JUN</option>
-        <option value="6">JUL</option><option value="7">AGO</option>
-        <option value="8">SET</option><option value="9">OUT</option>
-        <option value="10">NOV</option><option value="11">DEZ</option>
-      </select>
-      <button class="btn" onclick="loadLive()" title="Buscar dados do Google Sheets">⟳ Live</button>
-      <button class="btn sec" onclick="toggleDbg()">⚙</button>
-    </div>
+    <span class="tv-empresa-tag" id="tv-empresa-tag" style="display:none"></span>
   </div>
-
-  <!-- Status bar -->
-  <div class="sbar">
-    <div class="sdot" id="sdot"></div>
-    <span id="stxt">Inicializando…</span>
-    <span id="scnt" style="color:#2a3a5a;"></span>
+  <div class="tv-header-right">
+    <div class="tv-date" id="tv-date">—</div>
+    <div class="tv-time" id="tv-time">00:00:00</div>
   </div>
+</header>
 
-  <!-- Slides -->
-  <div class="sw" id="sw">
-    <div class="narr nl" id="nl" onclick="go(cur-1)">‹</div>
-    <div class="narr nr" id="nr" onclick="go(cur+1)">›</div>
-
-    <!-- S0: QTY RESUMO -->
-    <div class="slide" id="sl0">
-      <div class="slhdr">
-        <div class="sltitle">📦 Ajudantes – Visão Geral</div>
-        <div class="slbadge" id="b0">–</div>
-      </div>
-      <div class="krow">
-        <div class="kpi rt"><div class="klbl">🚛 ROTA</div><div class="kval" id="krt">–</div><div class="ksub">Total mês selecionado</div></div>
-        <div class="kpi ex"><div class="klbl">🏭 EXPEDIÇÃO</div><div class="kval" id="kex">–</div><div class="ksub">Total mês selecionado</div></div>
-        <div class="kpi tt"><div class="klbl">✅ Total Geral</div><div class="kval" id="ktt">–</div><div class="ksub" id="kmes">–</div></div>
-        <div class="kpi me"><div class="klbl">📅 Referência</div><div class="kval" style="font-size:22px;padding-top:6px;" id="kref">–</div><div class="ksub">Dado mais recente</div></div>
-      </div>
-      <div class="r1">
-        <div class="card">
-          <div class="ctitle">ROTA vs EXPEDIÇÃO – 12 Meses (Ajudantes)</div>
-          <div class="ch h280"><canvas id="ch-ano-qty"></canvas></div>
-        </div>
-      </div>
-      <div class="r2">
-        <div class="card">
-          <div class="ctitle">ROTA – Mês Selecionado por Operação</div>
-          <div class="ch h180"><canvas id="ch-rota-mes-s0"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="ctitle">EXPEDIÇÃO – Mês Selecionado por Operação</div>
-          <div class="ch h180"><canvas id="ch-exp-mes-s0"></canvas></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S1: QTY ROTA OPS COMPARATIVO -->
-    <div class="slide" id="sl1">
-      <div class="slhdr">
-        <div class="sltitle">🚛 Ajudantes – Operações ROTA (Externo) – Comparativo Mensal</div>
-        <div class="slbadge" id="b1">–</div>
-      </div>
-      <div class="card" style="height:calc(100% - 52px);">
-        <div class="ctitle" id="ct1">ROTA · Comparativo por Mês</div>
-        <div class="ch" style="height:calc(100% - 36px)"><canvas id="ch-cmp-rota-qty"></canvas></div>
-      </div>
-    </div>
-
-    <!-- S2: QTY EXP OPS COMPARATIVO -->
-    <div class="slide" id="sl2">
-      <div class="slhdr">
-        <div class="sltitle">🏭 Ajudantes – Operações EXPEDIÇÃO (Interno) – Comparativo Mensal</div>
-        <div class="slbadge" id="b2">–</div>
-      </div>
-      <div class="card" style="height:calc(100% - 52px);">
-        <div class="ctitle" id="ct2">EXPEDIÇÃO · Comparativo por Mês</div>
-        <div class="ch" style="height:calc(100% - 36px)"><canvas id="ch-cmp-exp-qty"></canvas></div>
-      </div>
-    </div>
-
-    <!-- S3: R$ RESUMO -->
-    <div class="slide" id="sl3">
-      <div class="slhdr">
-        <div class="sltitle">💰 Valores R$ – Visão Geral</div>
-        <div class="slbadge" id="b3">–</div>
-      </div>
-      <div class="krow">
-        <div class="kpi rt"><div class="klbl">🚛 R$ ROTA</div><div class="kval" style="font-size:20px;" id="kr-rt">–</div><div class="ksub">Mês selecionado</div></div>
-        <div class="kpi ex"><div class="klbl">🏭 R$ EXPEDIÇÃO</div><div class="kval" style="font-size:20px;" id="kr-ex">–</div><div class="ksub">Mês selecionado</div></div>
-        <div class="kpi tt"><div class="klbl">✅ R$ Total</div><div class="kval" style="font-size:20px;" id="kr-tt">–</div><div class="ksub" id="kr-mes">–</div></div>
-        <div class="kpi me"><div class="klbl">📈 Custo/Ajudante</div><div class="kval" style="font-size:20px;" id="kr-avg">–</div><div class="ksub">Média mensal</div></div>
-      </div>
-      <div class="r1">
-        <div class="card">
-          <div class="ctitle">R$ ROTA vs EXPEDIÇÃO – 12 Meses</div>
-          <div class="ch h280"><canvas id="ch-ano-rs"></canvas></div>
-        </div>
-      </div>
-      <div class="r2">
-        <div class="card">
-          <div class="ctitle">R$ ROTA – Estimativa por Operação (Mês Selecionado)</div>
-          <div class="ch h180"><canvas id="ch-rs-rota-s3"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="ctitle">R$ EXPEDIÇÃO – Estimativa por Operação (Mês Selecionado)</div>
-          <div class="ch h180"><canvas id="ch-rs-exp-s3"></canvas></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- S4: R$ ROTA OPS COMPARATIVO -->
-    <div class="slide" id="sl4">
-      <div class="slhdr">
-        <div class="sltitle">🚛 Valores R$ – Operações ROTA (Externo) – Comparativo Mensal</div>
-        <div class="slbadge" id="b4">–</div>
-      </div>
-      <div class="card" style="height:calc(100% - 52px);">
-        <div class="ctitle" id="ct4">R$ ROTA · Comparativo por Mês</div>
-        <div class="ch" style="height:calc(100% - 36px)"><canvas id="ch-cmp-rota-rs"></canvas></div>
-      </div>
-    </div>
-
-    <!-- S5: R$ EXP OPS COMPARATIVO -->
-    <div class="slide" id="sl5">
-      <div class="slhdr">
-        <div class="sltitle">🏭 Valores R$ – Operações EXPEDIÇÃO (Interno) – Comparativo Mensal</div>
-        <div class="slbadge" id="b5">–</div>
-      </div>
-      <div class="card" style="height:calc(100% - 52px);">
-        <div class="ctitle" id="ct5">R$ EXPEDIÇÃO · Comparativo por Mês</div>
-        <div class="ch" style="height:calc(100% - 36px)"><canvas id="ch-cmp-exp-rs"></canvas></div>
-      </div>
-    </div>
-
-  </div><!-- /sw -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-label">Total</span>
+    <span class="stat-val yellow" id="tot-total">0</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Presentes</span>
+    <span class="stat-val green" id="tot-presentes">0</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Rota</span>
+    <span class="stat-val blue" id="tot-rota">0</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-label">Expedição</span>
+    <span class="stat-val purple" id="tot-expedicao">0</span>
+  </div>
+  <div class="tv-live">
+    <div class="live-dot"></div>
+    Ao vivo
+  </div>
 </div>
 
-<div class="dbg" id="dbg"><pre id="dbgpre"></pre></div>
-<div class="srctag">BASE_IMPORT · MAODEOBRA</div>
+<div class="tv-content" id="tv-content">
+  <div class="tv-empty">Carregando dados...</div>
+</div>
 
 <script>
-Chart.register(ChartDataLabels);
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  CONFIG
-// ─────────────────────────────────────────────────────────────────────────────
-const SHEET_ID = '17UTS8niKLf6_XtiZjDRVn9f-_THWWqXM0FI1qYkKVJA';
-const GID      = '1650357084';   // MAODEOBRA
-const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-const REFRESH  = 5 * 60 * 1000;
-
-// ── Excel columns (0-based) ───────────────────────────────────────────────────
-const COL_OP_NAME  = 35;  // AJ  – operation name
-const COL_OP_TYPE  = 36;  // AK  – ROTA / EXPEDIÇÃO
-const COL_MES0     = 37;  // AL  – Jan (months 0-11 → +37 to +48)
-// ROTA/EXP totals rows (0-based):
-const ROW_ROTA_TOT = 16;  // Excel row 17
-const ROW_EXP_TOT  = 17;  // Excel row 18
-// Operations rows (0-based):
-const ROW_OPS_S    = 3;   // Excel row 4
-const ROW_OPS_E    = 12;  // Excel row 13
-// Daily data starts (0-based):
-const ROW_DAILY_S  = 31;  // Excel row 32
-// Daily columns (0-based):
-const DC_RS  = 1;  // TT R$ DIA
-const DC_TD  = 2;  // Total helpers
-const DC_RT  = 3;  // ROTA helpers
-const DC_EX  = 4;  // EXP helpers
-const DC_MES = 5;  // MÊS (1-12)
-
-// ── Palette ───────────────────────────────────────────────────────────────────
-const NAVY   = '#1B2B6B';
-const ORANGE = '#F07020';
-const C_RT   = ['#4fc3f7','#29b6f6','#039be5','#0288d1','#0277bd','#01579b','#00acc1','#006064'];
-const C_EX   = ['#F07020','#ff9a40','#ffcc80','#ffe0b2','#fff3e0'];
-const GRN    = '#a5d6a7';
-const MES    = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
-const MESFULL= ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
-                 'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  STATIC FALLBACK DATA (extracted from MAODEOBRA 24/04/2026)
-// ─────────────────────────────────────────────────────────────────────────────
-const STATIC = {
-  ops:[
-    {name:"EXPEDIÇÃO", type:"EXPEDIÇÃO", mths:[109,118,118,71,0,0,0,0,0,0,0,0]},
-    {name:"ROTA",      type:"ROTA",      mths:[110,73,69,47,0,0,0,0,0,0,0,0]},
-    {name:"ESTOQUE",   type:"EXPEDIÇÃO", mths:[19,27,1,29,0,0,0,0,0,0,0,0]},
-    {name:"BRAFT",     type:"ROTA",      mths:[6,25,46,35,0,0,0,0,0,0,0,0]},
-    {name:"SAMSONITE", type:"ROTA",      mths:[28,10,12,3,0,0,0,0,0,0,0,0]},
-    {name:"MATTEL",    type:"EXPEDIÇÃO", mths:[14,31,31,18,0,0,0,0,0,0,0,0]},
-    {name:"MANOBRA",   type:"ROTA",      mths:[0,1,0,0,0,0,0,0,0,0,0,0]},
-    {name:"THOMPSON",  type:"ROTA",      mths:[0,9,7,3,0,0,0,0,0,0,0,0]},
-    {name:"SKO",       type:"ROTA",      mths:[0,0,2,0,0,0,0,0,0,0,0,0]}
-  ],
-  rotaTot:[144,118,136,88,0,0,0,0,0,0,0,0],
-  expTot:[142,176,150,118,0,0,0,0,0,0,0,0],
-  monthlyRS:[61994,60903,59918,30504,0,0,0,0,0,0,0,0],
-  monthlyRS_rota:[31712,22350,26781,12842,0,0,0,0,0,0,0,0],
-  monthlyRS_exp:[30282,38553,33137,17662,0,0,0,0,0,0,0,0]
+// ===== CREDENCIAIS =====
+// Cada entrada: { senha, filtro }
+// filtro: string que será comparada (case-insensitive) contra empresaNome e opNome do colaborador
+// filtro null = acesso total (admin)
+const CREDENCIAIS = {
+  'ADMIN':  { senha: 'PORTOEXTV', filtro: null },
+  'LJA':    { senha: '123456', filtro: 'LJA' },
+  'RP':     { senha: 'RP123',  filtro: 'RP'  },
+  'IAGO':   { senha: '123456', filtro: 'IAGO' },
+  'litoral':{ senha: '123456', filtro: 'litoral' },
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  STATE
-// ─────────────────────────────────────────────────────────────────────────────
-let D       = null;
-let selMes  = 3;  // default ABR (last month with data)
-let cur     = 0;
-const NS    = 6;
-let charts  = {};
-let rtimer  = null, ctimer = null, nxtRef = 0;
-let dbgL    = [];
+let filtroEmpresa = null; // definido após login
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  INIT – render static immediately, then try live
-// ─────────────────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  setupNav();
-  go(0);
-  document.getElementById('selmes').value = selMes;
-  // Render static data right away
-  applyData(STATIC, 'Dados do arquivo (24/04/2026) · Clique ⟳ Live para atualizar');
-  showLd(false);
-  // Try live fetch
-  loadLive();
+// ===== LOGIN =====
+function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-error');
+
+  const cred = CREDENCIAIS[user] || CREDENCIAIS[user.toUpperCase()] ||
+    Object.entries(CREDENCIAIS).find(([k]) => k.toLowerCase() === user.toLowerCase())?.[1];
+
+  if (!cred || cred.senha !== pass) {
+    err.textContent = 'Usuário ou senha inválidos.';
+    document.getElementById('login-pass').value = '';
+    return;
+  }
+
+  filtroEmpresa = cred.filtro;
+
+  // Mostra tag da empresa no header
+  const tag = document.getElementById('tv-empresa-tag');
+  tag.textContent = user.toUpperCase();
+  tag.style.display = 'inline-block';
+
+  // Remove overlay
+  document.getElementById('login-overlay').style.display = 'none';
+
+  // Inicia Firebase e render
+  initFirebase();
+}
+
+// Enter no campo de senha dispara login
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('login-user').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-pass').focus();
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  LIVE FETCH
-// ─────────────────────────────────────────────────────────────────────────────
-async function loadLive() {
-  setSt('ld', 'Buscando dados ao vivo…');
-  try {
-    const r = await fetch(CSV_URL + '&_=' + Date.now(), { cache:'no-store' });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const csv = await r.text();
-    const nd = parseCSV(csv);
-    if (nd) {
-      applyData(nd, 'Dados ao vivo · ' + new Date().toLocaleTimeString('pt-BR'));
-      setSt('ok', 'Conectado ao Google Sheets · auto-refresh 5 min');
-    }
-  } catch(e) {
-    setSt('err', 'Não foi possível buscar ao vivo (' + e.message + '). Exibindo dados do arquivo.');
-    dbg('LIVE ERR: ' + e);
-    flushDbg();
-  }
-  if (rtimer) clearTimeout(rtimer);
-  if (ctimer) clearInterval(ctimer);
-  nxtRef = Date.now() + REFRESH;
-  rtimer = setTimeout(loadLive, REFRESH);
-  ctimer = setInterval(tickCnt, 15000);
-  tickCnt();
+// ===== FIREBASE =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDsKKZaK1WBo3FjNo-2o0O5a0ehV4tDy4U",
+  authDomain: "vagas-terceirizados-portoex.firebaseapp.com",
+  databaseURL: "https://vagas-terceirizados-portoex-default-rtdb.firebaseio.com",
+  projectId: "vagas-terceirizados-portoex",
+  storageBucket: "vagas-terceirizados-portoex.firebasestorage.app",
+  messagingSenderId: "688106736915",
+  appId: "1:688106736915:web:412ff19368208198269ee6"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let STATE = { acompanhamento: {}, motoristas: {} };
+let mdSaveTimeout = {};
+
+function initFirebase() {
+  db.ref('acompanhamento').on('value', snap => { STATE.acompanhamento = snap.val() || {}; render(); });
+  db.ref('motoristas').on('value',     snap => { STATE.motoristas     = snap.val() || {}; render(); });
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  PARSE CSV
-// ─────────────────────────────────────────────────────────────────────────────
-function parseCSV(txt) {
-  const raw = Papa.parse(txt, {skipEmptyLines:false}).data;
-  dbg('Rows: ' + raw.length);
-  function n(v){ const x=parseFloat(String(v||'').replace(/\s/g,'').replace(',','.')); return isNaN(x)?0:x; }
+// ===== RELÓGIO =====
+function updateClock() {
+  const now = new Date();
+  const dias  = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  document.getElementById('tv-date').textContent =
+    `${dias[now.getDay()]}, ${now.getDate()} ${meses[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('tv-time').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+}
+setInterval(updateClock, 1000);
+updateClock();
 
-  // Operations (rows 4-13, cols AJ/AK/AL-AW)
-  const ops = [];
-  for (let r = ROW_OPS_S; r <= ROW_OPS_E; r++) {
-    const row = raw[r] || [];
-    const name = String(row[COL_OP_NAME]||'').trim();
-    const type = String(row[COL_OP_TYPE]||'').trim().toUpperCase();
-    if (!name || name === 'nan') continue;
-    const mths = Array.from({length:12}, (_,i) => Math.round(n(row[COL_MES0+i])));
-    if (mths.some(v=>v>0)) ops.push({name, type, mths});
-  }
-  dbg('Ops found: ' + ops.length);
-
-  // ROTA/EXP totals (rows 17-18)
-  const rotaTot = Array.from({length:12}, (_,i) => Math.round(n((raw[ROW_ROTA_TOT]||[])[COL_MES0+i])));
-  const expTot  = Array.from({length:12}, (_,i) => Math.round(n((raw[ROW_EXP_TOT]||[])[COL_MES0+i])));
-
-  // Daily data aggregation for R$
-  const monthlyRS=[0]*12, monthlyRS_rota=[0]*12, monthlyRS_exp=[0]*12;
-  for (let r = ROW_DAILY_S; r < raw.length; r++) {
-    const row = raw[r]||[];
-    const mes = Math.round(n(row[DC_MES]));
-    if (mes<1||mes>12) continue;
-    const m=mes-1, rs=n(row[DC_RS]), td=n(row[DC_TD]);
-    const rt=n(row[DC_RT]), ex=n(row[DC_EX]);
-    if (rs>0 && td>0) {
-      monthlyRS[m]      += rs;
-      monthlyRS_rota[m] += (rt/td)*rs;
-      monthlyRS_exp[m]  += (ex/td)*rs;
-    }
-  }
-
-  // Auto-detect last active month
-  let lastM = 0;
-  for (let m=0; m<12; m++) if (rotaTot[m]+expTot[m]>0) lastM=m;
-  selMes = lastM;
-  document.getElementById('selmes').value = selMes;
-
-  return {ops, rotaTot, expTot,
-    monthlyRS: monthlyRS.map(v=>Math.round(v)),
-    monthlyRS_rota: monthlyRS_rota.map(v=>Math.round(v)),
-    monthlyRS_exp: monthlyRS_exp.map(v=>Math.round(v))};
+// ===== FILTRO POR EMPRESA =====
+function pertenceAEmpresa(a) {
+  if (!filtroEmpresa) return true; // acesso total
+  const f = filtroEmpresa.toLowerCase();
+  return (
+    (a.empresaNome  || '').toLowerCase().includes(f) ||
+    (a.opNome       || '').toLowerCase().includes(f) ||
+    (a.opCC         || '').toLowerCase().includes(f)
+  );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  APPLY DATA + RENDER
-// ─────────────────────────────────────────────────────────────────────────────
-function applyData(nd, msg) {
-  D = nd;
-  document.getElementById('upd').textContent = msg;
-  renderAll();
+// ===== RENDER =====
+function render() {
+  const content = document.getElementById('tv-content');
+  const hoje = new Date().toISOString().split('T')[0];
+
+  let items = Object.entries(STATE.acompanhamento)
+    .filter(([,a]) => a.data === hoje && pertenceAEmpresa(a));
+
+  if (!items.length) {
+    content.innerHTML = '<div class="tv-empty">Nenhum colaborador cadastrado para hoje.</div>';
+    updateTotais([], [], []);
+    return;
+  }
+
+  const rota      = items.filter(([,a]) => (a.opCC||'').toUpperCase() === 'ROTA');
+  const expedicao = items.filter(([,a]) => { const c=(a.opCC||'').toUpperCase(); return c==='EXPEDIÇÃO'||c==='EXPEDICAO'; });
+  const outros    = items.filter(([,a]) => { const c=(a.opCC||'').toUpperCase(); return c!=='ROTA'&&c!=='EXPEDIÇÃO'&&c!=='EXPEDICAO'; });
+
+  const temRota = rota.length > 0, temExp = expedicao.length > 0;
+  const gridClass = (temRota && temExp) ? 'two-col' : 'two-col single';
+
+  let gridHtml = `<div class="${gridClass}">`;
+  if (temRota) gridHtml += buildSection('ROTA',      rota,      'rota');
+  if (temExp)  gridHtml += buildSection('EXPEDIÇÃO', expedicao, 'expedicao');
+  gridHtml += '</div>';
+
+  let extrasHtml = '';
+  if (outros.length) {
+    const grupos = {};
+    outros.forEach(e => { const k = e[1].opCC || e[1].opNome || 'Outros'; if (!grupos[k]) grupos[k]=[]; grupos[k].push(e); });
+    extrasHtml = `<div class="extra-sections">${Object.entries(grupos).map(([cc,rows])=>buildSection(cc,rows,'expedicao')).join('')}</div>`;
+  }
+
+  content.innerHTML = gridHtml + extrasHtml;
+  updateTotais(rota, expedicao, outros);
+  attachMdEvents();
 }
 
-function renderAll() {
-  if (!D) return;
-  const m = selMes;
-  const rOps = D.ops.filter(o => o.type==='ROTA');
-  const eOps = D.ops.filter(o => o.type==='EXPEDIÇÃO');
+function buildSection(titulo, items, tipo) {
+  const presentes = items.filter(([,a]) => a.status === 'Presente').length;
+  const isRota = tipo === 'rota';
+  const ths = isRota
+    ? `<th>Nº</th><th>Nome</th><th>Operação</th><th class="center">Entrada</th><th class="center">Prev.Saída</th><th class="center">Saída</th><th>Motorista</th><th class="center">MD</th><th>Status</th>`
+    : `<th>Nº</th><th>Nome</th><th>Operação</th><th class="center">Entrada</th><th class="center">Prev.Saída</th><th class="center">Saída</th><th>Status</th>`;
 
-  // ── Per-operation R$ estimation ───────────────────────────────────────────
-  // Distribute type R$ proportionally based on operation QTD share
-  function opRS(op, typeRS, typeTot) {
-    return Array.from({length:12}, (_,i) => {
-      const tot = typeTot[i];
-      return tot > 0 ? Math.round((op.mths[i]/tot)*typeRS[i]) : 0;
+  const sorted = [...items].sort(([,a],[,b]) => {
+    const opCmp = (a.opNome||'').localeCompare(b.opNome||'', 'pt-BR');
+    if (opCmp !== 0) return opCmp;
+    return (a.chegada||'').localeCompare(b.chegada||'');
+  });
+  const rows = sorted.map(([id, a], i) => buildRow(id, a, i+1, isRota)).join('');
+
+  return `<div class="cc-section">
+    <div class="cc-header cc-${tipo}">
+      <div class="cc-title">${titulo}</div>
+      <div class="cc-count">${items.length} colab. · ${presentes} presente${presentes!==1?'s':''}</div>
+    </div>
+    <div class="table-scroll">
+      <table class="tv-table">
+        <thead><tr>${ths}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function buildRow(id, a, num, isRota) {
+  const chegada   = a.chegada  || '';
+  const refeicao  = a.refeicao || '01:00';
+  const saida     = a.saida    || '';
+  const prevSaida = chegada ? calcPrevSaida(chegada, refeicao) : '';
+
+  const statusMap = {
+    'Em escolha': ['s-escolha',   'Em Escolha'],
+    'Validada':   ['s-validada',  'Validada'],
+    'Presente':   ['s-presente',  'Presente'],
+    'Ausente':    ['s-ausente',   'Ausente'],
+    'Encerrado':  ['s-encerrado', 'Encerrado']
+  };
+  const [sCls, sLabel] = statusMap[a.status] || ['s-escolha', a.status||'Em Escolha'];
+
+  const motNome = a.motoristaId && STATE.motoristas[a.motoristaId]
+    ? STATE.motoristas[a.motoristaId].nome : (a.motoristaNome||'—');
+  const md = a.md || '';
+
+  // ATRASO: sem entrada E horário atual já passou do horaInicial
+  const semEntrada = !chegada;
+  let isAtraso = false;
+  if (semEntrada && a.horaInicial) {
+    const now = new Date();
+    const [hi, mi] = a.horaInicial.split(':').map(Number);
+    isAtraso = (now.getHours() * 60 + now.getMinutes()) > (hi * 60 + mi);
+  }
+  const nomeClass   = isAtraso ? 'td-nome-atraso' : 'td-nome';
+  const atrasoBadge = isAtraso ? `<span class="badge-atraso">⚠ ATRASO</span>` : '';
+
+  const tdNome    = `<td><div class="${nomeClass}">${a.colNome||'—'} ${atrasoBadge}</div><div class="td-empresa">${a.empresaNome||''}</div></td>`;
+  const tdOp      = `<td><div class="td-op">${a.opNome||'—'}</div><div class="td-func">${a.funcao||''}</div></td>`;
+  const tdEntrada = `<td class="td-time entrada">${chegada||'——'}</td>`;
+  const tdPrev    = `<td class="td-time saida-prev">${prevSaida||'——'}</td>`;
+  const tdSaida   = `<td class="td-time saida-real">${saida||'——'}</td>`;
+  const tdStatus  = `<td><span class="status-pill ${sCls}">${sLabel}</span></td>`;
+
+  if (isRota) {
+    return `<tr>
+      <td class="td-num">${num}</td>${tdNome}${tdOp}${tdEntrada}${tdPrev}${tdSaida}
+      <td class="td-motorista">${motNome}</td>
+      <td><input class="md-input" data-id="${id}" value="${md}" placeholder="MD nº"></td>
+      ${tdStatus}</tr>`;
+  }
+  return `<tr><td class="td-num">${num}</td>${tdNome}${tdOp}${tdEntrada}${tdPrev}${tdSaida}${tdStatus}</tr>`;
+}
+
+function calcPrevSaida(chegada, refeicao) {
+  const [h,m]   = chegada.split(':').map(Number);
+  const [rh,rm] = (refeicao||'01:00').split(':').map(Number);
+  const t = h*60 + m + 8*60 + rh*60 + rm;
+  return String(Math.floor(t/60)%24).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
+}
+
+function updateTotais(rota, expedicao, outros) {
+  const todos = [...rota, ...expedicao, ...(outros||[])];
+  document.getElementById('tot-total').textContent     = todos.length;
+  document.getElementById('tot-presentes').textContent = todos.filter(([,a])=>a.status==='Presente').length;
+  document.getElementById('tot-rota').textContent      = rota.length;
+  document.getElementById('tot-expedicao').textContent = expedicao.length;
+}
+
+function attachMdEvents() {
+  document.querySelectorAll('.md-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const id = inp.dataset.id;
+      clearTimeout(mdSaveTimeout[id]);
+      mdSaveTimeout[id] = setTimeout(() => db.ref(`acompanhamento/${id}/md`).set(inp.value.trim()), 800);
     });
-  }
-  const rOpsRS = rOps.map(o => ({...o, rs: opRS(o, D.monthlyRS_rota, D.rotaTot)}));
-  const eOpsRS = eOps.map(o => ({...o, rs: opRS(o, D.monthlyRS_exp, D.expTot)}));
-
-  // ── S0: QTY Summary ───────────────────────────────────────────────────────
-  const rt = D.rotaTot[m], ex = D.expTot[m];
-  set('krt', rt||'–'); set('kex', ex||'–');
-  set('ktt', (rt+ex)||'–'); set('kmes', MESFULL[m]);
-  set('kref', MES[m]+'/'+new Date().getFullYear());
-  set('b0', MES[m]+' '+new Date().getFullYear());
-
-  mk('ch-ano-qty','bar',MES,[
-    bDs('ROTA',D.rotaTot,C_RT[0],2),
-    bDs('EXPEDIÇÃO',D.expTot,ORANGE,2),
-    lDs('Total',D.rotaTot.map((v,i)=>v+D.expTot[i]),GRN,1)
-  ], xy());
-
-  hMes('ch-rota-mes-s0', rOps.map(o=>o.name), rOps.map(o=>o.mths[m]), C_RT);
-  hMes('ch-exp-mes-s0',  eOps.map(o=>o.name), eOps.map(o=>o.mths[m]), C_EX);
-
-  // ── S1: ROTA comparativo (qty) ────────────────────────────────────────────
-  set('b1', rOps.length+' operações · '+activeMths(D).length+' meses');
-  buildCmp('ch-cmp-rota-qty', rOps, false);
-
-  // ── S2: EXP comparativo (qty) ─────────────────────────────────────────────
-  set('b2', eOps.length+' operações · '+activeMths(D).length+' meses');
-  buildCmp('ch-cmp-exp-qty', eOps, false);
-
-  // ── S3: R$ Summary ────────────────────────────────────────────────────────
-  const rRS=D.monthlyRS_rota[m], eRS=D.monthlyRS_exp[m], tRS=D.monthlyRS[m];
-  const tot=rt+ex;
-  set('kr-rt', fR(rRS)); set('kr-ex', fR(eRS)); set('kr-tt', fR(tRS));
-  set('kr-mes', MESFULL[m]); set('b3', MES[m]+' '+new Date().getFullYear());
-  set('kr-avg', tot>0 ? fR(Math.round(tRS/tot)) : '–');
-
-  mk('ch-ano-rs','bar',MES,[
-    bDs('R$ ROTA',D.monthlyRS_rota,C_RT[0],2),
-    bDs('R$ EXPEDIÇÃO',D.monthlyRS_exp,ORANGE,2),
-    lDs('R$ Total',D.monthlyRS,GRN,1)
-  ], xy(false,true,true));
-
-  hMes('ch-rs-rota-s3', rOpsRS.map(o=>o.name), rOpsRS.map(o=>o.rs[m]), C_RT, true);
-  hMes('ch-rs-exp-s3',  eOpsRS.map(o=>o.name), eOpsRS.map(o=>o.rs[m]), C_EX, true);
-
-  // ── S4: R$ ROTA comparativo ───────────────────────────────────────────────
-  set('b4', rOpsRS.length+' operações · '+activeMths(D).length+' meses');
-  buildCmp('ch-cmp-rota-rs', rOpsRS.map(o=>({...o,mths:o.rs})), true);
-
-  // ── S5: R$ EXP comparativo ────────────────────────────────────────────────
-  set('b5', eOpsRS.length+' operações · '+activeMths(D).length+' meses');
-  buildCmp('ch-cmp-exp-rs', eOpsRS.map(o=>({...o,mths:o.rs})), true);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  CHART BUILDERS
-// ─────────────────────────────────────────────────────────────────────────────
-
-// Active months (those with any data across all ops)
-function activeMths(d) {
-  const ms = [];
-  for (let m=0; m<12; m++) {
-    if ((d.rotaTot[m]+d.expTot[m]) > 0) ms.push(m);
-  }
-  return ms;
-}
-
-// Month palette (navy shades + orange for last)
-const M_COLORS = ['#1B2B6B','#2e4a9e','#5072c8','#F07020','#ff9a40','#ffd080',
-                  '#a5d6a7','#4fc3f7','#ce93d8','#ef9a9a','#ffe082','#b0bec5'];
-
-function buildCmp(cid, ops, isRS) {
-  if (!ops || !ops.length) return;
-  const ms = activeMths(D);  // [0,1,2,3] = JAN,FEV,MAR,ABR
-  const labels = ops.map(o => o.name);
-
-  const dlFmt = (v) => {
-    if (!v || v === 0) return '';
-    return isRS ? fRs(v) : v;
-  };
-
-  const datasets = ms.map((m, i) => ({
-    type: 'bar',
-    label: MES[m],
-    data: ops.map(o => o.mths[m] || 0),
-    backgroundColor: M_COLORS[i % M_COLORS.length],
-    borderRadius: 4,
-    order: 2,
-    datalabels: {
-      display: ctx => (ctx.dataset.data[ctx.dataIndex] || 0) > 0,
-      color: '#fff',
-      font: { size: 10, weight: '800' },
-      anchor: 'end', align: 'end', offset: 3,
-      rotation: 0,
-      formatter: dlFmt
-    }
-  }));
-
-  const opts = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { labels: { color: '#ccc', font: { size: 11 }, padding: 12 } },
-      datalabels: { display: true }
-    },
-    scales: {
-      x: {
-        border: { display: false },
-        ticks: { color: '#e8eeff', font: { size: 13, weight: '700' } },
-        grid: { color: 'rgba(255,255,255,0.04)' }
-      },
-      y: {
-        border: { display: false },
-        ticks: { color: '#8898cc', font: { size: 10 },
-                 callback: isRS ? v => fRs(v) : v => v },
-        grid: { color: 'rgba(255,255,255,0.06)' },
-        beginAtZero: true
-      }
-    }
-  };
-
-  mk(cid, 'bar', labels, datasets, opts);
-}
-
-function hMes(id, labels, vals, colors, isRS=false) {
-  mk(id,'bar',labels,[{
-    data:vals, backgroundColor:colors.slice(0,labels.length), borderRadius:5,
-    order:2,
-    datalabels:{display:true,color:'#fff',font:{size:13,weight:'900'},
-      anchor:'end',align:'end',offset:4,
-      formatter:v=>v>0?(isRS?fR(v):v):''}
-  }],{
-    indexAxis:'y', responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false},datalabels:{display:true}},
-    scales:{
-      x:{border:{display:false},ticks:{color:'#8898cc',font:{size:10},
-         callback:isRS?v=>fRs(v):v=>v},
-         grid:{color:'rgba(255,255,255,0.06)'},beginAtZero:true},
-      y:{border:{display:false},ticks:{color:'#e8eeff',font:{size:12,weight:'700'}},
-         grid:{display:false}}
-    }
   });
 }
-
-function bDs(label,data,color,order){
-  return{type:'bar',label,data,backgroundColor:color,borderRadius:4,order,
-    datalabels:{display:ctx=>ctx.dataset.data[ctx.dataIndex]>0,
-      color:'#fff',font:{size:9,weight:'700'},anchor:'end',align:'end',offset:2,
-      formatter:v=>v>0?v:''}};
-}
-function lDs(label,data,color,order){
-  return{type:'line',label,data,borderColor:color,backgroundColor:color+'18',
-    tension:.3,pointRadius:4,pointBackgroundColor:color,fill:false,order,
-    datalabels:{display:ctx=>ctx.dataset.data[ctx.dataIndex]>0,
-      color,font:{size:9,weight:'700'},anchor:'end',align:'top',offset:5,
-      formatter:v=>v>0?v:''}};
-}
-function xy(stacked=false, legend=true, isRS=false){
-  return{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{
-      legend:legend?{labels:{color:'#ccc',font:{size:10},padding:10}}:{display:false},
-      datalabels:{display:true}
-    },
-    scales:{
-      x:{stacked,border:{display:false},ticks:{color:'#8898cc',font:{size:10}},
-         grid:{color:'rgba(255,255,255,0.05)'}},
-      y:{stacked,border:{display:false},
-         ticks:{color:'#8898cc',font:{size:10},callback:isRS?v=>fRs(v):v=>v},
-         grid:{color:'rgba(255,255,255,0.06)'},beginAtZero:true}
-    }
-  };
-}
-function mk(id,type,labels,datasets,options){
-  if(charts[id]){try{charts[id].destroy();}catch(e){}}
-  const el=document.getElementById(id);
-  if(!el)return;
-  charts[id]=new Chart(el.getContext('2d'),{type,data:{labels,datasets},options});
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  NAVIGATION
-// ─────────────────────────────────────────────────────────────────────────────
-function setupNav(){
-  const dc=document.getElementById('nav-dots');
-  dc.innerHTML='';
-  for(let i=0;i<NS;i++){
-    const d=document.createElement('div');
-    d.className='dot'+(i===cur?' on':'');
-    d.onclick=()=>go(i);
-    dc.appendChild(d);
-  }
-}
-function go(n){
-  n=Math.max(0,Math.min(NS-1,n));
-  document.getElementById('sl'+cur)?.classList.remove('on');
-  cur=n;
-  document.getElementById('sl'+cur)?.classList.add('on');
-  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
-  document.getElementById('nl').style.opacity=cur===0?.3:1;
-  document.getElementById('nr').style.opacity=cur===NS-1?.3:1;
-}
-document.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'||e.key==='PageDown') go(cur+1);
-  if(e.key==='ArrowLeft'||e.key==='PageUp')    go(cur-1);
-  if(e.key==='Home') go(0);
-  if(e.key==='End')  go(NS-1);
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  MONTH CHANGE
-// ─────────────────────────────────────────────────────────────────────────────
-function onMes(){ selMes=parseInt(document.getElementById('selmes').value); renderAll(); }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  UTILS
-// ─────────────────────────────────────────────────────────────────────────────
-function fR(v){ return v?'R$'+Math.round(v).toLocaleString('pt-BR'):'–'; }
-function fRs(v){ // short format for axes
-  if(!v) return '';
-  if(v>=1e6) return 'R$'+(v/1e6).toFixed(1)+'M';
-  if(v>=1e3) return 'R$'+(v/1e3).toFixed(0)+'k';
-  return 'R$'+v;
-}
-function setSt(s,msg){
-  const d=document.getElementById('sdot');
-  d.className='sdot'+(s==='ld'?' ld':s==='err'?' err':'');
-  document.getElementById('stxt').textContent=msg;
-}
-function showLd(v){ document.getElementById('ld').classList.toggle('hidden',!v); }
-function set(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
-function tickCnt(){
-  const rem=Math.max(0,Math.round((nxtRef-Date.now())/1000));
-  const mm=Math.floor(rem/60),ss=rem%60;
-  document.getElementById('scnt').textContent=
-    rem>0?`· próx. live ${mm}:${String(ss).padStart(2,'0')}`:'';
-}
-let dbgV=false;
-function toggleDbg(){ dbgV=!dbgV; document.getElementById('dbg').style.display=dbgV?'block':'none'; }
-function dbg(m){ dbgL.push(m); }
-function flushDbg(){ document.getElementById('dbgpre').textContent=dbgL.join('\n'); }
 </script>
 </body>
 </html>
