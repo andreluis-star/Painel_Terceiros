@@ -3,621 +3,897 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PORTOEX — Mão de Obra 3º</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<title>Portoex · Expedição & Logística Interna</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
-:root {
-  --navy: #0D1B3E;
-  --yellow: #F5C518;
-  --white: #FFFFFF;
-  --gray-400: #9BA3AF;
+:root{
+  --bg:#0b0f1a; --bg-2:#0f1524; --surface:#141b2e; --surface-2:#1a2238;
+  --border:#243049; --border-strong:#2f3d5c; --ink:#e8ecf5; --ink-dim:#a4adc4; --ink-muted:#6b7691;
+  --accent:#ff5b3a; --accent-2:#ffa552; --blue:#4d9fff; --blue-deep:#2d6fd1;
+  --green:#3ddc97; --yellow:#ffd23f; --red:#ff4d6d; --purple:#a78bfa; --teal:#5eead4;
+  --grid:rgba(255,255,255,.06);
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-
-body {
-  background: #111;
-  font-family: 'Barlow Condensed', sans-serif;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ===== LOGIN OVERLAY ===== */
-#login-overlay {
-  position: fixed;
-  inset: 0;
-  background: #0a0f1e;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-.login-box {
-  background: #1a1a2e;
-  border: 1px solid #2a2a4a;
-  border-top: 4px solid var(--yellow);
-  border-radius: 8px;
-  padding: 40px 48px;
-  width: 380px;
-  text-align: center;
-}
-.login-logo {
-  background: var(--yellow);
-  color: var(--navy);
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: 3px;
-  padding: 6px 16px;
-  border-radius: 4px;
-  display: inline-block;
-  margin-bottom: 12px;
-}
-.login-title {
-  color: var(--white);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-.login-sub {
-  color: var(--gray-400);
-  font-size: 12px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  margin-bottom: 32px;
-}
-.login-field {
-  margin-bottom: 14px;
-  text-align: left;
-}
-.login-field label {
-  display: block;
-  color: var(--gray-400);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.login-field input {
-  width: 100%;
-  background: #111;
-  border: 1px solid #333;
-  border-radius: 4px;
-  color: var(--white);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  padding: 10px 14px;
-  outline: none;
-  transition: border-color .2s;
-}
-.login-field input:focus { border-color: var(--yellow); }
-.login-btn {
-  width: 100%;
-  margin-top: 8px;
-  background: var(--yellow);
-  color: var(--navy);
-  border: none;
-  border-radius: 4px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 16px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  padding: 12px;
-  cursor: pointer;
-  transition: opacity .2s;
-}
-.login-btn:hover { opacity: .85; }
-.login-error {
-  margin-top: 12px;
-  color: #e74c3c;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  min-height: 18px;
-}
-
-/* HEADER */
-.tv-header {
-  background: var(--navy);
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  border-bottom: 4px solid var(--yellow);
-  flex-shrink: 0;
-}
-.tv-logo { display: flex; align-items: center; gap: 14px; }
-.tv-logo-box {
-  background: var(--yellow);
-  color: var(--navy);
-  font-size: 20px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  padding: 5px 12px;
-  border-radius: 4px;
-}
-.tv-title  { color: var(--white); font-size: 24px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
-.tv-subtitle { color: var(--yellow); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
-.tv-header-right { text-align: right; }
-.tv-date { color: var(--white); font-size: 18px; font-weight: 700; }
-.tv-time { color: var(--yellow); font-size: 30px; font-weight: 900; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
-.tv-empresa-tag {
-  margin-left: 16px;
-  background: rgba(245,197,24,.15);
-  color: var(--yellow);
-  border: 1px solid rgba(245,197,24,.3);
-  border-radius: 4px;
-  padding: 4px 12px;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-/* STATS BAR */
-.stats-bar {
-  background: #1a1a1a;
-  border-bottom: 1px solid #333;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  height: 48px;
-}
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-right: 24px;
-  margin-right: 24px;
-  border-right: 1px solid #333;
-}
-.stat-label { font-size: 10px; font-weight: 700; color: var(--gray-400); letter-spacing: 2px; text-transform: uppercase; }
-.stat-val   { font-size: 24px; font-weight: 900; color: var(--white); line-height: 1; }
-.stat-val.yellow { color: var(--yellow); }
-.stat-val.green  { color: #2ecc71; }
-.stat-val.blue   { color: #60a5fa; }
-.stat-val.purple { color: #a78bfa; }
-.tv-live {
-  margin-left: auto;
-  display: flex; align-items: center; gap: 8px;
-  font-size: 10px; font-weight: 700; color: var(--gray-400); letter-spacing: 2px; text-transform: uppercase;
-}
-.live-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #2ecc71;
-  animation: blink 1.5s infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-
-/* CONTENT */
-.tv-content {
-  flex: 1;
-  min-height: 0;
-  padding: 12px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow: hidden;
-}
-
-.two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  flex: 1;
-  min-height: 0;
-}
-.two-col.single { grid-template-columns: 1fr; }
-
-.extra-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* SECTION */
-.cc-section {
-  background: #1a1a1a;
-  border-radius: 6px;
-  border: 1px solid #333;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-}
-.cc-header { padding: 8px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.cc-rota      { background: var(--navy);  border-bottom: 2px solid var(--yellow); }
-.cc-expedicao { background: #1a2a1a; border-bottom: 2px solid #2ecc71; }
-.cc-title { font-size: 17px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
-.cc-rota .cc-title      { color: var(--yellow); }
-.cc-expedicao .cc-title { color: #2ecc71; }
-.cc-count { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 10px; letter-spacing: 1px; }
-.cc-rota .cc-count      { background: rgba(245,197,24,.15); color: var(--yellow); }
-.cc-expedicao .cc-count { background: rgba(46,204,113,.15); color: #2ecc71; }
-
-/* TABLE */
-.table-scroll { flex: 1; overflow-y: auto; min-height: 0; }
-.tv-table { width: 100%; border-collapse: collapse; }
-.tv-table thead tr { background: #111; position: sticky; top: 0; z-index: 1; }
-.tv-table thead th {
-  padding: 7px 10px;
-  text-align: left;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--gray-400);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  border-bottom: 1px solid #333;
-  white-space: nowrap;
-}
-.tv-table thead th.center { text-align: center; }
-.tv-table tbody tr { border-bottom: 1px solid #1e1e1e; }
-.tv-table tbody tr:nth-child(even) { background: rgba(255,255,255,.025); }
-.tv-table tbody tr:last-child { border-bottom: none; }
-.tv-table tbody td { padding: 7px 10px; vertical-align: middle; }
-
-.td-num  { color: var(--gray-400); font-size: 12px; font-weight: 600; width: 30px; text-align: center; }
-.td-nome { font-size: 16px; font-weight: 700; color: var(--white); }
-.td-empresa { font-size: 11px; color: var(--gray-400); }
-.td-op   { font-size: 13px; font-weight: 700; color: var(--yellow); }
-.td-func { font-size: 11px; color: var(--gray-400); }
-.td-time { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; text-align: center; }
-.td-time.entrada    { color: #3498db; }
-.td-time.saida-prev { color: var(--gray-400); }
-.td-time.saida-real { color: #2ecc71; }
-.td-motorista { font-size: 13px; font-weight: 600; color: #a78bfa; }
-.md-input {
-  background: transparent; border: 1px solid #444; border-radius: 4px;
-  color: var(--yellow); font-family: 'Barlow Condensed', sans-serif;
-  font-size: 15px; font-weight: 700; width: 80px; padding: 3px 6px;
-  text-align: center; outline: none;
-}
-.md-input:focus { border-color: var(--yellow); background: rgba(245,197,24,.05); }
-.md-input::placeholder { color: #444; font-size: 11px; }
-
-/* STATUS */
-.status-pill {
-  display: inline-flex; align-items: center;
-  padding: 3px 8px; border-radius: 4px;
-  font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap;
-}
-.s-escolha  { background: rgba(180,83,9,.2);   color: #f59e0b; border: 1px solid #f59e0b40; }
-.s-validada { background: rgba(21,101,192,.2);  color: #60a5fa; border: 1px solid #60a5fa40; }
-.s-presente { background: rgba(26,127,75,.2);   color: #4ade80; border: 1px solid #4ade8040; }
-.s-ausente  { background: rgba(192,57,43,.2);   color: #f87171; border: 1px solid #f8717140; }
-.s-encerrado{ background: rgba(100,100,100,.2); color: #9ca3af; border: 1px solid #9ca3af40; }
-
-.tv-empty { text-align: center; padding: 40px; color: #333; font-size: 18px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
-
-/* ATRASO */
-.td-nome-atraso { font-size: 16px; font-weight: 700; color: #e74c3c !important; }
-.badge-atraso {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: rgba(231,76,60,.2); color: #e74c3c;
-  border: 1px solid #e74c3c60;
-  padding: 2px 7px; border-radius: 4px;
-  font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
-  animation: pulse-red 1.5s infinite;
-}
-@keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:0.5} }
-
-::-webkit-scrollbar { width: 3px; height: 3px; }
-::-webkit-scrollbar-track { background: #111; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Inter Tight',sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+body{background:radial-gradient(1200px 600px at 90% -10%, rgba(255,91,58,.08), transparent 60%),radial-gradient(900px 500px at -10% 10%, rgba(77,159,255,.07), transparent 60%),var(--bg);}
+.header{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,15,26,.78);border-bottom:1px solid var(--border);}
+.header-inner{max-width:1500px;margin:0 auto;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;color:#0b0f1a;box-shadow:0 6px 18px rgba(255,91,58,.35);}
+.brand-text h1{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;letter-spacing:-.01em}
+.brand-text p{font-size:11.5px;color:var(--ink-muted);letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
+.head-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.period-pill{display:flex;align-items:center;gap:10px;padding:9px 14px;border:1px solid var(--border-strong);border-radius:999px;background:var(--surface);font-size:12.5px;color:var(--ink-dim);}
+.period-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+.period-pill strong{color:var(--ink);font-weight:600}
+.btn{appearance:none;border:1px solid var(--border-strong);background:var(--surface);color:var(--ink-dim);font-family:inherit;font-size:12.5px;font-weight:500;padding:9px 14px;border-radius:999px;cursor:pointer;}
+.btn:hover{color:var(--ink);}
+.period-select{appearance:none;background:var(--surface-2);color:var(--ink);border:1px solid var(--border-strong);border-radius:6px;padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:11.5px;cursor:pointer;}
+.period-select:focus{outline:none;border-color:var(--accent);}
+.view-toggle{display:flex;gap:8px;margin-bottom:14px;}
+.toggle-btn{appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--ink-dim);font-family:inherit;font-size:12.5px;font-weight:500;padding:7px 14px;border-radius:8px;cursor:pointer;}
+.toggle-btn:hover{color:var(--ink);}
+.toggle-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0b0f1a;border-color:transparent;font-weight:600;}
+.nav{max-width:1500px;margin:0 auto;padding:18px 32px 8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.nav-btn{appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--ink-dim);font-family:inherit;font-size:13px;font-weight:500;padding:10px 16px;border-radius:10px;cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:8px;}
+.nav-btn:hover{color:var(--ink);border-color:var(--border-strong);transform:translateY(-1px)}
+.nav-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0b0f1a;border-color:transparent;font-weight:600;box-shadow:0 8px 20px -8px rgba(255,91,58,.6);}
+.nav-btn .num{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.7;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.06);}
+.nav-btn.active .num{background:rgba(0,0,0,.15);opacity:.9}
+main{max-width:1500px;margin:0 auto;padding:24px 32px 64px}
+.page{display:none;animation:fadeIn .35s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.page-head{margin-bottom:24px}
+.page-head .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px;}
+.page-head h2{font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:700;letter-spacing:-.02em;}
+.page-head p{color:var(--ink-dim);font-size:14px;margin-top:6px;max-width:720px;line-height:1.6}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),transparent);}
+.kpi.accent::before{background:linear-gradient(90deg,var(--accent),transparent)}
+.kpi.green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.kpi.red::before{background:linear-gradient(90deg,var(--red),transparent)}
+.kpi.yellow::before{background:linear-gradient(90deg,var(--yellow),transparent)}
+.kpi.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.kpi-label{font-size:11.5px;color:var(--ink-muted);letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.kpi-value{font-family:'Bricolage Grotesque',sans-serif;font-size:34px;font-weight:700;letter-spacing:-.02em;margin:8px 0 4px;line-height:1;}
+.kpi-value small{font-size:14px;color:var(--ink-muted);font-weight:500;margin-left:4px}
+.kpi-foot{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink-dim);margin-top:8px;gap:8px;}
+.delta{font-family:'JetBrains Mono',monospace;font-weight:600;display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:11px;white-space:nowrap;}
+.delta.up{color:var(--green);background:rgba(61,220,151,.1)}
+.delta.down{color:var(--red);background:rgba(255,77,109,.1)}
+.delta.flat{color:var(--ink-muted);background:rgba(255,255,255,.04)}
+.row{display:grid;gap:14px;margin-bottom:14px}
+.row.cols-2{grid-template-columns:1fr 1fr}
+.row.cols-3{grid-template-columns:repeat(3,1fr)}
+.row.uneven{grid-template-columns:1.4fr 1fr}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;}
+.card-head h3{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:600;letter-spacing:-.01em;}
+.card-head .sub{font-size:12px;color:var(--ink-muted);margin-top:3px}
+.card-tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;padding:4px 9px;border-radius:6px;border:1px solid var(--border-strong);color:var(--ink-dim);text-transform:uppercase;white-space:nowrap;}
+.chart-wrap{position:relative;height:300px}
+.chart-wrap.tall{height:360px}
+.chart-wrap.short{height:240px}
+.table-wrap{overflow-x:auto;margin-top:6px}
+table.data{width:100%;border-collapse:collapse;font-size:12.5px;font-family:'JetBrains Mono',monospace;}
+table.data th{text-align:right;padding:10px 12px;color:var(--ink-muted);font-weight:500;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:.08em;text-transform:uppercase;}
+table.data th:first-child{text-align:left}
+table.data td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--ink);font-weight:500;}
+table.data td:first-child{text-align:left;color:var(--ink-dim);font-weight:600}
+table.data tr:last-child td{border-bottom:none}
+table.data tr:hover td{background:rgba(255,255,255,.02)}
+.cell-high{color:var(--accent) !important;font-weight:700 !important}
+.cell-low{color:var(--green) !important;font-weight:700 !important}
+.insight{margin-top:14px;padding:14px 16px;border-radius:10px;background:linear-gradient(135deg,rgba(77,159,255,.08),rgba(167,139,250,.05));border:1px solid rgba(77,159,255,.18);font-size:13px;line-height:1.55;color:var(--ink-dim);}
+.insight strong{color:var(--ink)}
+.insight.warn{background:linear-gradient(135deg,rgba(255,210,63,.08),rgba(255,91,58,.05));border-color:rgba(255,210,63,.2)}
+.insight.good{background:linear-gradient(135deg,rgba(61,220,151,.08),rgba(94,234,212,.05));border-color:rgba(61,220,151,.2)}
+#status{display:none;margin-bottom:20px;padding:12px 16px;border-radius:10px;background:var(--surface-2);color:var(--ink-dim);font-size:13px;border:1px solid var(--border);}
+#status.show{display:block;}
+#status.error{background:#3a1f24;color:#ff9b9b;border-color:#5a2a2f;}
+.footer{max-width:1500px;margin:32px auto 0;padding:20px 32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;letter-spacing:.05em;flex-wrap:wrap;gap:8px;}
+@media (max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.row.cols-2,.row.cols-3,.row.uneven{grid-template-columns:1fr}}
+@media (max-width:640px){.header-inner,.nav,main,.footer{padding-left:16px;padding-right:16px}.kpi-grid{grid-template-columns:1fr}.page-head h2{font-size:24px}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN OVERLAY -->
-<div id="login-overlay">
-  <div class="login-box">
-    <div class="login-logo">PORTOEX</div>
-    <div class="login-title">Painel TV</div>
-    <div class="login-sub">Mão de Obra Terceirizada</div>
-    <div class="login-field">
-      <label>Usuário</label>
-      <input type="text" id="login-user" placeholder="Login" autocomplete="off" autocapitalize="off">
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <div class="brand-text">
+        <h1>Expedição & Logística Interna</h1>
+        <p>Portoex · Itajaí/SC · Painel Mensal</p>
+      </div>
     </div>
-    <div class="login-field">
-      <label>Senha</label>
-      <input type="password" id="login-pass" placeholder="Senha">
+    <div class="head-controls">
+      <div class="period-pill">
+        <span class="dot"></span>
+        <span>Período:</span>
+        <select id="periodStart" class="period-select"></select>
+        <span>→</span>
+        <select id="periodEnd" class="period-select"></select>
+      </div>
+      <button class="btn" id="refreshBtn">Atualizar agora</button>
     </div>
-    <button class="login-btn" onclick="doLogin()">Entrar</button>
-    <div class="login-error" id="login-error"></div>
-  </div>
-</div>
-
-<header class="tv-header">
-  <div class="tv-logo">
-    <div class="tv-logo-box">PORTOEX</div>
-    <div>
-      <div class="tv-title">Mão de Obra — 3°</div>
-      <div class="tv-subtitle">Colaboradores Terceirizados</div>
-    </div>
-    <span class="tv-empresa-tag" id="tv-empresa-tag" style="display:none"></span>
-  </div>
-  <div class="tv-header-right">
-    <div class="tv-date" id="tv-date">—</div>
-    <div class="tv-time" id="tv-time">00:00:00</div>
   </div>
 </header>
 
-<div class="stats-bar">
-  <div class="stat-item">
-    <span class="stat-label">Total</span>
-    <span class="stat-val yellow" id="tot-total">0</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">Presentes</span>
-    <span class="stat-val green" id="tot-presentes">0</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">Rota</span>
-    <span class="stat-val blue" id="tot-rota">0</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-label">Expedição</span>
-    <span class="stat-val purple" id="tot-expedicao">0</span>
-  </div>
-  <div class="tv-live">
-    <div class="live-dot"></div>
-    Ao vivo
-  </div>
-</div>
+<nav class="nav" id="nav"></nav>
 
-<div class="tv-content" id="tv-content">
-  <div class="tv-empty">Carregando dados...</div>
-</div>
+<main>
+  <div id="status"></div>
+
+  <!-- 00 · VISÃO GERAL -->
+  <section class="page active" data-page="overview">
+    <div class="page-head">
+      <div class="eyebrow">00 · Visão Geral</div>
+      <h2>Resumo executivo do mês</h2>
+      <p>Indicadores-chave do último mês fechado comparados ao mês anterior. Os totais consolidam volumetria, despachos, conferências e tempos críticos.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-overview"></div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Volumetria JEM × Despachos JEM</h3><div class="sub">Volume movimentado vs. quantidade de despachos</div></div><span class="card-tag">JEM</span></div>
+        <div class="chart-wrap"><canvas id="chartJEM"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Entregas + Coletas mensal</h3><div class="sub">Movimentações totais por mês</div></div><span class="card-tag">OPERAÇÃO</span></div>
+        <div class="chart-wrap"><canvas id="chartEntCol"></canvas></div>
+      </div>
+    </div>
+    <div class="row cols-3">
+      <div class="card"><div class="card-head"><div><h3>Manifestos</h3><div class="sub">Documentos emitidos</div></div></div><div class="chart-wrap short"><canvas id="chartManifestos"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Personalizados</h3><div class="sub">Volumes customizados</div></div></div><div class="chart-wrap short"><canvas id="chartPersonalizados"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Operação CTN</h3><div class="sub">Operações por mês</div></div></div><div class="chart-wrap short"><canvas id="chartCTN"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Quadro consolidado</h3><div class="sub">Todos os indicadores em um único olhar</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableConsolidado"></table></div>
+    </div>
+  </section>
+
+  <!-- 01 · JEM -->
+  <section class="page" data-page="jem">
+    <div class="page-head">
+      <div class="eyebrow">01 · JEM</div>
+      <h2>Volumetria e despachos JEM</h2>
+      <p>Acompanhamento do volume e da quantidade de despachos do sistema JEM ao longo do período.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-jem"></div>
+    <div class="row uneven">
+      <div class="card"><div class="card-head"><div><h3>Evolução combinada</h3><div class="sub">Volumetria (barras) e despachos (linha)</div></div><span class="card-tag" id="jemMonthsTag">JEM</span></div><div class="chart-wrap tall"><canvas id="chartJEMCombo"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Despachos JEM</h3><div class="sub">Quantidade absoluta</div></div></div><div class="chart-wrap tall"><canvas id="chartDespachosBar"></canvas></div></div>
+    </div>
+    <div class="insight" id="insight-jem"></div>
+  </section>
+
+  <!-- 02 · BIPADOS X ERROS -->
+  <section class="page" data-page="bipados">
+    <div class="page-head">
+      <div class="eyebrow">02 · Conferência</div>
+      <h2>Veículos bipados × Erros de embarque</h2>
+      <p>Indicadores de conferência de carga na expedição.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-bipados"></div>
+    <div class="card"><div class="card-head"><div><h3>Veículos bipados × Erros</h3><div class="sub">Operação de conferência por mês</div></div><span class="card-tag">EMBARQUE</span></div><div class="chart-wrap tall"><canvas id="chartBipados"></canvas></div></div>
+    <div class="insight" id="insight-bipados"></div>
+  </section>
+
+  <!-- 03 · AJUDANTES -->
+  <section class="page" data-page="ajudantes">
+    <div class="page-head">
+      <div class="eyebrow">03 · Equipe</div>
+      <h2>Ajudantes & eventos</h2>
+      <p>Quantidade de ajudantes alocados versus eventos de ajudantes registrados no mês.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-ajudantes"></div>
+    <div class="card"><div class="card-head"><div><h3>Ajudantes × Eventos por mês</h3><div class="sub">Comparativo de alocação e demanda</div></div><span class="card-tag">EQUIPE DE APOIO</span></div><div class="chart-wrap tall"><canvas id="chartAjudantes"></canvas></div></div>
+    <div class="insight" id="insight-ajudantes"></div>
+  </section>
+
+  <!-- 04 · CONFERENTES -->
+  <section class="page" data-page="conferentes">
+    <div class="page-head">
+      <div class="eyebrow">04 · Equipe</div>
+      <h2>Conferentes & eventos</h2>
+      <p>Carga operacional dos conferentes ao longo do período.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-conferentes"></div>
+    <div class="card"><div class="card-head"><div><h3>Conferentes (6) × Eventos</h3><div class="sub">Carga operacional dos conferentes</div></div><span class="card-tag">CONFERÊNCIA</span></div><div class="chart-wrap tall"><canvas id="chartConferentes"></canvas></div></div>
+    <div class="insight" id="insight-conferentes"></div>
+  </section>
+
+  <!-- 05 · ATRASO EXPRESSO -->
+  <section class="page" data-page="atraso_expresso">
+    <div class="page-head">
+      <div class="eyebrow">05 · Tempos críticos</div>
+      <h2>Atraso expresso</h2>
+      <p>Tempo total de atraso e dias excedidos para saída de cargas expressas. Quanto menor, melhor.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-atraso_expresso"></div>
+    <div class="view-toggle">
+      <button class="toggle-btn active" data-page="atraso_expresso" data-mode="separado">Separado</button>
+      <button class="toggle-btn" data-page="atraso_expresso" data-mode="combinado">Combinado</button>
+    </div>
+    <div class="chart-view" id="view-separado-atraso_expresso">
+      <div class="row cols-2">
+        <div class="card"><div class="card-head"><div><h3>Tempo atraso expresso (horas)</h3><div class="sub">Atraso acumulado por mês</div></div><span class="card-tag">EXPRESSO</span></div><div class="chart-wrap"><canvas id="chartExpresso"></canvas></div></div>
+        <div class="card"><div class="card-head"><div><h3>Dias excedidos · Expresso</h3></div></div><div class="chart-wrap"><canvas id="chartDiasExpresso"></canvas></div></div>
+      </div>
+    </div>
+    <div class="chart-view" id="view-combinado-atraso_expresso" style="display:none">
+      <div class="card"><div class="card-head"><div><h3>Atraso expresso × Dias excedidos</h3><div class="sub">Comparativo combinado</div></div><span class="card-tag">COMBINADO</span></div><div class="chart-wrap tall"><canvas id="chartExpressoCombo"></canvas></div></div>
+    </div>
+    <div class="insight" id="insight-atraso_expresso"></div>
+  </section>
+
+  <!-- 06 · SAÍDA A+ -->
+  <section class="page" data-page="saida_a">
+    <div class="page-head">
+      <div class="eyebrow">06 · Tempos críticos</div>
+      <h2>Saída A+</h2>
+      <p>Tempo total de atraso e dias excedidos para saída de cargas regulares. Quanto menor, melhor.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-saida_a"></div>
+    <div class="view-toggle">
+      <button class="toggle-btn active" data-page="saida_a" data-mode="separado">Separado</button>
+      <button class="toggle-btn" data-page="saida_a" data-mode="combinado">Combinado</button>
+    </div>
+    <div class="chart-view" id="view-separado-saida_a">
+      <div class="row cols-2">
+        <div class="card"><div class="card-head"><div><h3>Tempo de saída A+ (horas)</h3><div class="sub">Atraso acumulado por mês</div></div><span class="card-tag">SAÍDA</span></div><div class="chart-wrap"><canvas id="chartSaida"></canvas></div></div>
+        <div class="card"><div class="card-head"><div><h3>Dias excedidos · Saída A+</h3></div></div><div class="chart-wrap"><canvas id="chartDiasSaida"></canvas></div></div>
+      </div>
+    </div>
+    <div class="chart-view" id="view-combinado-saida_a" style="display:none">
+      <div class="card"><div class="card-head"><div><h3>Saída A+ × Dias excedidos</h3><div class="sub">Comparativo combinado</div></div><span class="card-tag">COMBINADO</span></div><div class="chart-wrap tall"><canvas id="chartSaidaCombo"></canvas></div></div>
+    </div>
+    <div class="insight" id="insight-saida_a"></div>
+  </section>
+
+  <!-- 07 · MANIFESTOS -->
+  <section class="page" data-page="manifestos">
+    <div class="page-head">
+      <div class="eyebrow">07 · Operação fim</div>
+      <h2>Manifestos & operação</h2>
+      <p>Documentos manifestados versus o volume operacional total (entregas + coletas).</p>
+    </div>
+    <div class="kpi-grid" id="kpi-manifestos"></div>
+    <div class="card"><div class="card-head"><div><h3>Manifestos × Operação</h3><div class="sub">Eficiência documental</div></div><span class="card-tag">DOCUMENTOS</span></div><div class="chart-wrap tall"><canvas id="chartManifestosOp"></canvas></div></div>
+    <div class="insight" id="insight-manifestos"></div>
+  </section>
+
+  <!-- 08 · PERSONALIZADOS -->
+  <section class="page" data-page="personalizados">
+    <div class="page-head">
+      <div class="eyebrow">08 · Operação fim</div>
+      <h2>Personalizados</h2>
+      <p>Volumes personalizados frente ao total entregue/coletado no mês.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-personalizados"></div>
+    <div class="card"><div class="card-head"><div><h3>Comparativo personalizado</h3><div class="sub">Volumes personalizados vs. total entregue/coletado</div></div><span class="card-tag">PERSONALIZADOS</span></div><div class="chart-wrap tall"><canvas id="chartPersonalizadosOp"></canvas></div></div>
+    <div class="insight" id="insight-personalizados"></div>
+  </section>
+
+  <!-- 09 · CUBAGEM -->
+  <section class="page" data-page="cubagem">
+    <div class="page-head">
+      <div class="eyebrow">09 · Cubagem</div>
+      <h2>Volumes cubados & NFs</h2>
+      <p>Quantidade de notas fiscais cubadas e volume total medido. Indicador relevante para faturamento e ocupação do galpão.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-cubagem"></div>
+    <div class="view-toggle">
+      <button class="toggle-btn active" data-page="cubagem" data-mode="separado">Separado</button>
+      <button class="toggle-btn" data-page="cubagem" data-mode="combinado">Combinado</button>
+    </div>
+    <div class="chart-view" id="view-separado-cubagem">
+      <div class="row uneven">
+        <div class="card"><div class="card-head"><div><h3>Volume cubado por mês</h3><div class="sub">Total de m³ medidos</div></div><span class="card-tag">CUBAGEM</span></div><div class="chart-wrap tall"><canvas id="chartVolCubado"></canvas></div></div>
+        <div class="card"><div class="card-head"><div><h3>NFs cubadas</h3><div class="sub">Documentos processados</div></div></div><div class="chart-wrap tall"><canvas id="chartNFCubadas"></canvas></div></div>
+      </div>
+    </div>
+    <div class="chart-view" id="view-combinado-cubagem" style="display:none">
+      <div class="card"><div class="card-head"><div><h3>Volume cubado × NFs cubadas</h3><div class="sub">Comparativo combinado</div></div><span class="card-tag">COMBINADO</span></div><div class="chart-wrap tall"><canvas id="chartCubagemCombo"></canvas></div></div>
+    </div>
+    <div class="insight" id="insight-cubagem"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>PORTOEX · EXPEDIÇÃO/LOGÍSTICA INTERNA</span>
+  <span id="footerUpdate">DASHBOARD MENSAL</span>
+</footer>
 
 <script>
-// ===== CREDENCIAIS =====
-// Cada entrada: { senha, filtro }
-// filtro: string que será comparada (case-insensitive) contra empresaNome e opNome do colaborador
-// filtro null = acesso total (admin)
-const CREDENCIAIS = {
-  'ADMIN':  { senha: 'PORTOEXTV', filtro: null },
-  'LJA':    { senha: '123456', filtro: 'LJA' },
-  'RP':     { senha: 'RP123',  filtro: 'RP'  },
-  'IAGO':   { senha: '123456', filtro: 'IAGO' },
-  'litoral':{ senha: '123456', filtro: 'litoral' },
-};
+(function(){
+  const SHEET_ID = '1VZKDyY8oAtRHcT0TDvyv5zI1rJeEZe_KAvbbyRbE9qs';
+  const SHEET_NAME = 'MONTAGENS GRAF';
+  const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
-let filtroEmpresa = null; // definido após login
+  // ============ STATUS ============
+  const statusEl = document.getElementById('status');
+  function setStatus(msg, isError){ statusEl.textContent = msg; statusEl.className = 'show' + (isError?' error':''); }
+  function clearStatus(){ statusEl.className = ''; }
 
-// ===== LOGIN =====
-function doLogin() {
-  const user = document.getElementById('login-user').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const err  = document.getElementById('login-error');
-
-  const cred = CREDENCIAIS[user] || CREDENCIAIS[user.toUpperCase()] ||
-    Object.entries(CREDENCIAIS).find(([k]) => k.toLowerCase() === user.toLowerCase())?.[1];
-
-  if (!cred || cred.senha !== pass) {
-    err.textContent = 'Usuário ou senha inválidos.';
-    document.getElementById('login-pass').value = '';
-    return;
+  // ============ DATA LOADING ============
+  // Direct fetch() is fast but browsers block it when the page is opened via
+  // file:// (double-click). JSONP via <script> tag is exempt from that
+  // restriction (same reason the Chart.js CDN script above always works),
+  // so it's used as a fallback that works no matter how the file is opened.
+  async function loadRows(){
+    try{ return await loadViaFetch(); }
+    catch(err){ console.warn('Fetch direto falhou, tentando via JSONP…', err.message); return await loadViaJSONP(); }
+  }
+  async function loadViaFetch(){
+    const res = await fetch(CSV_URL, { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    return Papa.parse(text.trim(), { skipEmptyLines: false }).data;
+  }
+  function loadViaJSONP(){
+    return new Promise((resolve, reject) => {
+      const cbName = 'gvizCB_' + Math.random().toString(36).slice(2);
+      const timeout = setTimeout(() => { cleanup(); reject(new Error('Tempo esgotado ao carregar os dados da planilha.')); }, 15000);
+      function cleanup(){ clearTimeout(timeout); delete window[cbName]; if(script.parentNode) script.parentNode.removeChild(script); }
+      window[cbName] = function(dataTable){
+        cleanup();
+        try{
+          const rows = (dataTable.table.rows || []).map(row =>
+            (row.c || []).map(cell => {
+              if(!cell) return '';
+              if(cell.f !== undefined && cell.f !== null) return String(cell.f);
+              if(cell.v !== undefined && cell.v !== null) return String(cell.v);
+              return '';
+            })
+          );
+          resolve(rows);
+        }catch(err){ reject(err); }
+      };
+      const script = document.createElement('script');
+      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json;responseHandler:${cbName}`;
+      script.onerror = () => { cleanup(); reject(new Error('Falha ao carregar o script da planilha.')); };
+      document.body.appendChild(script);
+    });
   }
 
-  filtroEmpresa = cred.filtro;
-
-  // Mostra tag da empresa no header
-  const tag = document.getElementById('tv-empresa-tag');
-  tag.textContent = user.toUpperCase();
-  tag.style.display = 'inline-block';
-
-  // Remove overlay
-  document.getElementById('login-overlay').style.display = 'none';
-
-  // Inicia Firebase e render
-  initFirebase();
-}
-
-// Enter no campo de senha dispara login
-document.getElementById('login-pass').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
-document.getElementById('login-user').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('login-pass').focus();
-});
-
-// ===== FIREBASE =====
-const firebaseConfig = {
-  apiKey: "AIzaSyDsKKZaK1WBo3FjNo-2o0O5a0ehV4tDy4U",
-  authDomain: "vagas-terceirizados-portoex.firebaseapp.com",
-  databaseURL: "https://vagas-terceirizados-portoex-default-rtdb.firebaseio.com",
-  projectId: "vagas-terceirizados-portoex",
-  storageBucket: "vagas-terceirizados-portoex.firebasestorage.app",
-  messagingSenderId: "688106736915",
-  appId: "1:688106736915:web:412ff19368208198269ee6"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let STATE = { acompanhamento: {}, motoristas: {} };
-let mdSaveTimeout = {};
-
-function initFirebase() {
-  db.ref('acompanhamento').on('value', snap => { STATE.acompanhamento = snap.val() || {}; render(); });
-  db.ref('motoristas').on('value',     snap => { STATE.motoristas     = snap.val() || {}; render(); });
-}
-
-// ===== RELÓGIO =====
-function updateClock() {
-  const now = new Date();
-  const dias  = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  document.getElementById('tv-date').textContent =
-    `${dias[now.getDay()]}, ${now.getDate()} ${meses[now.getMonth()]} ${now.getFullYear()}`;
-  document.getElementById('tv-time').textContent =
-    String(now.getHours()).padStart(2,'0') + ':' +
-    String(now.getMinutes()).padStart(2,'0') + ':' +
-    String(now.getSeconds()).padStart(2,'0');
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// ===== FILTRO POR EMPRESA =====
-function pertenceAEmpresa(a) {
-  if (!filtroEmpresa) return true; // acesso total
-  const f = filtroEmpresa.toLowerCase();
-  return (
-    (a.empresaNome  || '').toLowerCase().includes(f) ||
-    (a.opNome       || '').toLowerCase().includes(f) ||
-    (a.opCC         || '').toLowerCase().includes(f)
-  );
-}
-
-// ===== RENDER =====
-function render() {
-  const content = document.getElementById('tv-content');
-  const hoje = new Date().toISOString().split('T')[0];
-
-  let items = Object.entries(STATE.acompanhamento)
-    .filter(([,a]) => a.data === hoje && pertenceAEmpresa(a));
-
-  if (!items.length) {
-    content.innerHTML = '<div class="tv-empty">Nenhum colaborador cadastrado para hoje.</div>';
-    updateTotais([], [], []);
-    return;
+  // ============ PARSING HELPERS ============
+  function parseNumberBR(v){
+    if(v == null) return null;
+    v = String(v).trim();
+    if(v === '') return null;
+    const n = parseFloat(v.replace(/\./g,'').replace(',', '.'));
+    return isNaN(n) ? null : n;
+  }
+  function parseDurationHours(v){
+    if(v == null) return null;
+    v = String(v).trim();
+    if(v === '') return null;
+    const parts = v.split(':').map(Number);
+    if(parts.some(isNaN)) return null;
+    const h = parts[0]||0, m = parts[1]||0, s = parts[2]||0;
+    return h + m/60 + s/3600;
+  }
+  function genMeses(n){
+    const abbr = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+    let y = 2025, m = 9; // dados mensais começam em OUT/2025
+    const out = [];
+    for(let i=0;i<n;i++){ out.push(abbr[m] + '/' + String(y).slice(2)); m++; if(m>11){ m=0; y++; } }
+    return out;
   }
 
-  const rota      = items.filter(([,a]) => (a.opCC||'').toUpperCase() === 'ROTA');
-  const expedicao = items.filter(([,a]) => { const c=(a.opCC||'').toUpperCase(); return c==='EXPEDIÇÃO'||c==='EXPEDICAO'; });
-  const outros    = items.filter(([,a]) => { const c=(a.opCC||'').toUpperCase(); return c!=='ROTA'&&c!=='EXPEDIÇÃO'&&c!=='EXPEDICAO'; });
+  // Row sequence exactly as laid out in the "MONTAGENS GRAF" tab, starting
+  // at the row whose first cell is "MANIFESTOS".
+  const ROW_SEQUENCE = [
+    'manifestos','operacao_ctn','despachos_jem','volumetria_jem','personalizados',
+    'nfs_cubadas','qtds_vol_cubado','veiculos_bipados','erros_embarques',
+    'tempo_saida_raw','qtd_dias_excedidos_saida',
+    'ajudantes','qtd_eventos_ajud','conferentes_6','qtd_eventos_conf','dias_uteis',
+    'tempo_atraso_expresso_raw','qtd_dias_excedidos_exp',
+    'entregas_realizadas','coletas_realizadas','entregas_coletas'
+  ];
 
-  const temRota = rota.length > 0, temExp = expedicao.length > 0;
-  const gridClass = (temRota && temExp) ? 'two-col' : 'two-col single';
+  function buildMonthly(rows){
+    let start = -1;
+    for(let i=0;i<rows.length;i++){
+      if(((rows[i]&&rows[i][0])||'').trim() === 'MANIFESTOS'){ start = i; break; }
+    }
+    if(start === -1) throw new Error('Não encontrei a linha "MANIFESTOS" na aba "MONTAGENS GRAF".');
 
-  let gridHtml = `<div class="${gridClass}">`;
-  if (temRota) gridHtml += buildSection('ROTA',      rota,      'rota');
-  if (temExp)  gridHtml += buildSection('EXPEDIÇÃO', expedicao, 'expedicao');
-  gridHtml += '</div>';
+    const raw = {};
+    ROW_SEQUENCE.forEach((key, idx) => { raw[key] = rows[start + idx] || []; });
 
-  let extrasHtml = '';
-  if (outros.length) {
-    const grupos = {};
-    outros.forEach(e => { const k = e[1].opCC || e[1].opNome || 'Outros'; if (!grupos[k]) grupos[k]=[]; grupos[k].push(e); });
-    extrasHtml = `<div class="extra-sections">${Object.entries(grupos).map(([cc,rows])=>buildSection(cc,rows,'expedicao')).join('')}</div>`;
+    // Count only CONSECUTIVE populated columns starting at column 1 — the
+    // sheet has an unrelated reference/target block further to the right
+    // that can contain stray non-empty cells, which would otherwise be
+    // mistaken for extra months.
+    const diasUteisRow = raw['dias_uteis'];
+    let lastCol = 0;
+    for(let c = 1; c < diasUteisRow.length; c++){
+      if((diasUteisRow[c]||'').trim() !== '') lastCol = c;
+      else break;
+    }
+    if(lastCol === 0) throw new Error('Não encontrei meses preenchidos na aba "MONTAGENS GRAF".');
+
+    function nums(key){ const row = raw[key]; const out=[]; for(let c=1;c<=lastCol;c++) out.push(parseNumberBR(row[c])); return out; }
+    function hours(key){ const row = raw[key]; const out=[]; for(let c=1;c<=lastCol;c++) out.push(parseDurationHours(row[c])); return out; }
+
+    const D = {
+      manifestos: nums('manifestos'), operacao_ctn: nums('operacao_ctn'),
+      despachos_jem: nums('despachos_jem'), volumetria_jem: nums('volumetria_jem'),
+      personalizados: nums('personalizados'), nfs_cubadas: nums('nfs_cubadas'),
+      qtds_vol_cubado: nums('qtds_vol_cubado'), veiculos_bipados: nums('veiculos_bipados'),
+      erros_embarques: nums('erros_embarques'), tempo_saida_h: hours('tempo_saida_raw'),
+      qtd_dias_excedidos_saida: nums('qtd_dias_excedidos_saida'), ajudantes: nums('ajudantes'),
+      qtd_eventos_ajud: nums('qtd_eventos_ajud'), conferentes_6: nums('conferentes_6'),
+      qtd_eventos_conf: nums('qtd_eventos_conf'), dias_uteis: nums('dias_uteis'),
+      tempo_atraso_expresso_h: hours('tempo_atraso_expresso_raw'),
+      qtd_dias_excedidos_exp: nums('qtd_dias_excedidos_exp'),
+      entregas_realizadas: nums('entregas_realizadas'), coletas_realizadas: nums('coletas_realizadas'),
+      entregas_coletas: nums('entregas_coletas'),
+    };
+    return { D, meses: genMeses(lastCol) };
   }
 
-  content.innerHTML = gridHtml + extrasHtml;
-  updateTotais(rota, expedicao, outros);
-  attachMdEvents();
-}
-
-function buildSection(titulo, items, tipo) {
-  const presentes = items.filter(([,a]) => a.status === 'Presente').length;
-  const isRota = tipo === 'rota';
-  const ths = isRota
-    ? `<th>Nº</th><th>Nome</th><th>Operação</th><th class="center">Entrada</th><th class="center">Prev.Saída</th><th class="center">Saída</th><th>Motorista</th><th class="center">MD</th><th>Status</th>`
-    : `<th>Nº</th><th>Nome</th><th>Operação</th><th class="center">Entrada</th><th class="center">Prev.Saída</th><th class="center">Saída</th><th>Status</th>`;
-
-  const sorted = [...items].sort(([,a],[,b]) => {
-    const opCmp = (a.opNome||'').localeCompare(b.opNome||'', 'pt-BR');
-    if (opCmp !== 0) return opCmp;
-    return (a.chegada||'').localeCompare(b.chegada||'');
+  // ============ NAV ============
+  const nav = document.getElementById('nav');
+  const pages = [
+    {id:'overview', label:'Visão Geral', num:'00'},
+    {id:'jem', label:'JEM', num:'01'},
+    {id:'bipados', label:'Bipados x Erros', num:'02'},
+    {id:'ajudantes', label:'Ajudantes', num:'03'},
+    {id:'conferentes', label:'Conferentes', num:'04'},
+    {id:'atraso_expresso', label:'Atraso Expresso', num:'05'},
+    {id:'saida_a', label:'Saída A+', num:'06'},
+    {id:'manifestos', label:'Manifestos', num:'07'},
+    {id:'personalizados', label:'Personalizados', num:'08'},
+    {id:'cubagem', label:'Cubagem', num:'09'},
+  ];
+  pages.forEach((p,i)=>{
+    const b=document.createElement('button');
+    b.className='nav-btn'+(i===0?' active':'');
+    b.dataset.target=p.id;
+    b.innerHTML=`<span class="num">${p.num}</span> ${p.label}`;
+    b.onclick=()=>{
+      document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      document.querySelector(`.page[data-page="${p.id}"]`).classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    nav.appendChild(b);
   });
-  const rows = sorted.map(([id, a], i) => buildRow(id, a, i+1, isRota)).join('');
 
-  return `<div class="cc-section">
-    <div class="cc-header cc-${tipo}">
-      <div class="cc-title">${titulo}</div>
-      <div class="cc-count">${items.length} colab. · ${presentes} presente${presentes!==1?'s':''}</div>
-    </div>
-    <div class="table-scroll">
-      <table class="tv-table">
-        <thead><tr>${ths}</tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
-function buildRow(id, a, num, isRota) {
-  const chegada   = a.chegada  || '';
-  const refeicao  = a.refeicao || '01:00';
-  const saida     = a.saida    || '';
-  const prevSaida = chegada ? calcPrevSaida(chegada, refeicao) : '';
-
-  const statusMap = {
-    'Em escolha': ['s-escolha',   'Em Escolha'],
-    'Validada':   ['s-validada',  'Validada'],
-    'Presente':   ['s-presente',  'Presente'],
-    'Ausente':    ['s-ausente',   'Ausente'],
-    'Encerrado':  ['s-encerrado', 'Encerrado']
+  // ============ CHART DEFAULTS ============
+  Chart.register(ChartDataLabels);
+  Chart.defaults.font.family = "'Inter Tight', sans-serif";
+  Chart.defaults.font.size = 11.5;
+  Chart.defaults.color = '#a4adc4';
+  Chart.defaults.plugins.legend.labels.boxWidth = 11;
+  Chart.defaults.plugins.legend.labels.boxHeight = 11;
+  Chart.defaults.plugins.legend.labels.padding = 14;
+  Chart.defaults.plugins.legend.labels.color = '#e8ecf5';
+  Chart.defaults.plugins.legend.labels.font = {size:12, weight:'500'};
+  const gridColor = 'rgba(255,255,255,.06)';
+  const tickColor = '#a4adc4';
+  const baseScales = {
+    x:{grid:{color:gridColor,drawBorder:false},ticks:{color:tickColor,font:{size:11}},border:{display:false}},
+    y:{grid:{color:gridColor,drawBorder:false},ticks:{color:tickColor,font:{size:11}},border:{display:false}}
   };
-  const [sCls, sLabel] = statusMap[a.status] || ['s-escolha', a.status||'Em Escolha'];
-
-  const motNome = a.motoristaId && STATE.motoristas[a.motoristaId]
-    ? STATE.motoristas[a.motoristaId].nome : (a.motoristaNome||'—');
-  const md = a.md || '';
-
-  // ATRASO: sem entrada E horário atual já passou do horaInicial
-  const semEntrada = !chegada;
-  let isAtraso = false;
-  if (semEntrada && a.horaInicial) {
-    const now = new Date();
-    const [hi, mi] = a.horaInicial.split(':').map(Number);
-    isAtraso = (now.getHours() * 60 + now.getMinutes()) > (hi * 60 + mi);
+  const fmt = n => n==null ? '—' : n.toLocaleString('pt-BR');
+  const horaLabel = h => { if(h==null) return '—'; const H=Math.floor(h), M=Math.round((h-H)*60); return `${H}:${String(M).padStart(2,'0')}h`; };
+  const dl = (color, anchor='end', align='end') => ({
+    color, anchor, align, font:{family:"'JetBrains Mono', monospace", weight:'700', size:11},
+    formatter: v => (v===0||v==null) ? '' : fmt(v), padding:{top:2,bottom:2,left:4,right:4}
+  });
+  const charts = {}; // id -> Chart instance, so we can destroy on reload
+  function mkChart(id, config){ if(charts[id]) charts[id].destroy(); charts[id] = new Chart(document.getElementById(id), config); }
+  const miniBar = (id, meses, data, color) => mkChart(id, {
+    type:'bar', data:{labels:meses,datasets:[{label:'',data,backgroundColor:color,borderRadius:5,datalabels:dl(color,'end','end')}]},
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,right:8}},scales:baseScales,plugins:{legend:{display:false}}}
+  });
+  // Dual-axis "combined" chart: bars on the left axis, a line on the right
+  // axis — used by the Separado/Combinado toggle on pages 05, 06 and 09.
+  function comboChart(id, meses, barData, barLabel, barColor, lineData, lineLabel, lineColor, barFmt, lineFmt){
+    const bf = barFmt || (v => (v===0||v==null) ? '' : fmt(v));
+    const lf = lineFmt || (v => (v===0||v==null) ? '' : fmt(v));
+    mkChart(id, {
+      type:'bar',
+      data:{labels:meses,datasets:[
+        {type:'bar',label:barLabel,data:barData,backgroundColor:barColor,borderRadius:6,order:2,yAxisID:'y',
+          datalabels:{...dl(barColor,'end','end'), formatter:bf}},
+        {type:'line',label:lineLabel,data:lineData,borderColor:lineColor,backgroundColor:lineColor,yAxisID:'y1',
+          tension:.35,borderWidth:3,pointRadius:6,pointBackgroundColor:lineColor,pointBorderColor:'#0b0f1a',pointBorderWidth:2,order:1,
+          datalabels:{...dl(lineColor,'end','top'),offset:8, formatter:lf}}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30,right:14}},
+        scales:{x:baseScales.x,
+          y:{...baseScales.y,position:'left',title:{display:true,text:barLabel,color:barColor,font:{size:11,weight:'600'}}},
+          y1:{...baseScales.y,position:'right',grid:{display:false},title:{display:true,text:lineLabel,color:lineColor,font:{size:11,weight:'600'}}}
+        },
+        plugins:{legend:{position:'top',align:'end'}}}
+    });
   }
-  const nomeClass   = isAtraso ? 'td-nome-atraso' : 'td-nome';
-  const atrasoBadge = isAtraso ? `<span class="badge-atraso">⚠ ATRASO</span>` : '';
-
-  const tdNome    = `<td><div class="${nomeClass}">${a.colNome||'—'} ${atrasoBadge}</div><div class="td-empresa">${a.empresaNome||''}</div></td>`;
-  const tdOp      = `<td><div class="td-op">${a.opNome||'—'}</div><div class="td-func">${a.funcao||''}</div></td>`;
-  const tdEntrada = `<td class="td-time entrada">${chegada||'——'}</td>`;
-  const tdPrev    = `<td class="td-time saida-prev">${prevSaida||'——'}</td>`;
-  const tdSaida   = `<td class="td-time saida-real">${saida||'——'}</td>`;
-  const tdStatus  = `<td><span class="status-pill ${sCls}">${sLabel}</span></td>`;
-
-  if (isRota) {
-    return `<tr>
-      <td class="td-num">${num}</td>${tdNome}${tdOp}${tdEntrada}${tdPrev}${tdSaida}
-      <td class="td-motorista">${motNome}</td>
-      <td><input class="md-input" data-id="${id}" value="${md}" placeholder="MD nº"></td>
-      ${tdStatus}</tr>`;
-  }
-  return `<tr><td class="td-num">${num}</td>${tdNome}${tdOp}${tdEntrada}${tdPrev}${tdSaida}${tdStatus}</tr>`;
-}
-
-function calcPrevSaida(chegada, refeicao) {
-  const [h,m]   = chegada.split(':').map(Number);
-  const [rh,rm] = (refeicao||'01:00').split(':').map(Number);
-  const t = h*60 + m + 8*60 + rh*60 + rm;
-  return String(Math.floor(t/60)%24).padStart(2,'0') + ':' + String(t%60).padStart(2,'0');
-}
-
-function updateTotais(rota, expedicao, outros) {
-  const todos = [...rota, ...expedicao, ...(outros||[])];
-  document.getElementById('tot-total').textContent     = todos.length;
-  document.getElementById('tot-presentes').textContent = todos.filter(([,a])=>a.status==='Presente').length;
-  document.getElementById('tot-rota').textContent      = rota.length;
-  document.getElementById('tot-expedicao').textContent = expedicao.length;
-}
-
-function attachMdEvents() {
-  document.querySelectorAll('.md-input').forEach(inp => {
-    inp.addEventListener('input', () => {
-      const id = inp.dataset.id;
-      clearTimeout(mdSaveTimeout[id]);
-      mdSaveTimeout[id] = setTimeout(() => db.ref(`acompanhamento/${id}/md`).set(inp.value.trim()), 800);
+  // Wire up the Separado/Combinado toggle buttons (static UI, set up once).
+  document.querySelectorAll('.view-toggle').forEach(group=>{
+    group.querySelectorAll('.toggle-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const page = btn.dataset.page, mode = btn.dataset.mode;
+        group.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const sep = document.getElementById(`view-separado-${page}`);
+        const comb = document.getElementById(`view-combinado-${page}`);
+        if(sep) sep.style.display = mode==='separado' ? '' : 'none';
+        if(comb) comb.style.display = mode==='combinado' ? '' : 'none';
+        // A chart built while its container was display:none can end up
+        // with a zero-size canvas; force a resize now that it's visible.
+        if(mode==='combinado'){
+          const comboIds = { atraso_expresso:'chartExpressoCombo', saida_a:'chartSaidaCombo', cubagem:'chartCubagemCombo' };
+          const cid = comboIds[page];
+          if(cid && charts[cid]) requestAnimationFrame(()=>charts[cid].resize());
+        }
+      });
     });
   });
-}
+
+  // ============ KPI / DELTA HELPERS ============
+  function delta(curr, prev, higherIsBetter){
+    if(curr==null || prev==null || prev===0) return {cls:'flat', arrow:'—', text:'sem comparação'};
+    const diff = curr - prev;
+    const pct = (diff/Math.abs(prev))*100;
+    const arrow = diff>0 ? '▲' : diff<0 ? '▼' : '—';
+    let cls;
+    if(diff===0) cls='flat';
+    else{ const better = higherIsBetter===false ? diff<0 : diff>0; cls = better ? 'up' : 'down'; }
+    return {cls, arrow, text: Math.abs(pct).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%'};
+  }
+  function kpiCard(label, value, sub, deltaObj, colorClass){
+    const div = document.createElement('div');
+    div.className = 'kpi ' + (colorClass||'');
+    div.innerHTML = `<div class="kpi-label">${label}</div><div class="kpi-value">${value}</div>
+      <div class="kpi-foot"><span>${sub}</span><span class="delta ${deltaObj.cls}">${deltaObj.arrow} ${deltaObj.text}</span></div>`;
+    return div;
+  }
+  function peakInfo(arr, meses){
+    let best=-Infinity, idx=-1;
+    arr.forEach((v,i)=>{ if(v!=null && v>best){ best=v; idx=i; } });
+    return idx===-1 ? {value:null, mes:'—'} : {value:best, mes:meses[idx]};
+  }
+  function last2(arr){
+    let ci=-1, pi=-1;
+    for(let i=arr.length-1;i>=0;i--){ if(arr[i]!=null){ if(ci===-1) ci=i; else { pi=i; break; } } }
+    return {curr: ci===-1?null:arr[ci], prev: pi===-1?null:arr[pi], ci, pi};
+  }
+
+  // ============ RENDER ============
+  function renderAll(D, meses){
+    const mAtual = meses[meses.length-1];
+    const mAnterior = meses.length>1 ? meses[meses.length-2] : '—';
+    document.getElementById('footerUpdate').textContent = 'DASHBOARD MENSAL · ATUALIZADO ' + mAtual;
+
+    renderOverview(D, meses);
+    renderJEM(D, meses, mAtual, mAnterior);
+    renderBipados(D, meses, mAtual, mAnterior);
+    renderAjudantes(D, meses, mAtual, mAnterior);
+    renderConferentes(D, meses, mAtual, mAnterior);
+    renderAtrasoExpresso(D, meses, mAtual, mAnterior);
+    renderSaidaA(D, meses, mAtual, mAnterior);
+    renderManifestos(D, meses, mAtual, mAnterior);
+    renderPersonalizados(D, meses, mAtual, mAnterior);
+    renderCubagem(D, meses, mAtual, mAnterior);
+  }
+
+  function renderOverview(D, meses){
+    const grid = document.getElementById('kpi-overview'); grid.innerHTML='';
+    const vol=last2(D.volumetria_jem), desp=last2(D.despachos_jem), ec=last2(D.entregas_coletas), du=last2(D.dias_uteis);
+    grid.appendChild(kpiCard('Volumetria JEM', fmt(vol.curr), 'volumes processados', delta(vol.curr,vol.prev,true), 'accent'));
+    grid.appendChild(kpiCard('Despachos JEM', fmt(desp.curr), 'nº de despachos', delta(desp.curr,desp.prev,true)));
+    grid.appendChild(kpiCard('Entregas + Coletas', fmt(ec.curr), 'movimentações', delta(ec.curr,ec.prev,true), 'green'));
+    grid.appendChild(kpiCard('Dias úteis', fmt(du.curr), 'no mês', {cls:'flat',arrow:'—',text:meses[meses.length-1]}, 'yellow'));
+
+    mkChart('chartJEM', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Volumetria JEM',data:D.volumetria_jem,backgroundColor:'#ff5b3a',borderRadius:6,yAxisID:'y',datalabels:dl('#ff5b3a','end','end')},
+        {label:'Despachos JEM',data:D.despachos_jem,backgroundColor:'#4d9fff',borderRadius:6,yAxisID:'y1',datalabels:dl('#4d9fff','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},
+        scales:{x:baseScales.x,y:{...baseScales.y,position:'left',title:{display:true,text:'Volumetria',color:'#ff5b3a',font:{size:11,weight:'600'}}},
+        y1:{...baseScales.y,position:'right',grid:{display:false},title:{display:true,text:'Despachos',color:'#4d9fff',font:{size:11,weight:'600'}}}},
+        plugins:{legend:{position:'top',align:'end'}}}
+    });
+    mkChart('chartEntCol', {
+      type:'line', data:{labels:meses,datasets:[{label:'Entregas + Coletas',data:D.entregas_coletas,
+        borderColor:'#3ddc97',backgroundColor:'rgba(61,220,151,.15)',fill:true,tension:.35,borderWidth:2.5,
+        pointBackgroundColor:'#3ddc97',pointBorderColor:'#0b0f1a',pointBorderWidth:2,pointRadius:5,pointHoverRadius:7,
+        datalabels:dl('#3ddc97','end','top')}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30,right:14,left:8}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    miniBar('chartManifestos', meses, D.manifestos, '#a78bfa');
+    miniBar('chartPersonalizados', meses, D.personalizados, '#5eead4');
+    miniBar('chartCTN', meses, D.operacao_ctn, '#ffd23f');
+
+    const tableRows = [
+      ['Manifestos',D.manifestos],['Operação CTN',D.operacao_ctn],['Despachos JEM',D.despachos_jem],
+      ['Volumetria JEM',D.volumetria_jem],['Personalizados',D.personalizados],['NFs cubadas',D.nfs_cubadas],
+      ['Volume cubado',D.qtds_vol_cubado],['Veículos bipados',D.veiculos_bipados],['Erros embarques',D.erros_embarques],
+      ['Ajudantes',D.ajudantes],['Eventos ajudantes',D.qtd_eventos_ajud],['Conferentes (6)',D.conferentes_6],
+      ['Eventos conferentes',D.qtd_eventos_conf],['Entregas',D.entregas_realizadas],['Coletas',D.coletas_realizadas],
+      ['Entregas + Coletas',D.entregas_coletas],['Dias úteis',D.dias_uteis],
+    ];
+    let html = '<thead><tr><th>Indicador</th>'+meses.map(m=>`<th>${m}</th>`).join('')+'</tr></thead><tbody>';
+    tableRows.forEach(([k,v])=>{
+      const nums = v.filter(x=>x!=null);
+      const max = nums.length?Math.max(...nums):null, min = nums.filter(x=>x>0).length>1?Math.min(...nums.filter(x=>x>0)):null;
+      html+='<tr><td>'+k+'</td>'+v.map(x=>{
+        let cls='';
+        if(x!=null && x===max && x!==0) cls='cell-high';
+        else if(x!=null && min!=null && x===min) cls='cell-low';
+        return `<td class="${cls}">${x==null?'—':fmt(x)}</td>`;
+      }).join('')+'</tr>';
+    });
+    html+='</tbody>';
+    document.getElementById('tableConsolidado').innerHTML=html;
+  }
+
+  function setInsight(id, html, cls){ const el = document.getElementById('insight-'+id); el.className = 'insight'+(cls?(' '+cls):''); el.innerHTML = html; }
+
+  function renderJEM(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-jem'); grid.innerHTML='';
+    const vol=last2(D.volumetria_jem), desp=last2(D.despachos_jem);
+    const ratioCurr = (vol.curr!=null&&desp.curr)?vol.curr/desp.curr:null;
+    const ratioPrev = (vol.prev!=null&&desp.prev)?vol.prev/desp.prev:null;
+    const peak = peakInfo(D.volumetria_jem, meses);
+    grid.appendChild(kpiCard(`Volume ${mAtual}`, fmt(vol.curr), `vs. ${mAnterior}: ${fmt(vol.prev)}`, delta(vol.curr,vol.prev,true), 'accent'));
+    grid.appendChild(kpiCard(`Despachos ${mAtual}`, fmt(desp.curr), `vs. ${mAnterior}: ${fmt(desp.prev)}`, delta(desp.curr,desp.prev,true)));
+    grid.appendChild(kpiCard('Volume por despacho', ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:1}):'—', `média ${mAtual}`, delta(ratioCurr,ratioPrev,true), 'purple'));
+    grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
+
+    mkChart('chartJEMCombo', {
+      type:'bar', data:{labels:meses,datasets:[
+        {type:'bar',label:'Volumetria JEM',data:D.volumetria_jem,backgroundColor:'rgba(255,91,58,.85)',borderRadius:6,order:2,datalabels:dl('#ff5b3a','end','end')},
+        {type:'line',label:'Despachos JEM',data:D.despachos_jem,borderColor:'#4d9fff',backgroundColor:'#4d9fff',yAxisID:'y1',tension:.35,borderWidth:3,pointRadius:6,pointBackgroundColor:'#4d9fff',pointBorderColor:'#0b0f1a',pointBorderWidth:2,order:1,datalabels:{...dl('#4d9fff','end','top'),offset:8}}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30,right:14}},
+        scales:{x:baseScales.x,y:{...baseScales.y,position:'left',title:{display:true,text:'Volumetria',color:'#ff5b3a',font:{size:11,weight:'600'}}},
+        y1:{...baseScales.y,position:'right',grid:{display:false},title:{display:true,text:'Despachos',color:'#4d9fff',font:{size:11,weight:'600'}}}},
+        plugins:{legend:{position:'top',align:'end'}}}
+    });
+    mkChart('chartDespachosBar', {
+      type:'bar', data:{labels:meses,datasets:[{label:'Despachos JEM',data:D.despachos_jem,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:48}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    document.getElementById('jemMonthsTag').textContent = `JEM · ${meses.length} MESES`;
+    const d = delta(vol.curr, vol.prev, true);
+    setInsight('jem', `<strong>Leitura do mês:</strong> o volume JEM em <strong>${mAtual}</strong> foi de ${fmt(vol.curr)}, uma variação de ${d.arrow} ${d.text} frente a ${mAnterior}. Despachos: ${fmt(desp.curr)} (${delta(desp.curr,desp.prev,true).arrow} ${delta(desp.curr,desp.prev,true).text}).`);
+  }
+
+  function renderBipados(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-bipados'); grid.innerHTML='';
+    const bip=last2(D.veiculos_bipados), err=last2(D.erros_embarques);
+    const taxaCurr = (bip.curr!=null&&bip.curr)?(err.curr/bip.curr)*100:null;
+    const taxaPrev = (bip.prev!=null&&bip.prev)?(err.prev/bip.prev)*100:null;
+    grid.appendChild(kpiCard(`Veículos bipados ${mAtual}`, fmt(bip.curr), `vs. ${mAnterior}: ${fmt(bip.prev)}`, delta(bip.curr,bip.prev,true), 'green'));
+    grid.appendChild(kpiCard('Erros de embarque', fmt(err.curr), `vs. ${mAnterior}: ${fmt(err.prev)}`, delta(err.curr,err.prev,false), 'red'));
+    grid.appendChild(kpiCard('Taxa de erro', taxaCurr!=null?taxaCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—', 'erros / bipados', delta(taxaCurr,taxaPrev,false), 'purple'));
+    const peak = peakInfo(D.erros_embarques, meses);
+    grid.appendChild(kpiCard('Pico de erros', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'atenção'}, 'yellow'));
+
+    mkChart('chartBipados', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Veículos bipados',data:D.veiculos_bipados,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')},
+        {label:'Erros embarques',data:D.erros_embarques,backgroundColor:'#ff4d6d',borderRadius:6,datalabels:dl('#ff4d6d','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+    const d = delta(err.curr, err.prev, false);
+    const cls = d.cls==='up' ? 'good' : (d.cls==='down' ? 'warn' : '');
+    setInsight('bipados', `<strong>${d.cls==='up'?'Destaque positivo':'Atenção'}:</strong> os erros de embarque foram de ${fmt(err.prev)} (${mAnterior}) para ${fmt(err.curr)} (${mAtual}) — variação de ${d.arrow} ${d.text}, com ${fmt(bip.curr)} veículos bipados no mês.`, cls);
+  }
+
+  function renderAjudantes(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-ajudantes'); grid.innerHTML='';
+    const aj=last2(D.ajudantes), ev=last2(D.qtd_eventos_ajud);
+    const ratioCurr=(aj.curr!=null&&aj.curr)?ev.curr/aj.curr:null, ratioPrev=(aj.prev!=null&&aj.prev)?ev.prev/aj.prev:null;
+    const peak = peakInfo(D.ajudantes, meses);
+    grid.appendChild(kpiCard(`Ajudantes ${mAtual}`, fmt(aj.curr), `vs. ${mAnterior}: ${fmt(aj.prev)}`, delta(aj.curr,aj.prev,true)));
+    grid.appendChild(kpiCard('Eventos ajudantes', fmt(ev.curr), 'QTD eventos AJUD', delta(ev.curr,ev.prev,true), 'accent'));
+    grid.appendChild(kpiCard('Eventos por ajudante', ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:2}):'—', `razão ${mAtual}`, delta(ratioCurr,ratioPrev,true), 'purple'));
+    grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
+
+    mkChart('chartAjudantes', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Ajudantes',data:D.ajudantes,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
+        {label:'QTD Eventos AJUD',data:D.qtd_eventos_ajud,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+    setInsight('ajudantes', `<strong>Análise:</strong> em ${mAtual}, ${fmt(aj.curr)} ajudantes registraram ${fmt(ev.curr)} eventos (razão de ${ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:2}):'—'} evento/ajudante).`);
+  }
+
+  function renderConferentes(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-conferentes'); grid.innerHTML='';
+    const cf=last2(D.conferentes_6), ev=last2(D.qtd_eventos_conf);
+    const ratioCurr=(cf.curr!=null&&cf.curr)?ev.curr/cf.curr:null, ratioPrev=(cf.prev!=null&&cf.prev)?ev.prev/cf.prev:null;
+    const peak = peakInfo(D.conferentes_6, meses);
+    grid.appendChild(kpiCard(`Conferentes ${mAtual}`, fmt(cf.curr), `vs. ${mAnterior}: ${fmt(cf.prev)}`, delta(cf.curr,cf.prev,true)));
+    grid.appendChild(kpiCard('Eventos conferentes', fmt(ev.curr), 'QTD eventos CONF', delta(ev.curr,ev.prev,true), 'accent'));
+    grid.appendChild(kpiCard('Eventos por conferente', ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:2}):'—', `razão ${mAtual}`, delta(ratioCurr,ratioPrev,true), 'purple'));
+    grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
+
+    mkChart('chartConferentes', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Conferentes (6)',data:D.conferentes_6,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
+        {label:'QTD Eventos CONF',data:D.qtd_eventos_conf,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+    setInsight('conferentes', `<strong>Análise:</strong> em ${mAtual}, ${fmt(cf.curr)} conferentes registraram ${fmt(ev.curr)} eventos (razão de ${ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:2}):'—'} evento/conferente).`);
+  }
+
+  function renderAtrasoExpresso(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-atraso_expresso'); grid.innerHTML='';
+    const t=last2(D.tempo_atraso_expresso_h), dias=last2(D.qtd_dias_excedidos_exp);
+    const peak = peakInfo(D.tempo_atraso_expresso_h, meses);
+    grid.appendChild(kpiCard(`Atraso expresso ${mAtual}`, horaLabel(t.curr), `vs. ${mAnterior}: ${horaLabel(t.prev)}`, delta(t.curr,t.prev,false), 'accent'));
+    grid.appendChild(kpiCard('Dias excedidos', fmt(dias.curr), `vs. ${mAnterior}: ${fmt(dias.prev)}`, delta(dias.curr,dias.prev,false), 'yellow'));
+    grid.appendChild(kpiCard('Pior mês', horaLabel(peak.value), peak.mes, {cls:'flat',arrow:'',text:'maior atraso'}, 'red'));
+    grid.appendChild(kpiCard('Dias úteis no mês', fmt(D.dias_uteis[D.dias_uteis.length-1]), mAtual, {cls:'flat',arrow:'—',text:'referência'}));
+
+    mkChart('chartExpresso', {
+      type:'bar', data:{labels:meses,datasets:[{label:'Atraso expresso (h)',data:D.tempo_atraso_expresso_h,backgroundColor:'#4d9fff',borderRadius:6,
+        datalabels:{...dl('#4d9fff','end','end'),formatter:v=>(v===0||v==null)?'':horaLabel(v)}}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:50}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    miniBar('chartDiasExpresso', meses, D.qtd_dias_excedidos_exp, '#a78bfa');
+    comboChart('chartExpressoCombo', meses, D.tempo_atraso_expresso_h, 'Atraso expresso (h)', '#4d9fff',
+      D.qtd_dias_excedidos_exp, 'Dias excedidos', '#a78bfa', v=>(v===0||v==null)?'':horaLabel(v));
+    const d = delta(t.curr, t.prev, false);
+    const cls = d.cls==='up' ? 'good' : (d.cls==='down' ? 'warn' : '');
+    setInsight('atraso_expresso', `<strong>${d.cls==='up'?'Boa evolução':'Atenção'}:</strong> o atraso expresso passou de ${horaLabel(t.prev)} (${mAnterior}) para ${horaLabel(t.curr)} (${mAtual}) — variação de ${d.arrow} ${d.text}.`, cls);
+  }
+
+  function renderSaidaA(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-saida_a'); grid.innerHTML='';
+    const t=last2(D.tempo_saida_h), dias=last2(D.qtd_dias_excedidos_saida);
+    const peak = peakInfo(D.tempo_saida_h, meses);
+    grid.appendChild(kpiCard(`Saída A+ ${mAtual}`, horaLabel(t.curr), `vs. ${mAnterior}: ${horaLabel(t.prev)}`, delta(t.curr,t.prev,false), 'green'));
+    grid.appendChild(kpiCard('Dias excedidos', fmt(dias.curr), `vs. ${mAnterior}: ${fmt(dias.prev)}`, delta(dias.curr,dias.prev,false), 'yellow'));
+    grid.appendChild(kpiCard('Pior mês', horaLabel(peak.value), peak.mes, {cls:'flat',arrow:'',text:'maior atraso'}, 'red'));
+    grid.appendChild(kpiCard('Dias úteis no mês', fmt(D.dias_uteis[D.dias_uteis.length-1]), mAtual, {cls:'flat',arrow:'—',text:'referência'}));
+
+    mkChart('chartSaida', {
+      type:'bar', data:{labels:meses,datasets:[{label:'Tempo saída A+ (h)',data:D.tempo_saida_h,backgroundColor:'#ff5b3a',borderRadius:6,
+        datalabels:{...dl('#ff5b3a','end','end'),formatter:v=>(v===0||v==null)?'':horaLabel(v)}}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:50}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    miniBar('chartDiasSaida', meses, D.qtd_dias_excedidos_saida, '#ffd23f');
+    comboChart('chartSaidaCombo', meses, D.tempo_saida_h, 'Saída A+ (h)', '#ff5b3a',
+      D.qtd_dias_excedidos_saida, 'Dias excedidos', '#ffd23f', v=>(v===0||v==null)?'':horaLabel(v));
+    const d = delta(t.curr, t.prev, false);
+    const cls = d.cls==='up' ? 'good' : (d.cls==='down' ? 'warn' : '');
+    setInsight('saida_a', `<strong>${d.cls==='up'?'Boa evolução':'Atenção'}:</strong> o tempo de saída A+ passou de ${horaLabel(t.prev)} (${mAnterior}) para ${horaLabel(t.curr)} (${mAtual}) — variação de ${d.arrow} ${d.text}.`, cls);
+  }
+
+  function renderManifestos(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-manifestos'); grid.innerHTML='';
+    const man=last2(D.manifestos), ctn=last2(D.operacao_ctn), ec=last2(D.entregas_coletas);
+    const ratioCurr=(ec.curr!=null&&ec.curr)?man.curr/ec.curr*100:null, ratioPrev=(ec.prev!=null&&ec.prev)?man.prev/ec.prev*100:null;
+    grid.appendChild(kpiCard(`Manifestos ${mAtual}`, fmt(man.curr), `vs. ${mAnterior}: ${fmt(man.prev)}`, delta(man.curr,man.prev,true), 'purple'));
+    grid.appendChild(kpiCard('Operação CTN', fmt(ctn.curr), `vs. ${mAnterior}: ${fmt(ctn.prev)}`, delta(ctn.curr,ctn.prev,true)));
+    grid.appendChild(kpiCard('Manifestos / operação', ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—', `${mAtual}`, delta(ratioCurr,ratioPrev,true)));
+    grid.appendChild(kpiCard('Entregas + Coletas', fmt(ec.curr), `vs. ${mAnterior}: ${fmt(ec.prev)}`, delta(ec.curr,ec.prev,true), 'accent'));
+
+    mkChart('chartManifestosOp', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Manifestos',data:D.manifestos,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')},
+        {label:'Entregas + Coletas',data:D.entregas_coletas,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+    setInsight('manifestos', `<strong>Leitura do mês:</strong> ${fmt(man.curr)} manifestos emitidos em ${mAtual} para ${fmt(ec.curr)} movimentações (entregas + coletas).`);
+  }
+
+  function renderPersonalizados(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-personalizados'); grid.innerHTML='';
+    const p=last2(D.personalizados), ec=last2(D.entregas_coletas);
+    const shareCurr=(ec.curr!=null&&ec.curr)?p.curr/ec.curr*100:null, sharePrev=(ec.prev!=null&&ec.prev)?p.prev/ec.prev*100:null;
+    const peak = peakInfo(D.personalizados, meses);
+    grid.appendChild(kpiCard(`Personalizados ${mAtual}`, fmt(p.curr), `vs. ${mAnterior}: ${fmt(p.prev)}`, delta(p.curr,p.prev,true), 'teal'));
+    grid.appendChild(kpiCard('Participação no total', shareCurr!=null?shareCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—', 'sobre entregas+coletas', delta(shareCurr,sharePrev,true), 'purple'));
+    grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
+    grid.appendChild(kpiCard('Entregas + Coletas', fmt(ec.curr), `vs. ${mAnterior}: ${fmt(ec.prev)}`, delta(ec.curr,ec.prev,true), 'accent'));
+
+    mkChart('chartPersonalizadosOp', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Personalizados',data:D.personalizados,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')},
+        {label:'Entregas + Coletas',data:D.entregas_coletas,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+    setInsight('personalizados', `<strong>Leitura do mês:</strong> ${fmt(p.curr)} volumes personalizados em ${mAtual}, representando ${shareCurr!=null?shareCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—'} do total de entregas + coletas.`);
+  }
+
+  function renderCubagem(D, meses, mAtual, mAnterior){
+    const grid = document.getElementById('kpi-cubagem'); grid.innerHTML='';
+    const vc=last2(D.qtds_vol_cubado), nf=last2(D.nfs_cubadas);
+    const ratioCurr=(nf.curr!=null&&nf.curr)?vc.curr/nf.curr:null, ratioPrev=(nf.prev!=null&&nf.prev)?vc.prev/nf.prev:null;
+    const first = D.qtds_vol_cubado.find(v=>v!=null), lastV = [...D.qtds_vol_cubado].reverse().find(v=>v!=null);
+    const periodChange = (first!=null&&lastV!=null&&first!==0) ? ((lastV-first)/first*100) : null;
+    grid.appendChild(kpiCard(`Volume cubado ${mAtual}`, fmt(vc.curr), `vs. ${mAnterior}: ${fmt(vc.prev)}`, delta(vc.curr,vc.prev,true), 'accent'));
+    grid.appendChild(kpiCard(`NFs cubadas ${mAtual}`, fmt(nf.curr), `vs. ${mAnterior}: ${fmt(nf.prev)}`, delta(nf.curr,nf.prev,true)));
+    grid.appendChild(kpiCard('Volume por NF', ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:1}):'—', `média ${mAtual}`, delta(ratioCurr,ratioPrev,true), 'purple'));
+    grid.appendChild(kpiCard('Variação no período', periodChange!=null?periodChange.toLocaleString('pt-BR',{maximumFractionDigits:0})+'%':'—', `${meses[0]} → ${mAtual}`, {cls: periodChange>=0?'up':'down', arrow: periodChange>=0?'▲':'▼', text:'tendência'}, 'red'));
+
+    mkChart('chartVolCubado', {
+      type:'bar', data:{labels:meses,datasets:[{label:'Volume cubado',data:D.qtds_vol_cubado,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    mkChart('chartNFCubadas', {
+      type:'line', data:{labels:meses,datasets:[{label:'NFs cubadas',data:D.nfs_cubadas,borderColor:'#4d9fff',backgroundColor:'rgba(77,159,255,.18)',
+        fill:true,tension:.35,borderWidth:2.5,pointBackgroundColor:'#4d9fff',pointBorderColor:'#0b0f1a',pointBorderWidth:2,pointRadius:5,datalabels:dl('#4d9fff','end','top')}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    comboChart('chartCubagemCombo', meses, D.qtds_vol_cubado, 'Volume cubado', '#ff5b3a',
+      D.nfs_cubadas, 'NFs cubadas', '#4d9fff');
+    const cls = periodChange!=null && periodChange<0 ? 'warn' : '';
+    setInsight('cubagem', `<strong>Tendência:</strong> o volume cubado e a quantidade de NFs variaram ${periodChange!=null?(periodChange>=0?'+':'')+periodChange.toLocaleString('pt-BR',{maximumFractionDigits:0})+'%':'—'} entre ${meses[0]} e ${mAtual}.`, cls);
+  }
+
+  // ============ PERÍODO CONFIGURÁVEL ============
+  let fullData = null; // { D, meses } sem filtro de período
+  function sliceData(D, meses, startIdx, endIdx){
+    const slicedD = {};
+    Object.keys(D).forEach(k => { slicedD[k] = D[k].slice(startIdx, endIdx+1); });
+    return { D: slicedD, meses: meses.slice(startIdx, endIdx+1) };
+  }
+  function populatePeriodSelectors(meses){
+    const startSel = document.getElementById('periodStart');
+    const endSel = document.getElementById('periodEnd');
+    const opts = meses.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
+    startSel.innerHTML = opts;
+    endSel.innerHTML = opts;
+    startSel.value = 0;
+    endSel.value = meses.length - 1;
+  }
+  function onPeriodChange(){
+    if(!fullData) return;
+    let s = parseInt(document.getElementById('periodStart').value, 10);
+    let e = parseInt(document.getElementById('periodEnd').value, 10);
+    if(s > e){ const tmp = s; s = e; e = tmp; } // impede intervalo invertido
+    const { D, meses } = sliceData(fullData.D, fullData.meses, s, e);
+    renderAll(D, meses);
+  }
+  document.getElementById('periodStart').addEventListener('change', onPeriodChange);
+  document.getElementById('periodEnd').addEventListener('change', onPeriodChange);
+
+  // ============ INIT ============
+  async function init(){
+    setStatus('Carregando dados da planilha…', false);
+    try{
+      const rows = await loadRows();
+      const { D, meses } = buildMonthly(rows);
+      clearStatus();
+      fullData = { D, meses };
+      populatePeriodSelectors(meses);
+      renderAll(D, meses);
+    }catch(err){
+      console.error(err);
+      setStatus('Não foi possível carregar a planilha. Verifique se ela está compartilhada como "qualquer pessoa com o link pode visualizar". Detalhe: ' + err.message, true);
+    }
+  }
+  document.getElementById('refreshBtn').addEventListener('click', init);
+  init();
+  setInterval(init, 5 * 60 * 1000);
+})();
 </script>
 </body>
 </html>
