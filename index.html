@@ -101,6 +101,20 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
 .footer{max-width:1500px;margin:32px auto 0;padding:20px 32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;letter-spacing:.05em;flex-wrap:wrap;gap:8px;}
 @media (max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.row.cols-2,.row.cols-3,.row.uneven{grid-template-columns:1fr}}
 @media (max-width:640px){.header-inner,.nav,main,.footer{padding-left:16px;padding-right:16px}.kpi-grid{grid-template-columns:1fr}.page-head h2{font-size:24px}}
+/* ---- Mão de Obra: grade "por operação/mês" ---- */
+.op-months-grid{display:grid;gap:14px}
+.op-month-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
+.op-month-label{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.op-bars{display:flex;flex-direction:column;gap:8px}
+.op-bar-row{display:flex;align-items:center;gap:8px}
+.op-bar-name{font-size:11px;color:var(--ink-dim);width:84px;flex-shrink:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-bar-track{flex:1;background:var(--surface-2);border-radius:5px;height:22px;position:relative;overflow:hidden}
+.op-bar-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;min-width:26px;transition:width .4s ease}
+.op-bar-fill span{font-size:11px;font-weight:700;color:#0b0f1a;white-space:nowrap}
+.op-type-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.05em;flex-shrink:0}
+.op-type-rota{background:rgba(255,91,58,.15);color:var(--accent)}
+.op-type-exp{background:rgba(77,159,255,.15);color:var(--blue)}
+.mo-note{font-size:12px;color:var(--ink-muted);margin-bottom:14px;padding:10px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -307,6 +321,74 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="insight" id="insight-cubagem"></div>
   </section>
+
+  <!-- 10 · MÃO DE OBRA · VISÃO GERAL -->
+  <section class="page" data-page="mo_overview">
+    <div class="page-head">
+      <div class="eyebrow">10 · Mão de Obra</div>
+      <h2>Ajudantes terceiros · Visão geral</h2>
+      <p>Quantidade de ajudantes terceiros alocados por mês, segmentados entre Rota e Expedição.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-mo_overview"></div>
+    <div class="card">
+      <div class="card-head"><div><h3>Total de ajudantes por mês</h3><div class="sub">Volume mensal consolidado (Rota + Expedição)</div></div><span class="card-tag">MÃO DE OBRA</span></div>
+      <div class="chart-wrap tall"><canvas id="chartMOTotal"></canvas></div>
+    </div>
+    <div class="row cols-2">
+      <div class="card"><div class="card-head"><div><h3>Rota × Expedição</h3><div class="sub">Comparativo mensal por tipo</div></div></div><div class="chart-wrap"><canvas id="chartMORotaExpMini"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Proporção acumulada</h3><div class="sub">Rota vs. Expedição no período</div></div></div><div class="chart-wrap"><canvas id="chartMOPie"></canvas></div></div>
+    </div>
+    <div class="insight" id="insight-mo_overview"></div>
+  </section>
+
+  <!-- 11 · ROTA X EXPEDIÇÃO -->
+  <section class="page" data-page="mo_rota_exp">
+    <div class="page-head">
+      <div class="eyebrow">11 · Mão de Obra</div>
+      <h2>Rota × Expedição</h2>
+      <p>Comparativo mensal entre ajudantes alocados em Rota e em Expedição.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-mo_rota_exp"></div>
+    <div class="card">
+      <div class="card-head"><div><h3>Ajudantes por mês — Rota vs Expedição</h3><div class="sub">Comparativo agrupado</div></div><span class="card-tag">ROTA / EXPEDIÇÃO</span></div>
+      <div class="chart-wrap tall"><canvas id="chartMORotaExp"></canvas></div>
+    </div>
+    <div class="insight" id="insight-mo_rota_exp"></div>
+  </section>
+
+  <!-- 12 · POR OPERAÇÃO -->
+  <section class="page" data-page="mo_operacao">
+    <div class="page-head">
+      <div class="eyebrow">12 · Mão de Obra</div>
+      <h2>Ajudantes por operação</h2>
+      <p>Todas as operações e meses com dados em uma única visão.</p>
+    </div>
+    <div class="op-months-grid" id="mo-op-grid"></div>
+  </section>
+
+  <!-- 13 · POR FORNECEDOR -->
+  <section class="page" data-page="mo_fornecedor">
+    <div class="page-head">
+      <div class="eyebrow">13 · Mão de Obra</div>
+      <h2>Pessoas por fornecedor</h2>
+      <p>Volume de ajudantes alocados por fornecedor, mês a mês.</p>
+    </div>
+    <div class="row cols-2" id="mo-forn-grid"></div>
+  </section>
+
+  <!-- 14 · RESUMO ANUAL -->
+  <section class="page" data-page="mo_resumo">
+    <div class="page-head">
+      <div class="eyebrow">14 · Mão de Obra</div>
+      <h2>Resumo anual</h2>
+      <p>Totais acumulados por operação e por tipo no período com dados.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-mo_resumo"></div>
+    <div class="row uneven">
+      <div class="card"><div class="card-head"><div><h3>Total por operação — acumulado</h3><div class="sub">Laranja = Rota · Azul = Expedição</div></div></div><div class="chart-wrap tall" id="moOpWrap"><canvas id="chartMOOpTotal"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Rota vs Expedição — acumulado</h3><div class="sub">Por mês, período completo</div></div></div><div class="chart-wrap tall"><canvas id="chartMOTipoAnual"></canvas></div></div>
+    </div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -318,7 +400,8 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
 (function(){
   const SHEET_ID = '1VZKDyY8oAtRHcT0TDvyv5zI1rJeEZe_KAvbbyRbE9qs';
   const SHEET_NAME = 'MONTAGENS GRAF';
-  const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+  const SHEET_NAME_MO = 'ACOMP M.O.3º';
+  const csvUrl = sheetName => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
 
   // ============ STATUS ============
   const statusEl = document.getElementById('status');
@@ -330,17 +413,17 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
   // file:// (double-click). JSONP via <script> tag is exempt from that
   // restriction (same reason the Chart.js CDN script above always works),
   // so it's used as a fallback that works no matter how the file is opened.
-  async function loadRows(){
-    try{ return await loadViaFetch(); }
-    catch(err){ console.warn('Fetch direto falhou, tentando via JSONP…', err.message); return await loadViaJSONP(); }
+  async function loadRows(sheetName){
+    try{ return await loadViaFetch(sheetName); }
+    catch(err){ console.warn('Fetch direto falhou, tentando via JSONP…', err.message); return await loadViaJSONP(sheetName); }
   }
-  async function loadViaFetch(){
-    const res = await fetch(CSV_URL, { cache: 'no-store' });
+  async function loadViaFetch(sheetName){
+    const res = await fetch(csvUrl(sheetName), { cache: 'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     return Papa.parse(text.trim(), { skipEmptyLines: false }).data;
   }
-  function loadViaJSONP(){
+  function loadViaJSONP(sheetName){
     return new Promise((resolve, reject) => {
       const cbName = 'gvizCB_' + Math.random().toString(36).slice(2);
       const timeout = setTimeout(() => { cleanup(); reject(new Error('Tempo esgotado ao carregar os dados da planilha.')); }, 15000);
@@ -360,7 +443,7 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
         }catch(err){ reject(err); }
       };
       const script = document.createElement('script');
-      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(SHEET_NAME)}&tqx=out:json;responseHandler:${cbName}`;
+      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=out:json;responseHandler:${cbName}`;
       script.onerror = () => { cleanup(); reject(new Error('Falha ao carregar o script da planilha.')); };
       document.body.appendChild(script);
     });
@@ -444,6 +527,104 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
     return { D, meses: genMeses(lastCol) };
   }
 
+  // ============ MÃO DE OBRA (aba "ACOMP M.O.3º") ============
+  // Colunas: [3]=nome da operação, [4]=tipo (ROTA/EXPEDIÇÃO), [5..]=meses.
+  // A lista de operações termina na linha cujo início de dados (coluna 5)
+  // é um rótulo de mês (ex.: "jan.25") em vez de um número — essa linha
+  // também fornece os nomes dos meses usados nos gráficos.
+  function buildMO(rows){
+    let opStart = -1;
+    for(let i=0;i<rows.length;i++){
+      const r = rows[i]||[];
+      if(((r[3])||'').trim()==='OPERAÇÃO' && ((r[4])||'').trim()==='ROTA/EXP'){ opStart=i; break; }
+    }
+    if(opStart===-1) throw new Error('Não encontrei o cabeçalho "OPERAÇÃO" na aba "'+SHEET_NAME_MO+'".');
+
+    const headerRow = rows[opStart];
+    let lastCol = 4;
+    for(let c=5;c<headerRow.length;c++){
+      if((headerRow[c]||'').trim()!=='') lastCol=c; else break;
+    }
+    if(lastCol===4) throw new Error('Não encontrei meses preenchidos na aba "'+SHEET_NAME_MO+'".');
+
+    const ops=[];
+    let i=opStart+1, totalsHeaderIdx=-1;
+    for(; i<rows.length; i++){
+      const r = rows[i]||[];
+      const name=(r[3]||'').trim(), type=(r[4]||'').trim();
+      if(type==='ROTA'||type==='EXPEDIÇÃO'){
+        const monthly=[];
+        for(let c=5;c<=lastCol;c++) monthly.push(parseNumberBR(r[c])||0);
+        ops.push({ name, type, monthly });
+      }
+      const c5 = (r[5]||'').toString().trim().toLowerCase();
+      if(c5 && /[a-z]/.test(c5)){ totalsHeaderIdx=i; break; }
+    }
+    if(totalsHeaderIdx===-1) throw new Error('Não encontrei a linha de meses (ex.: "jan.25") na aba "'+SHEET_NAME_MO+'".');
+
+    const labelRow = rows[totalsHeaderIdx] || [];
+    const meses = [];
+    for(let c=5;c<=lastCol;c++){
+      const lbl = (labelRow[c]||'').trim();
+      meses.push(lbl ? lbl.replace('.','/').toUpperCase() : ('M'+(c-4)));
+    }
+
+    const nMonths = lastCol-5+1;
+    const rota = new Array(nMonths).fill(0);
+    const exp = new Array(nMonths).fill(0);
+    ops.forEach(o => { o.monthly.forEach((v,idx) => { if(o.type==='ROTA') rota[idx]+=v; else exp[idx]+=v; }); });
+    const grand = rota.map((v,idx) => v+exp[idx]);
+    const active = []; for(let m=0;m<nMonths;m++) if(grand[m]>0) active.push(m);
+
+    const opTotals = {}, opType = {};
+    ops.forEach(o => { opTotals[o.name] = (opTotals[o.name]||0) + o.monthly.reduce((a,b)=>a+b,0); opType[o.name] = o.type; });
+
+    return { ops, meses, rota, exp, grand, active, opTotals, opType };
+  }
+
+  // ============ MÃO DE OBRA · FORNECEDOR (mesma aba "ACOMP M.O.3º") ============
+  // Tabela separada na mesma aba: coluna E = nome do fornecedor, colunas F.. = meses.
+  // Localizada por busca de âncora (célula da coluna E igual a "Fornecedor"), pois a
+  // posição das linhas muda conforme a planilha é editada.
+  function buildMOFornecedor(rows){
+    let start = -1;
+    for(let i=0;i<rows.length;i++){
+      const r = rows[i]||[];
+      if(((r[4])||'').trim()==='Fornecedor'){ start=i; break; }
+    }
+    if(start===-1) throw new Error('Não encontrei o cabeçalho "Fornecedor" na aba "'+SHEET_NAME_MO+'".');
+
+    const headerRow = rows[start];
+    let lastCol = 4;
+    for(let c=5;c<headerRow.length;c++){
+      if((headerRow[c]||'').trim()!=='') lastCol=c; else break;
+    }
+    if(lastCol===4) throw new Error('Não encontrei meses preenchidos na tabela de fornecedores.');
+
+    const suppliers=[];
+    let i=start+1, totalsHeaderIdx=-1;
+    for(; i<rows.length; i++){
+      const r = rows[i]||[];
+      const name=(r[4]||'').trim();
+      const c5 = (r[5]||'').toString().trim().toLowerCase();
+      if(c5 && /[a-z]/.test(c5)){ totalsHeaderIdx=i; break; }
+      if(name){
+        const monthly=[];
+        for(let c=5;c<=lastCol;c++) monthly.push(parseNumberBR(r[c])||0);
+        suppliers.push({ name, monthly });
+      }
+    }
+    if(totalsHeaderIdx===-1) throw new Error('Não encontrei a linha de meses da tabela de fornecedores.');
+
+    const labelRow = rows[totalsHeaderIdx] || [];
+    const meses = [];
+    for(let c=5;c<=lastCol;c++){
+      const lbl = (labelRow[c]||'').trim();
+      meses.push(lbl ? lbl.replace('.','/').toUpperCase() : ('M'+(c-4)));
+    }
+    return { suppliers, meses };
+  }
+
   // ============ NAV ============
   const nav = document.getElementById('nav');
   const pages = [
@@ -457,6 +638,11 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
     {id:'manifestos', label:'Manifestos', num:'07'},
     {id:'personalizados', label:'Personalizados', num:'08'},
     {id:'cubagem', label:'Cubagem', num:'09'},
+    {id:'mo_overview', label:'Mão de Obra', num:'10'},
+    {id:'mo_rota_exp', label:'Rota x Expedição', num:'11'},
+    {id:'mo_operacao', label:'Por Operação', num:'12'},
+    {id:'mo_fornecedor', label:'Por Fornecedor', num:'13'},
+    {id:'mo_resumo', label:'Resumo Anual MO', num:'14'},
   ];
   pages.forEach((p,i)=>{
     const b=document.createElement('button');
@@ -575,10 +761,13 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
   }
 
   // ============ RENDER ============
+  let footerJEM = '', footerMO = '';
+  function updateFooter(){ document.getElementById('footerUpdate').textContent = [footerJEM, footerMO].filter(Boolean).join(' · '); }
   function renderAll(D, meses){
     const mAtual = meses[meses.length-1];
     const mAnterior = meses.length>1 ? meses[meses.length-2] : '—';
-    document.getElementById('footerUpdate').textContent = 'DASHBOARD MENSAL · ATUALIZADO ' + mAtual;
+    footerJEM = 'DASHBOARD MENSAL · ATUALIZADO ' + mAtual;
+    updateFooter();
 
     renderOverview(D, meses);
     renderJEM(D, meses, mAtual, mAnterior);
@@ -848,8 +1037,175 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
     setInsight('cubagem', `<strong>Tendência:</strong> o volume cubado e a quantidade de NFs variaram ${periodChange!=null?(periodChange>=0?'+':'')+periodChange.toLocaleString('pt-BR',{maximumFractionDigits:0})+'%':'—'} entre ${meses[0]} e ${mAtual}.`, cls);
   }
 
-  // ============ PERÍODO CONFIGURÁVEL ============
-  let fullData = null; // { D, meses } sem filtro de período
+  // ============ MÃO DE OBRA · RENDER ============
+  function renderMOAll(mo, forn){
+    const activeMeses = mo.active.map(i=>mo.meses[i]);
+    const totalActive = mo.active.map(i=>mo.grand[i]);
+    const rotaActive = mo.active.map(i=>mo.rota[i]);
+    const expActive = mo.active.map(i=>mo.exp[i]);
+    footerMO = 'MÃO DE OBRA ATUALIZADA ' + (activeMeses[activeMeses.length-1]||'—');
+    updateFooter();
+    if(!mo.active.length){
+      ['kpi-mo_overview','kpi-mo_rota_exp','kpi-mo_resumo'].forEach(id=>{ document.getElementById(id).innerHTML=''; });
+      const msg = '<div class="mo-note">Nenhum dado de mão de obra no período selecionado.</div>';
+      document.getElementById('mo-op-grid').innerHTML = msg;
+      setInsight('mo_overview', 'Nenhum dado de mão de obra no período selecionado.');
+      setInsight('mo_rota_exp', 'Nenhum dado de mão de obra no período selecionado.');
+    }else{
+      renderMOOverview(mo, activeMeses, totalActive, rotaActive, expActive);
+      renderMORotaExp(mo, activeMeses, totalActive, rotaActive, expActive);
+      renderMOOperacao(mo);
+      renderMOResumo(mo, activeMeses, rotaActive, expActive);
+    }
+    renderMOFornecedor(forn);
+  }
+
+  function renderMOOverview(mo, meses, total, rota, exp){
+    const grid = document.getElementById('kpi-mo_overview'); grid.innerHTML='';
+    const t = last2(total), r = last2(rota), e = last2(exp);
+    const peak = peakInfo(total, meses);
+    grid.appendChild(kpiCard(`Total ${meses[meses.length-1]||'—'}`, fmt(t.curr), `vs. ${meses[meses.length-2]||'—'}: ${fmt(t.prev)}`, delta(t.curr,t.prev,true), 'accent'));
+    grid.appendChild(kpiCard('Rota', fmt(r.curr), `vs. mês anterior: ${fmt(r.prev)}`, delta(r.curr,r.prev,true)));
+    grid.appendChild(kpiCard('Expedição', fmt(e.curr), `vs. mês anterior: ${fmt(e.prev)}`, delta(e.curr,e.prev,true), 'green'));
+    grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
+
+    mkChart('chartMOTotal', {
+      type:'bar', data:{labels:meses,datasets:[{label:'Total ajudantes',data:total,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    mkChart('chartMORotaExpMini', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Rota',data:rota,backgroundColor:'#ff5b3a',borderRadius:5,datalabels:dl('#ff5b3a','end','end')},
+        {label:'Expedição',data:exp,backgroundColor:'#4d9fff',borderRadius:5,datalabels:dl('#4d9fff','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,right:8}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+    const rotaSum = rota.reduce((a,b)=>a+b,0), expSum = exp.reduce((a,b)=>a+b,0);
+    mkChart('chartMOPie', {
+      type:'doughnut', data:{labels:['Rota','Expedição'],datasets:[{data:[rotaSum,expSum],backgroundColor:['#ff5b3a','#4d9fff'],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'55%',
+        plugins:{legend:{position:'bottom'},datalabels:{color:'#e8ecf5',font:{size:12,weight:'700'},
+          formatter:(v,ctx)=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return fmt(v)+'\n'+Math.round(v/tot*100)+'%';},textAlign:'center'}}}
+    });
+    const d = delta(t.curr, t.prev, true);
+    setInsight('mo_overview', `<strong>Leitura do mês:</strong> ${fmt(t.curr)} ajudantes em ${meses[meses.length-1]}, variação de ${d.arrow} ${d.text} frente a ${meses[meses.length-2]||'—'} — ${fmt(r.curr)} em Rota e ${fmt(e.curr)} em Expedição.`);
+  }
+
+  function renderMORotaExp(mo, meses, total, rota, exp){
+    const grid = document.getElementById('kpi-mo_rota_exp'); grid.innerHTML='';
+    const rotaSum = rota.reduce((a,b)=>a+b,0), expSum = exp.reduce((a,b)=>a+b,0), grandSum = rotaSum+expSum;
+    const r = last2(rota), e = last2(exp);
+    grid.appendChild(kpiCard('Total Rota', fmt(rotaSum), grandSum?Math.round(rotaSum/grandSum*100)+'% do total':'—', {cls:'flat',arrow:'',text:'período'}));
+    grid.appendChild(kpiCard('Total Expedição', fmt(expSum), grandSum?Math.round(expSum/grandSum*100)+'% do total':'—', {cls:'flat',arrow:'',text:'período'}, 'green'));
+    grid.appendChild(kpiCard('Rota último mês', fmt(r.curr), meses[meses.length-1]||'—', delta(r.curr,r.prev,true), 'accent'));
+    grid.appendChild(kpiCard('Exp. último mês', fmt(e.curr), meses[meses.length-1]||'—', delta(e.curr,e.prev,true)));
+
+    mkChart('chartMORotaExp', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Rota',data:rota,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
+        {label:'Expedição',data:exp,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+    setInsight('mo_rota_exp', `<strong>Distribuição do período:</strong> Rota soma ${fmt(rotaSum)} (${grandSum?Math.round(rotaSum/grandSum*100):0}%) e Expedição soma ${fmt(expSum)} (${grandSum?Math.round(expSum/grandSum*100):0}%) de ${fmt(grandSum)} ajudantes no total.`);
+  }
+
+  function renderMOOperacao(mo){
+    const grid = document.getElementById('mo-op-grid'); grid.innerHTML='';
+    let globalMax = 0;
+    mo.ops.forEach(o => mo.active.forEach(m => { if(o.monthly[m]>globalMax) globalMax=o.monthly[m]; }));
+    if(!globalMax) globalMax = 1;
+    grid.style.gridTemplateColumns = `repeat(${Math.min(mo.active.length,4)},1fr)`;
+    mo.active.forEach(m => {
+      const opsWithData = mo.ops.filter(o => o.monthly[m]>0);
+      const card = document.createElement('div');
+      card.className = 'op-month-card';
+      card.innerHTML = `<div class="op-month-label">${mo.meses[m]}</div><div class="op-bars"></div>`;
+      const barsEl = card.querySelector('.op-bars');
+      opsWithData.sort((a,b)=>b.monthly[m]-a.monthly[m]).forEach(op => {
+        const v = op.monthly[m];
+        const widthPct = Math.round(v/globalMax*100);
+        const isRota = op.type==='ROTA';
+        const row = document.createElement('div');
+        row.className = 'op-bar-row';
+        row.innerHTML = `<div class="op-bar-name" title="${op.name}">${op.name}</div>
+          <div class="op-bar-track"><div class="op-bar-fill" style="width:${widthPct}%;background:${isRota?'#ff5b3a':'#4d9fff'}"><span>${fmt(v)}</span></div></div>
+          <span class="op-type-badge ${isRota?'op-type-rota':'op-type-exp'}">${isRota?'ROTA':'EXP'}</span>`;
+        barsEl.appendChild(row);
+      });
+      if(!opsWithData.length){
+        const empty = document.createElement('div');
+        empty.style.cssText = 'font-size:11px;color:var(--ink-muted);padding:8px 0';
+        empty.textContent = 'Sem dados';
+        barsEl.appendChild(empty);
+      }
+      grid.appendChild(card);
+    });
+  }
+
+  function renderMOFornecedor(forn){
+    const wrap = document.getElementById('mo-forn-grid'); wrap.innerHTML='';
+    const idxs = forn.activeIdx || [];
+    if(!idxs.length){
+      wrap.innerHTML = '<div class="mo-note">Nenhum dado de fornecedor no período selecionado.</div>';
+      return;
+    }
+    idxs.forEach(m => {
+      const names = forn.suppliers.filter(s=>s.monthly[m]>0).map(s=>s.name);
+      const vals = forn.suppliers.filter(s=>s.monthly[m]>0).map(s=>s.monthly[m]);
+      if(!names.length) return;
+      const card = document.createElement('div');
+      card.className = 'card';
+      const cid = 'chartMOForn'+m;
+      card.innerHTML = `<div class="card-head"><div><h3>Fornecedores — ${forn.meses[m]}</h3></div></div><div class="chart-wrap" style="height:220px"><canvas id="${cid}"></canvas></div>`;
+      wrap.appendChild(card);
+      mkChart(cid, {
+        type:'bar', data:{labels:names,datasets:[{data:vals,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}]},
+        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,right:8}},scales:baseScales,plugins:{legend:{display:false}}}
+      });
+    });
+  }
+
+  function renderMOResumo(mo, meses, rota, exp){
+    const grid = document.getElementById('kpi-mo_resumo'); grid.innerHTML='';
+    const rotaSum = mo.rota.reduce((a,b)=>a+b,0), expSum = mo.exp.reduce((a,b)=>a+b,0), grand = rotaSum+expSum;
+    const topOp = Object.entries(mo.opTotals).sort((a,b)=>b[1]-a[1])[0] || ['—',0];
+    grid.appendChild(kpiCard('Total no período', fmt(grand), 'ajudantes', {cls:'flat',arrow:'',text:mo.active.length+' meses'}, 'accent'));
+    grid.appendChild(kpiCard('Total Rota', fmt(rotaSum), grand?Math.round(rotaSum/grand*100)+'% do total':'—', {cls:'flat',arrow:'',text:'período'}));
+    grid.appendChild(kpiCard('Total Expedição', fmt(expSum), grand?Math.round(expSum/grand*100)+'% do total':'—', {cls:'flat',arrow:'',text:'período'}, 'green'));
+    grid.appendChild(kpiCard('Principal operação', topOp[0], fmt(topOp[1])+' ajudantes', {cls:'flat',arrow:'',text:'—'}, 'yellow'));
+
+    const opNames = Object.keys(mo.opTotals);
+    const opVals = opNames.map(n=>mo.opTotals[n]);
+    const opColors = opNames.map(n=>mo.opType[n]==='ROTA' ? '#ff5b3a' : '#4d9fff');
+    const h = Math.max(280, opNames.length*40+80);
+    document.getElementById('moOpWrap').style.height = h+'px';
+    mkChart('chartMOOpTotal', {
+      type:'bar', data:{labels:opNames,datasets:[{data:opVals,backgroundColor:opColors,borderRadius:6,datalabels:{...dl('#e8ecf5','end','end'),formatter:v=>v>0?fmt(v):''}}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    mkChart('chartMOTipoAnual', {
+      type:'bar', data:{labels:meses,datasets:[
+        {label:'Rota',data:rota,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
+        {label:'Expedição',data:exp,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+  }
+
+  // ============ PERÍODO CONFIGURÁVEL (compartilhado por todas as abas) ============
+  let fullData = null;   // { D, meses } · dados JEM sem filtro de período
+  let moFullData = null; // { mo, forn } · dados de Mão de Obra sem filtro de período
+  const MES_ABBR = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  function monthKey(label){
+    if(!label) return null;
+    const parts = String(label).split('/');
+    if(parts.length!==2) return null;
+    const mi = MES_ABBR.indexOf(parts[0].toUpperCase());
+    const yy = parseInt(parts[1],10);
+    if(mi===-1 || isNaN(yy)) return null;
+    return (2000+yy)*12 + mi;
+  }
   function sliceData(D, meses, startIdx, endIdx){
     const slicedD = {};
     Object.keys(D).forEach(k => { slicedD[k] = D[k].slice(startIdx, endIdx+1); });
@@ -864,6 +1220,40 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
     startSel.value = 0;
     endSel.value = meses.length - 1;
   }
+  // Intervalo [chave-mês inicial, chave-mês final] do período selecionado nas abas
+  // JEM (00-09) — usado para filtrar também as abas de Mão de Obra (10-14).
+  function getSelectedPeriodRange(){
+    if(!fullData) return null;
+    let s = parseInt(document.getElementById('periodStart').value, 10);
+    let e = parseInt(document.getElementById('periodEnd').value, 10);
+    if(isNaN(s) || isNaN(e)) return null;
+    if(s > e){ const tmp = s; s = e; e = tmp; }
+    const start = monthKey(fullData.meses[s]), end = monthKey(fullData.meses[e]);
+    if(start==null || end==null) return null;
+    return { start, end };
+  }
+  function filterMOForPeriod(mo, range){
+    if(!range) return mo;
+    const active = mo.active.filter(idx => {
+      const k = monthKey(mo.meses[idx]);
+      return k!=null && k>=range.start && k<=range.end;
+    });
+    return { ...mo, active };
+  }
+  function filterFornForPeriod(forn, range){
+    const activeIdx = [];
+    for(let m=0;m<forn.meses.length;m++){
+      const k = monthKey(forn.meses[m]);
+      if(range && (k==null || k<range.start || k>range.end)) continue;
+      activeIdx.push(m);
+    }
+    return { ...forn, activeIdx };
+  }
+  function renderMOFiltered(){
+    if(!moFullData) return;
+    const range = getSelectedPeriodRange();
+    renderMOAll(filterMOForPeriod(moFullData.mo, range), filterFornForPeriod(moFullData.forn, range));
+  }
   function onPeriodChange(){
     if(!fullData) return;
     let s = parseInt(document.getElementById('periodStart').value, 10);
@@ -871,23 +1261,43 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
     if(s > e){ const tmp = s; s = e; e = tmp; } // impede intervalo invertido
     const { D, meses } = sliceData(fullData.D, fullData.meses, s, e);
     renderAll(D, meses);
+    renderMOFiltered();
   }
   document.getElementById('periodStart').addEventListener('change', onPeriodChange);
   document.getElementById('periodEnd').addEventListener('change', onPeriodChange);
 
   // ============ INIT ============
+  // As duas abas são buscadas em paralelo (para não esperar uma pela outra),
+  // mas só renderizamos depois que AMBAS resolvem — a aba JEM é processada
+  // primeiro para popular o seletor de período, que a Mão de Obra usa em
+  // seguida para filtrar seus próprios dados pelo mesmo intervalo.
   async function init(){
     setStatus('Carregando dados da planilha…', false);
-    try{
-      const rows = await loadRows();
-      const { D, meses } = buildMonthly(rows);
-      clearStatus();
+    const [jemResult, moResult] = await Promise.allSettled([
+      loadRows(SHEET_NAME).then(buildMonthly),
+      loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) }))
+    ]);
+    const errors = [];
+    if(jemResult.status==='fulfilled'){
+      const { D, meses } = jemResult.value;
       fullData = { D, meses };
       populatePeriodSelectors(meses);
       renderAll(D, meses);
-    }catch(err){
-      console.error(err);
-      setStatus('Não foi possível carregar a planilha. Verifique se ela está compartilhada como "qualquer pessoa com o link pode visualizar". Detalhe: ' + err.message, true);
+    }else{
+      console.error(jemResult.reason);
+      errors.push('aba "'+SHEET_NAME+'": '+jemResult.reason.message);
+    }
+    if(moResult.status==='fulfilled'){
+      moFullData = moResult.value;
+      renderMOFiltered();
+    }else{
+      console.error(moResult.reason);
+      errors.push('aba "'+SHEET_NAME_MO+'": '+moResult.reason.message);
+    }
+    if(!errors.length){
+      clearStatus();
+    }else{
+      setStatus('Não foi possível carregar parte dos dados da planilha. Verifique se ela está compartilhada como "qualquer pessoa com o link pode visualizar". Detalhe: ' + errors.join(' | '), true);
     }
   }
   document.getElementById('refreshBtn').addEventListener('click', init);
