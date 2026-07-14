@@ -115,6 +115,35 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
 .op-type-rota{background:rgba(255,91,58,.15);color:var(--accent)}
 .op-type-exp{background:rgba(77,159,255,.15);color:var(--blue)}
 .mo-note{font-size:12px;color:var(--ink-muted);margin-bottom:14px;padding:10px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border)}
+
+/* ---- Modo apresentação (tela cheia, só gráficos) ---- */
+.pres-bar{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;
+  align-items:center;gap:16px;background:rgba(20,27,46,.92);border:1px solid var(--border-strong);
+  border-radius:999px;padding:10px 18px;font-size:12.5px;color:var(--ink-dim);backdrop-filter:blur(8px);
+  box-shadow:0 8px 24px rgba(0,0,0,.45);}
+.pres-bar .num{font-family:'JetBrains Mono',monospace;font-size:11px;opacity:.7;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.08);margin-right:6px}
+.pres-hint{color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:10.5px;white-space:nowrap}
+.pres-exit{appearance:none;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--ink);
+  font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.pres-exit:hover{background:var(--accent);color:#0b0f1a;border-color:transparent}
+body.presentation{background:#000}
+body.presentation .header,
+body.presentation .nav,
+body.presentation .page-head,
+body.presentation .kpi-grid,
+body.presentation .insight,
+body.presentation .card:has(.table-wrap),
+body.presentation .footer,
+body.presentation .view-toggle,
+body.presentation #status{ display:none !important; }
+body.presentation .pres-bar{ display:flex; }
+body.presentation main{ max-width:100%; padding:28px 40px; }
+body.presentation .card{ padding:18px 22px; }
+body.presentation .chart-wrap{ height:min(72vh,680px); }
+body.presentation .chart-wrap.tall,
+body.presentation .chart-wrap.short{ height:min(72vh,680px); }
+body.presentation .card > .card-head{ margin-bottom:10px; }
+body.presentation .card > .card-head .sub{ display:none; }
 </style>
 </head>
 <body>
@@ -137,11 +166,18 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
         <select id="periodEnd" class="period-select"></select>
       </div>
       <button class="btn" id="refreshBtn">Atualizar agora</button>
+      <button class="btn" id="presentBtn">⛶ Tela cheia</button>
     </div>
   </div>
 </header>
 
 <nav class="nav" id="nav"></nav>
+
+<div class="pres-bar" id="presBar">
+  <span id="presPageLabel"></span>
+  <span class="pres-hint">← → navega entre abas · Esc sai</span>
+  <button class="pres-exit" id="presExitBtn">Sair ✕</button>
+</div>
 
 <main>
   <div id="status"></div>
@@ -644,19 +680,79 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
     {id:'mo_fornecedor', label:'Por Fornecedor', num:'13'},
     {id:'mo_resumo', label:'Resumo Anual MO', num:'14'},
   ];
+  const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
+  let currentPageIdx = 0;
+  // Ativa uma página pelo índice (usado tanto pelo clique no menu quanto pela
+  // navegação por teclado no modo apresentação), mantendo tudo em sincronia:
+  // botão ativo, seção visível, indicador do modo apresentação e resize dos
+  // gráficos (Chart.js precisa disso ao trocar de container visível).
+  function activatePageByIndex(idx){
+    if(idx < 0) idx = pages.length - 1;
+    if(idx >= pages.length) idx = 0;
+    currentPageIdx = idx;
+    const p = pages[idx];
+    document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+    const btn = nav.children[idx];
+    if(btn) btn.classList.add('active');
+    const sec = document.querySelector(`.page[data-page="${p.id}"]`);
+    if(sec) sec.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+    updatePresBar();
+    raf(()=>{ Object.values(charts).forEach(c=>{ if(c && c.resize) c.resize(); }); });
+  }
   pages.forEach((p,i)=>{
     const b=document.createElement('button');
     b.className='nav-btn'+(i===0?' active':'');
     b.dataset.target=p.id;
     b.innerHTML=`<span class="num">${p.num}</span> ${p.label}`;
-    b.onclick=()=>{
-      document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-      document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-      document.querySelector(`.page[data-page="${p.id}"]`).classList.add('active');
-      window.scrollTo({top:0,behavior:'smooth'});
-    };
+    b.onclick=()=>activatePageByIndex(i);
     nav.appendChild(b);
+  });
+
+  // ============ MODO APRESENTAÇÃO (tela cheia, só gráficos) ============
+  function updatePresBar(){
+    const label = document.getElementById('presPageLabel');
+    if(!label) return;
+    const p = pages[currentPageIdx];
+    label.innerHTML = `<span class="num">${p.num}</span><strong>${p.label}</strong>`;
+  }
+  async function enterPresentation(){
+    document.body.classList.add('presentation');
+    updatePresBar();
+    try{
+      const el = document.documentElement;
+      if(el.requestFullscreen) await el.requestFullscreen();
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    }catch(err){ console.warn('Tela cheia nativa indisponível, seguindo só com o modo visual:', err.message); }
+    raf(()=>{ Object.values(charts).forEach(c=>{ if(c && c.resize) c.resize(); }); });
+  }
+  function exitPresentation(){
+    document.body.classList.remove('presentation');
+    if(document.fullscreenElement){
+      if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+      else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
+    raf(()=>{ Object.values(charts).forEach(c=>{ if(c && c.resize) c.resize(); }); });
+  }
+  function togglePresentation(){
+    if(document.body.classList.contains('presentation')) exitPresentation();
+    else enterPresentation();
+  }
+  document.getElementById('presentBtn').addEventListener('click', togglePresentation);
+  document.getElementById('presExitBtn').addEventListener('click', exitPresentation);
+  // Se o usuário sair da tela cheia nativa (Esc, F11, botão do navegador) sem
+  // passar pelo nosso botão, mantemos o modo visual sincronizado.
+  document.addEventListener('fullscreenchange', () => {
+    if(!document.fullscreenElement && document.body.classList.contains('presentation')){
+      document.body.classList.remove('presentation');
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if(!document.body.classList.contains('presentation')) return;
+    if(e.key==='ArrowRight'){ e.preventDefault(); activatePageByIndex(currentPageIdx+1); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); activatePageByIndex(currentPageIdx-1); }
+    else if(e.key==='Escape'){ exitPresentation(); }
   });
 
   // ============ CHART DEFAULTS ============
