@@ -116,6 +116,25 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
 .op-type-exp{background:rgba(77,159,255,.15);color:var(--blue)}
 .mo-note{font-size:12px;color:var(--ink-muted);margin-bottom:14px;padding:10px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border)}
 
+/* ---- Colaboradores: filtros e chips de sigla ---- */
+.colab-filter-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:14px}
+.colab-filter-row label{display:flex;flex-direction:column;gap:4px;font-size:10.5px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+.colab-filter-row select,.colab-filter-row input{background:var(--surface-2);color:var(--ink);border:1px solid var(--border-strong);border-radius:6px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:12px}
+.colab-filter-sep{align-self:center;font-size:11px;color:var(--ink-muted);padding:0 2px 8px}
+.colab-sigla-row{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1px solid var(--border)}
+.sigla-chip{appearance:none;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--ink-dim);font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;letter-spacing:.03em}
+.sigla-chip.active{color:#0b0f1a;border-color:transparent}
+/* Tabela pivotada de Resultados: função/colaborador fixos ao rolar na horizontal */
+#colabResultTable th:nth-child(2),#colabResultTable td:nth-child(2){text-align:left}
+#colabResultTable th:nth-child(-n+2),#colabResultTable td:nth-child(-n+2){position:sticky;background:var(--surface);z-index:1}
+#colabResultTable th:first-child,#colabResultTable td:first-child{left:0;min-width:110px}
+#colabResultTable th:nth-child(2),#colabResultTable td:nth-child(2){left:110px;min-width:180px;box-shadow:2px 0 0 var(--border)}
+#colabResultTable td{text-align:center}
+/* Colaboradores disponíveis por mês (aba 15): um "chip" por nome, colorido por função */
+.colab-name-list{display:flex;flex-direction:column;gap:6px}
+.colab-name-chip{font-size:11.5px;font-weight:700;color:#0b0f1a;padding:6px 10px;border-radius:7px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;letter-spacing:.01em}
+
 /* ---- Modo apresentação (tela cheia, só gráficos) ---- */
 .pres-bar{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;
   align-items:center;gap:16px;background:rgba(20,27,46,.92);border:1px solid var(--border-strong);
@@ -428,6 +447,74 @@ body.presentation .card > .card-head .sub{ display:none; }
       <div class="card"><div class="card-head"><div><h3>Rota vs Expedição — acumulado</h3><div class="sub">Por mês, período completo</div></div></div><div class="chart-wrap tall"><canvas id="chartMOTipoAnual"></canvas></div></div>
     </div>
   </section>
+
+  <!-- 15 · COLABORADORES · VISÃO GERAL -->
+  <section class="page" data-page="colab_overview">
+    <div class="page-head">
+      <div class="eyebrow">15 · Colaboradores</div>
+      <h2>Expedição · Visão geral</h2>
+      <p>Dias trabalhados e colaboradores disponíveis por mês. Ativo = FO, FE, FA, P, AT ou LT no dia; trabalhado = P.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-colab_overview"></div>
+    <div class="card">
+      <div class="card-head"><div><h3>Dias trabalhados × Disponíveis</h3><div class="sub">Evolução mensal</div></div><span class="card-tag">COLABORADORES</span></div>
+      <div class="chart-wrap tall"><canvas id="chartColabCombo"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Distribuição de siglas no mês</h3><div class="sub">Último mês do período selecionado</div></div></div>
+      <div class="chart-wrap"><canvas id="chartColabPie"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Colaboradores disponíveis por mês</h3><div class="sub">Um nome por linha, cor de fundo por função — clique/passe o mouse para ver o nome completo</div></div></div>
+      <div class="op-months-grid" id="colabDisponiveisGrid"></div>
+    </div>
+    <div class="insight" id="insight-colab_overview"></div>
+  </section>
+
+  <!-- 16 · COLABORADORES · ESTATÍSTICAS MENSAIS -->
+  <section class="page" data-page="colab_mensal">
+    <div class="page-head">
+      <div class="eyebrow">16 · Colaboradores</div>
+      <h2>Estatísticas mensais</h2>
+      <p>Contagem de dias por sigla, mês a mês, para os colaboradores ativos e para as demais situações (home office, afastamento, não contratado, desligamento).</p>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><h3>Situações ativas por mês</h3><div class="sub">Folga, Férias, Falta, Presente, Atestado, Luto</div></div><span class="card-tag">ATIVOS</span></div>
+      <div class="chart-wrap tall"><canvas id="chartColabAtivos"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Outras situações por mês</h3><div class="sub">Home office, Afastado, Não contratado, Demissão voluntária, Demitido</div></div><span class="card-tag">OUTROS</span></div>
+      <div class="chart-wrap tall"><canvas id="chartColabOutros"></canvas></div>
+    </div>
+  </section>
+
+  <!-- 17 · COLABORADORES · EQUIPE INTERNA -->
+  <section class="page" data-page="colab_verificacao">
+    <div class="page-head">
+      <div class="eyebrow">17 · Colaboradores</div>
+      <h2>Equipe Interna</h2>
+      <p>Tamanho de equipe por função (Líder, Conferente, Ajudante): presença real ("P") comparada à estimativa de dias úteis do mês. Segue o mesmo período selecionado nas demais abas, sempre de 1º ao último dia de cada mês.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-colab_equipe"></div>
+    <div class="card">
+      <div class="card-head"><div><h3>Colaboradores disponíveis por função</h3><div class="sub">Quem teve ao menos um "P" no mês — contratado e vindo na operação</div></div><span class="card-tag">EQUIPE</span></div>
+      <div class="chart-wrap tall"><canvas id="chartEquipeHeadcount"></canvas></div>
+    </div>
+    <div class="row cols-3" id="equipe-p-grid" style="margin-top:14px"></div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Resumo de eventos — situações ativas</h3><div class="sub">Folga, Férias, Falta, Presente, Atestado, Luto — soma das três equipes</div></div><span class="card-tag">ATIVOS</span></div>
+      <div class="chart-wrap tall"><canvas id="chartEquipeEventosAtivos"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Resumo de eventos — outras situações</h3><div class="sub">Home office, Afastado, Não contratado, Demissão voluntária, Demitido</div></div><span class="card-tag">OUTROS</span></div>
+      <div class="chart-wrap tall"><canvas id="chartEquipeEventosOutras"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Detalhamento mensal por equipe</h3><div class="sub">Dias úteis, disponíveis, presença real, estimado e utilização</div></div></div>
+      <div class="table-wrap"><table class="data" id="equipeDetailTable"></table></div>
+    </div>
+    <div class="insight" id="insight-colab_equipe"></div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -440,7 +527,12 @@ body.presentation .card > .card-head .sub{ display:none; }
   const SHEET_ID = '1VZKDyY8oAtRHcT0TDvyv5zI1rJeEZe_KAvbbyRbE9qs';
   const SHEET_NAME = 'MONTAGENS GRAF';
   const SHEET_NAME_MO = 'ACOMP M.O.3º';
-  const csvUrl = sheetName => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  const SHEET_NAME_COLAB = 'ABS VERTICAL';
+  // A busca sem "range" explícito às vezes traz um intervalo usado menor do
+  // que o real (visto na aba "ABS VERTICAL": sem range, o gviz para na
+  // coluna AA e nunca devolve os blocos de totais por equipe em AB:BL) —
+  // por isso essa aba pede um range largo explicitamente.
+  const csvUrl = (sheetName, range) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}${range?('&range='+encodeURIComponent(range)):''}&_=${Date.now()}`;
 
   // ============ STATUS ============
   const statusEl = document.getElementById('status');
@@ -452,17 +544,17 @@ body.presentation .card > .card-head .sub{ display:none; }
   // file:// (double-click). JSONP via <script> tag is exempt from that
   // restriction (same reason the Chart.js CDN script above always works),
   // so it's used as a fallback that works no matter how the file is opened.
-  async function loadRows(sheetName){
-    try{ return await loadViaFetch(sheetName); }
-    catch(err){ console.warn('Fetch direto falhou, tentando via JSONP…', err.message); return await loadViaJSONP(sheetName); }
+  async function loadRows(sheetName, range){
+    try{ return await loadViaFetch(sheetName, range); }
+    catch(err){ console.warn('Fetch direto falhou, tentando via JSONP…', err.message); return await loadViaJSONP(sheetName, range); }
   }
-  async function loadViaFetch(sheetName){
-    const res = await fetch(csvUrl(sheetName), { cache: 'no-store' });
+  async function loadViaFetch(sheetName, range){
+    const res = await fetch(csvUrl(sheetName, range), { cache: 'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     return Papa.parse(text.trim(), { skipEmptyLines: false }).data;
   }
-  function loadViaJSONP(sheetName){
+  function loadViaJSONP(sheetName, range){
     return new Promise((resolve, reject) => {
       const cbName = 'gvizCB_' + Math.random().toString(36).slice(2);
       const timeout = setTimeout(() => { cleanup(); reject(new Error('Tempo esgotado ao carregar os dados da planilha.')); }, 15000);
@@ -470,19 +562,37 @@ body.presentation .card > .card-head .sub{ display:none; }
       window[cbName] = function(dataTable){
         cleanup();
         try{
+          // Células do tipo "data" chegam via JSON como v="Date(ano,mês,dia)"
+          // (mês baseado em 0) em vez do texto formatado. Convertemos para
+          // "DD/MM/AAAA" (com ano, já que temos ele em mãos aqui) para ficar
+          // no mesmo formato que o export CSV produz ao usar "range" — sem
+          // isso, colunas de data ficam ilegíveis para o resto do código.
+          const GVIZ_DATE_RE = /^Date\((\d+),\s*(\d+),\s*(\d+)/;
           const rows = (dataTable.table.rows || []).map(row =>
             (row.c || []).map(cell => {
               if(!cell) return '';
+              const v = (cell.v !== undefined && cell.v !== null) ? String(cell.v) : '';
+              const dm = v.match(GVIZ_DATE_RE);
+              if(dm) return String(+dm[3]).padStart(2,'0') + '/' + String(+dm[2]+1).padStart(2,'0') + '/' + dm[1];
               if(cell.f !== undefined && cell.f !== null) return String(cell.f);
-              if(cell.v !== undefined && cell.v !== null) return String(cell.v);
-              return '';
+              return v;
             })
           );
+          // Ao contrário do export CSV (que devolve o cabeçalho como a
+          // primeira linha), o formato JSON do gviz separa os rótulos das
+          // colunas em "table.cols" e deixa "table.rows" só com os dados.
+          // Reconstituímos a linha de cabeçalho a partir de table.cols para
+          // que o restante do código enxergue exatamente a mesma estrutura
+          // de linhas nos dois caminhos de carregamento.
+          const cols = dataTable.table.cols || [];
+          if(cols.length && cols.some(c => c && c.label)){
+            rows.unshift(cols.map(c => (c && c.label) ? String(c.label) : ''));
+          }
           resolve(rows);
         }catch(err){ reject(err); }
       };
       const script = document.createElement('script');
-      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=out:json;responseHandler:${cbName}`;
+      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}${range?('&range='+encodeURIComponent(range)):''}&tqx=out:json;responseHandler:${cbName}&_=${Date.now()}`;
       script.onerror = () => { cleanup(); reject(new Error('Falha ao carregar o script da planilha.')); };
       document.body.appendChild(script);
     });
@@ -664,6 +774,289 @@ body.presentation .card > .card-head .sub{ display:none; }
     return { suppliers, meses };
   }
 
+  // ============ COLABORADORES (aba "ABS VERTICAL") ============
+  // Coluna A = nº da semana (não usado), coluna B = data "DD/MM" (sem ano),
+  // colunas C em diante = um colaborador por coluna, com "FUNÇÃO NOME" no
+  // cabeçalho e a sigla do dia em cada célula. Colunas em branco no
+  // cabeçalho são espaçadores e são ignoradas.
+  const CODE_INFO = {
+    P:{label:'Presente', color:'#3ddc97'},
+    FO:{label:'Folga', color:'#4d9fff'},
+    FE:{label:'Férias', color:'#a78bfa'},
+    FA:{label:'Falta', color:'#ff4d6d'},
+    AT:{label:'Atestado', color:'#ffd23f'},
+    LT:{label:'Luto', color:'#5eead4'},
+    H:{label:'Home Office', color:'#ff8a3d'},
+    AF:{label:'Afastado', color:'#8b95ab'},
+    NC:{label:'Não contratado', color:'#48506b'},
+    DV:{label:'Demissão voluntária', color:'#ff5b3a'},
+    D:{label:'Demitido', color:'#6b1f2a'},
+  };
+  const CODE_LIST = Object.keys(CODE_INFO);
+  // Regra do usuário: só estas siglas contam como colaborador "ativo" no dia.
+  const ACTIVE_CODES = new Set(['FO','FE','FA','P','AT','LT']);
+  function normalizeSigla(v){
+    v = (v||'').trim().toUpperCase();
+    return v==='PR' ? 'P' : v; // PR é grafia alternativa de "Presente" usada por um dos gestores
+  }
+  // "JOAO PAULO DE SOUSA" -> "JOAO P." — primeiro nome por extenso + inicial
+  // do segundo nome, para caber em espaços curtos (cards, chips).
+  function abbrevName(name){
+    const parts = (name||'').trim().split(/\s+/).filter(Boolean);
+    if(parts.length <= 1) return parts[0] || '';
+    return parts[0] + ' ' + parts[1].charAt(0) + '.';
+  }
+  // O ano vem opcionalmente: buscas com "range" explícito (necessário para
+  // pegar os blocos de equipe além da coluna AA) fazem o gviz devolver
+  // "DD/MM/AAAA" em vez de só "DD/MM" como no export CSV padrão.
+  const DATE_DDMM_RE = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/;
+  function isCodeLikeText(s){
+    const t = (s||'').trim().toUpperCase();
+    return t==='' || CODE_LIST.includes(t) || DATE_DDMM_RE.test(t);
+  }
+  function cleanScore(list){
+    if(!list.length) return -1;
+    const bad = list.filter(e => isCodeLikeText(e.role) || isCodeLikeText(e.name)).length;
+    return list.length - bad;
+  }
+  function buildFromRoleNameRows(rows, roleRowIdx, nameRowIdx, dataStart){
+    const roleRow = rows[roleRowIdx] || [], nameRow = rows[nameRowIdx] || [];
+    const width = Math.max(roleRow.length, nameRow.length);
+    const out = [];
+    for(let c=2;c<width;c++){
+      const role = (roleRow[c]||'').trim(), name = (nameRow[c]||'').trim();
+      if(!role && !name) continue;
+      out.push({ col:c, role: role||'—', name: name||('Coluna '+c) });
+    }
+    return { employees: out, dataStart, score: cleanScore(out) };
+  }
+  // O cabeçalho da aba pode chegar de formas diferentes dependendo de como o
+  // Google Sheets exporta linhas congeladas/mescladas. A forma mais confiável
+  // de localizá-lo é ancorar na própria célula com o texto "DATA" (coluna B
+  // da linha do nome, conforme confirmado pelo usuário) — a linha logo acima
+  // é a de FUNÇÃO, a própria linha da âncora é a de NOME, e os dados começam
+  // na linha seguinte. Se essa âncora não existir, caímos para os dois modos
+  // antigos (combinado numa linha só, ou função/nome nas duas primeiras
+  // linhas) e, entre os candidatos válidos, ficamos com o que produzir
+  // nomes/funções "de verdade" — isto é, que não são iguais a nenhuma sigla
+  // de dado (P, NC, FE, ...) nem parecem uma data, o que indicaria que
+  // pegamos uma linha de dados por engano.
+  function parseColabHeader(rows){
+    const candidates = [];
+
+    let anchorRow = -1;
+    for(let r=0;r<Math.min(rows.length,10);r++){
+      const cell = ((rows[r]||[])[1]||'').trim().toUpperCase();
+      if(cell === 'DATA'){ anchorRow = r; break; }
+    }
+    if(anchorRow >= 1){
+      candidates.push(buildFromRoleNameRows(rows, anchorRow-1, anchorRow, anchorRow+1));
+    }
+
+    const header = rows[0] || [];
+    const combined = [];
+    for(let c=2;c<header.length;c++){
+      const raw = (header[c]||'').trim();
+      if(!raw) continue;
+      const sp = raw.indexOf(' ');
+      if(sp===-1) continue;
+      combined.push({ col:c, role: raw.slice(0,sp).trim(), name: raw.slice(sp+1).trim() });
+    }
+    if(combined.length && DATE_DDMM_RE.test(((rows[1]||[])[1]||'').trim())){
+      candidates.push({ employees: combined, dataStart: 1, score: cleanScore(combined) });
+    }
+
+    if(DATE_DDMM_RE.test(((rows[2]||[])[1]||'').trim())){
+      candidates.push(buildFromRoleNameRows(rows, 0, 1, 2));
+    }
+
+    const valid = candidates.filter(c => c.employees.length && c.score > 0);
+    if(!valid.length) return null;
+    valid.sort((a,b) => b.score - a.score);
+    return valid[0];
+  }
+  // A planilha também mantém, à direita do bloco de colaboradores (a partir da
+  // coluna AA), três blocos já agregados por equipe — LÍDER, CONFERENTE e
+  // AJUDANTE — cada um com uma célula-rótulo seguida de 11 colunas (uma por
+  // sigla) com o total do dia. Localizamos cada bloco pelo texto do rótulo em
+  // vez de confiar nas letras de coluna fixas, para resistir a edições na
+  // planilha.
+  const TEAM_LABELS = ['LÍDER', 'CONFERENTE', 'AJUDANTE'];
+  function findTeamBlock(rows, dataStart, teamLabel){
+    for(let r=0; r<dataStart; r++){
+      const headerRow = rows[r] || [];
+      for(let c=26; c<headerRow.length; c++){
+        if((headerRow[c]||'').trim().toUpperCase() !== teamLabel) continue;
+        const map = {};
+        for(let k=1; k<=CODE_LIST.length+3 && (c+k)<headerRow.length; k++){
+          const lbl = (headerRow[c+k]||'').trim().toUpperCase();
+          if(!lbl){ if(Object.keys(map).length) break; else continue; }
+          if(CODE_LIST.includes(lbl)) map[lbl] = c+k;
+          else if(Object.keys(map).length) break;
+        }
+        if(Object.keys(map).length) return map;
+      }
+    }
+    return null;
+  }
+  function buildColaboradores(rows){
+    if(!rows.length) throw new Error('Aba "'+SHEET_NAME_COLAB+'" vazia.');
+    const parsed = parseColabHeader(rows);
+    if(!parsed || !parsed.employees.length || parsed.score <= 0){
+      const dump = [0,1,2].map(r => JSON.stringify((rows[r]||[]).slice(0,4))).join(' | ');
+      throw new Error('Não encontrei colaboradores no cabeçalho da aba "'+SHEET_NAME_COLAB+'". Confira se FUNÇÃO/NOME estão nas linhas 1-2 e se a coluna B tem datas "DD/MM" logo abaixo. [debug linhas 1-3: '+dump+']');
+    }
+    const { employees, dataStart } = parsed;
+
+    const rawDays = [];
+    for(let r=dataStart;r<rows.length;r++){
+      const row = rows[r]||[];
+      const m = (row[1]||'').trim().match(DATE_DDMM_RE);
+      if(!m) continue;
+      let yr = null;
+      if(m[3]){ yr = parseInt(m[3],10); if(m[3].length===2) yr += 2000; }
+      rawDays.push({ r, day: parseInt(m[1],10), month: parseInt(m[2],10), year: yr });
+    }
+    if(!rawDays.length) throw new Error('Não encontrei datas na aba "'+SHEET_NAME_COLAB+'".');
+
+    // Quando a busca não traz o ano junto da data (export CSV padrão, sem
+    // "range"), ancoramos a última linha perto da data atual e propagamos os
+    // anos para trás (detectando quedas de mês). Quando o ano já veio na
+    // própria célula (busca com "range" explícito), usamos ele direto.
+    if(rawDays[rawDays.length-1].year == null){
+      const now = new Date();
+      const lastMonth = rawDays[rawDays.length-1].month;
+      let lastYear = now.getFullYear();
+      if(lastMonth > now.getMonth()+1+2) lastYear -= 1;
+      rawDays[rawDays.length-1].year = lastYear;
+    }
+    for(let i=rawDays.length-2;i>=0;i--){
+      if(rawDays[i].year != null) continue;
+      const cur = rawDays[i], next = rawDays[i+1];
+      cur.year = (cur.month > next.month) ? next.year - 1 : next.year;
+    }
+
+    const days = rawDays.map(d => {
+      const row = rows[d.r]||[];
+      const values = {};
+      employees.forEach(e => { values[e.col] = normalizeSigla(row[e.col]); });
+      return { day:d.day, month:d.month, year:d.year, r:d.r, values };
+    });
+
+    // Blocos de totais diários já agregados por equipe (ver findTeamBlock).
+    const teamCols = {};
+    TEAM_LABELS.forEach(t => { teamCols[t] = findTeamBlock(rows, dataStart, t); });
+    const teamDaily = days.map(d => {
+      const row = rows[d.r]||[];
+      const teams = {};
+      TEAM_LABELS.forEach(t => {
+        const colMap = teamCols[t];
+        if(!colMap) return;
+        const counts = {};
+        Object.entries(colMap).forEach(([code,col]) => { counts[code] = parseNumberBR(row[col]) || 0; });
+        teams[t] = counts;
+      });
+      return { day:d.day, month:d.month, year:d.year, teams };
+    });
+
+    return { employees, days, teamCols, teamDaily };
+  }
+  // Dias úteis (segunda a sexta) dentro de um mês/ano específico.
+  function businessDaysInMonth(year, month){
+    let count = 0;
+    const totalDays = new Date(year, month, 0).getDate();
+    for(let d=1; d<=totalDays; d++){
+      const wd = new Date(year, month-1, d).getDay();
+      if(wd>=1 && wd<=5) count++;
+    }
+    return count;
+  }
+  // Tamanho de equipe por mês/função (aba 17 · Equipe Interna): dias úteis do
+  // mês, "P" real (somado dos blocos agregados por equipe), colaboradores
+  // disponíveis (quem teve ao menos 1 "P" no mês — só isso indica que estava
+  // contratado e vindo na operação) e a quantidade estimada (dias úteis ×
+  // disponíveis).
+  function aggregateEquipeMonthly(colab, range){
+    const { employees, days, teamDaily } = colab;
+    const map = new Map(); // 'AAAA-MM' -> { year, month, teams:{T:{sigla:n}}, headcountSets:{T:Set} }
+    function ensureBucket(mapKey, year, month){
+      if(!map.has(mapKey)){
+        const teams = {}, headcountSets = {};
+        TEAM_LABELS.forEach(t => { teams[t] = {}; headcountSets[t] = new Set(); });
+        map.set(mapKey, { year, month, teams, headcountSets });
+      }
+      return map.get(mapKey);
+    }
+    function inRange(year, month){
+      const k = monthKey(MES_ABBR[month-1]+'/'+String(year).slice(2));
+      return !range || (k!=null && k>=range.start && k<=range.end);
+    }
+    teamDaily.forEach(d => {
+      if(!inRange(d.year, d.month)) return;
+      const mapKey = d.year+'-'+String(d.month).padStart(2,'0');
+      const bucket = ensureBucket(mapKey, d.year, d.month);
+      TEAM_LABELS.forEach(t => {
+        const counts = d.teams[t];
+        if(!counts) return;
+        Object.entries(counts).forEach(([code,n]) => { bucket.teams[t][code] = (bucket.teams[t][code]||0) + n; });
+      });
+    });
+    days.forEach(d => {
+      if(!inRange(d.year, d.month)) return;
+      const mapKey = d.year+'-'+String(d.month).padStart(2,'0');
+      const bucket = ensureBucket(mapKey, d.year, d.month);
+      employees.forEach(e => {
+        if(d.values[e.col] !== 'P') return;
+        if(!TEAM_LABELS.includes(e.role)) return;
+        bucket.headcountSets[e.role].add(e.col);
+      });
+    });
+    const keys = [...map.keys()].sort();
+    const meses = keys.map(k => { const [y,m]=k.split('-'); return MES_ABBR[parseInt(m,10)-1]+'/'+y.slice(2); });
+    const businessDays = keys.map(k => { const b = map.get(k); return businessDaysInMonth(b.year, b.month); });
+    const teams = {};
+    TEAM_LABELS.forEach(t => {
+      const headcount = keys.map(k => map.get(k).headcountSets[t].size);
+      const pReal = keys.map(k => map.get(k).teams[t]['P']||0);
+      const estimado = keys.map((k,i) => businessDays[i]*headcount[i]);
+      const codeCounts = keys.map(k => map.get(k).teams[t]);
+      teams[t] = { headcount, pReal, estimado, codeCounts };
+    });
+    return { keys, meses, businessDays, teams };
+  }
+  // Agrega por mês, opcionalmente restrito a um intervalo [start,end] de
+  // monthKey (mesmo formato usado pelo período compartilhado das outras abas).
+  function aggregateColabMonthly(colab, range){
+    const map = new Map();
+    colab.days.forEach(d => {
+      const k = monthKey(MES_ABBR[d.month-1]+'/'+String(d.year).slice(2));
+      if(range && (k==null || k<range.start || k>range.end)) return;
+      const mapKey = d.year+'-'+String(d.month).padStart(2,'0');
+      if(!map.has(mapKey)) map.set(mapKey, { year:d.year, month:d.month, worked:0, activeCols:new Set(), codeCounts:{}, activeDayCounts:new Map() });
+      const bucket = map.get(mapKey);
+      colab.employees.forEach(e => {
+        const code = d.values[e.col];
+        if(!code) return;
+        bucket.codeCounts[code] = (bucket.codeCounts[code]||0) + 1;
+        if(code==='P') bucket.worked++;
+        if(ACTIVE_CODES.has(code)){
+          bucket.activeCols.add(e.col);
+          bucket.activeDayCounts.set(e.col, (bucket.activeDayCounts.get(e.col)||0) + 1);
+        }
+      });
+    });
+    const keys = [...map.keys()].sort();
+    const meses = keys.map(k => { const [y,m]=k.split('-'); return MES_ABBR[parseInt(m,10)-1]+'/'+y.slice(2); });
+    return {
+      keys, meses,
+      worked: keys.map(k=>map.get(k).worked),
+      disponiveis: keys.map(k=>map.get(k).activeCols.size),
+      codeCounts: keys.map(k=>map.get(k).codeCounts),
+      employees: colab.employees,
+      activeDayCounts: keys.map(k=>map.get(k).activeDayCounts),
+    };
+  }
+
   // ============ NAV ============
   const nav = document.getElementById('nav');
   const pages = [
@@ -682,6 +1075,9 @@ body.presentation .card > .card-head .sub{ display:none; }
     {id:'mo_operacao', label:'Por Operação', num:'12'},
     {id:'mo_fornecedor', label:'Por Fornecedor', num:'13'},
     {id:'mo_resumo', label:'Resumo Anual MO', num:'14'},
+    {id:'colab_overview', label:'Colaboradores', num:'15'},
+    {id:'colab_mensal', label:'Estatísticas Mensais', num:'16'},
+    {id:'colab_verificacao', label:'Equipe Interna', num:'17'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -1292,6 +1688,191 @@ body.presentation .card > .card-head .sub{ display:none; }
     });
   }
 
+  // ============ COLABORADORES · RENDER (abas 15-17) ============
+  const ATIVO_CODES_ORDER = ['P','FO','FE','FA','AT','LT'];
+  const OUTRAS_CODES_ORDER = ['H','AF','NC','DV','D'];
+
+  function renderColabOverview(agg){
+    const grid = document.getElementById('kpi-colab_overview'); grid.innerHTML='';
+    if(!agg.meses.length){
+      grid.innerHTML = '<div class="mo-note">Nenhum dado de colaboradores no período selecionado.</div>';
+      mkChart('chartColabCombo', {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
+      mkChart('chartColabPie', {type:'doughnut',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
+      document.getElementById('colabDisponiveisGrid').innerHTML = '';
+      setInsight('colab_overview', 'Nenhum dado de colaboradores no período selecionado.');
+      return;
+    }
+    const w = last2(agg.worked), d = last2(agg.disponiveis);
+    const peak = peakInfo(agg.worked, agg.meses);
+    const lastCodes = agg.codeCounts[agg.codeCounts.length-1] || {};
+    const activeSum = ATIVO_CODES_ORDER.reduce((s,c)=>s+(lastCodes[c]||0),0);
+    const taxa = activeSum ? (lastCodes['P']||0)/activeSum*100 : null;
+
+    grid.appendChild(kpiCard(`Dias trabalhados ${agg.meses[agg.meses.length-1]}`, fmt(w.curr), `vs. ${agg.meses[agg.meses.length-2]||'—'}: ${fmt(w.prev)}`, delta(w.curr,w.prev,true), 'accent'));
+    grid.appendChild(kpiCard('Colaboradores disponíveis', fmt(d.curr), `vs. mês anterior: ${fmt(d.prev)}`, delta(d.curr,d.prev,true), 'green'));
+    grid.appendChild(kpiCard('Taxa de presença', taxa!=null?taxa.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—', 'presente / dias ativos', {cls:'flat',arrow:'',text:'—'}, 'purple'));
+    grid.appendChild(kpiCard('Pico de dias trabalhados', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
+
+    comboChart('chartColabCombo', agg.meses, agg.worked, 'Dias trabalhados', '#3ddc97', agg.disponiveis, 'Disponíveis', '#4d9fff');
+
+    const codes = CODE_LIST.filter(c=>lastCodes[c]);
+    mkChart('chartColabPie', {
+      type:'doughnut',
+      data:{labels:codes.map(c=>c+' · '+CODE_INFO[c].label), datasets:[{data:codes.map(c=>lastCodes[c]), backgroundColor:codes.map(c=>CODE_INFO[c].color), borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'52%',
+        plugins:{legend:{position:'bottom',labels:{color:'#a4adc4',font:{size:11},padding:10,boxWidth:10,boxHeight:10}},
+          datalabels:{color:'#e8ecf5',font:{size:11,weight:'700'},formatter:(v,ctx)=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return v+'\n'+Math.round(v/tot*100)+'%';},textAlign:'center'}}}
+    });
+    // Colaboradores disponíveis por mês: um card por mês, com um nome por
+    // linha (abreviado — primeiro nome + inicial do segundo), cor de fundo
+    // por função. Só entra na lista de um mês quem teve pelo menos 1 dia
+    // ativo (FO, FE, FA, P, AT ou LT) naquele mês.
+    const employees = agg.employees || [];
+    const gridEl = document.getElementById('colabDisponiveisGrid'); gridEl.innerHTML='';
+    gridEl.style.gridTemplateColumns = `repeat(${Math.min(agg.meses.length,4)},1fr)`;
+    agg.meses.forEach((mLabel,mi) => {
+      const counts = agg.activeDayCounts[mi];
+      const namesThisMonth = employees.filter(e => counts.get(e.col)).sort((a,b) =>
+        a.role.localeCompare(b.role,'pt-BR') || a.name.localeCompare(b.name,'pt-BR'));
+      const card = document.createElement('div');
+      card.className = 'op-month-card';
+      card.innerHTML = `<div class="op-month-label">${mLabel}</div><div class="colab-name-list"></div>`;
+      const listEl = card.querySelector('.colab-name-list');
+      if(!namesThisMonth.length){
+        const empty = document.createElement('div');
+        empty.style.cssText = 'font-size:11px;color:var(--ink-muted);padding:8px 0';
+        empty.textContent = 'Sem dados';
+        listEl.appendChild(empty);
+      }else{
+        namesThisMonth.forEach(e => {
+          const chip = document.createElement('div');
+          chip.className = 'colab-name-chip';
+          chip.style.background = TEAM_COLORS[e.role] || '#8b95ab';
+          chip.title = `${e.name} · ${e.role} · ${fmt(counts.get(e.col))} dia(s) ativo(s) em ${mLabel}`;
+          chip.textContent = abbrevName(e.name);
+          listEl.appendChild(chip);
+        });
+      }
+      gridEl.appendChild(card);
+    });
+
+    const dd = delta(w.curr, w.prev, true);
+    setInsight('colab_overview', `<strong>Leitura do mês:</strong> ${fmt(w.curr)} dias trabalhados em ${agg.meses[agg.meses.length-1]} (${dd.arrow} ${dd.text} vs. ${agg.meses[agg.meses.length-2]||'—'}), com ${fmt(d.curr)} colaboradores disponíveis e taxa de presença de ${taxa!=null?taxa.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—'}.`);
+  }
+
+  function renderColabMensal(agg){
+    if(!agg.meses.length){
+      mkChart('chartColabAtivos', {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
+      mkChart('chartColabOutros', {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
+      return;
+    }
+    const stackedScales = {
+      x:{...baseScales.x, stacked:true},
+      y:{...baseScales.y, stacked:true},
+    };
+    mkChart('chartColabAtivos', {
+      type:'bar',
+      data:{labels:agg.meses, datasets: ATIVO_CODES_ORDER.map(c=>({
+        label:c+' · '+CODE_INFO[c].label, data:agg.codeCounts.map(cc=>cc[c]||0), backgroundColor:CODE_INFO[c].color, borderRadius:3,
+      }))},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20,right:14}},scales:stackedScales,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10}}}}
+    });
+    mkChart('chartColabOutros', {
+      type:'bar',
+      data:{labels:agg.meses, datasets: OUTRAS_CODES_ORDER.map(c=>({
+        label:c+' · '+CODE_INFO[c].label, data:agg.codeCounts.map(cc=>cc[c]||0), backgroundColor:CODE_INFO[c].color, borderRadius:3,
+      }))},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20,right:14}},scales:stackedScales,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10}}}}
+    });
+  }
+
+  let colabFullData = null;   // { employees, days, teamCols, teamDaily } sem filtro
+
+  // ---- Equipe Interna (aba 17): tamanho de equipe por função, mensal ----
+  // Segue o mesmo período global das demais abas — sem filtros próprios.
+  const TEAM_COLORS = { 'LÍDER':'#a78bfa', 'CONFERENTE':'#4d9fff', 'AJUDANTE':'#3ddc97' };
+  function renderEquipeInterna(agg){
+    const grid = document.getElementById('kpi-colab_equipe'); grid.innerHTML='';
+    if(!agg.keys.length){
+      grid.innerHTML = '<div class="mo-note">Nenhum dado de equipe no período selecionado.</div>';
+      mkChart('chartEquipeHeadcount', {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
+      mkChart('chartEquipeEventosAtivos', {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
+      mkChart('chartEquipeEventosOutras', {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
+      document.getElementById('equipe-p-grid').innerHTML = '';
+      document.getElementById('equipeDetailTable').innerHTML = '';
+      setInsight('colab_equipe', 'Nenhum dado de equipe no período selecionado.');
+      return;
+    }
+    const lastIdx = agg.keys.length - 1;
+    const prevIdx = agg.keys.length - 2;
+
+    const tamanhoCurr = TEAM_LABELS.reduce((s,t)=>s+agg.teams[t].headcount[lastIdx],0);
+    const tamanhoPrev = prevIdx>=0 ? TEAM_LABELS.reduce((s,t)=>s+agg.teams[t].headcount[prevIdx],0) : null;
+    const pRealCurr = TEAM_LABELS.reduce((s,t)=>s+agg.teams[t].pReal[lastIdx],0);
+    const estimadoCurr = TEAM_LABELS.reduce((s,t)=>s+agg.teams[t].estimado[lastIdx],0);
+    const pRealPrev = prevIdx>=0 ? TEAM_LABELS.reduce((s,t)=>s+agg.teams[t].pReal[prevIdx],0) : null;
+    const estimadoPrev = prevIdx>=0 ? TEAM_LABELS.reduce((s,t)=>s+agg.teams[t].estimado[prevIdx],0) : null;
+    const utilCurr = estimadoCurr ? pRealCurr/estimadoCurr*100 : null;
+    const utilPrev = estimadoPrev ? pRealPrev/estimadoPrev*100 : null;
+
+    grid.appendChild(kpiCard('Tamanho de equipe', fmt(tamanhoCurr), agg.meses[lastIdx], delta(tamanhoCurr,tamanhoPrev,true), 'accent'));
+    grid.appendChild(kpiCard('Presença real (P)', fmt(pRealCurr), `estimado: ${fmt(estimadoCurr)}`, delta(pRealCurr,pRealPrev,true), 'green'));
+    grid.appendChild(kpiCard('Taxa de utilização', utilCurr!=null?utilCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—', 'P real ÷ estimado', delta(utilCurr,utilPrev,true), 'purple'));
+    grid.appendChild(kpiCard('Dias úteis', fmt(agg.businessDays[lastIdx]), agg.meses[lastIdx], {cls:'flat',arrow:'—',text:'seg–sex'}, 'yellow'));
+
+    mkChart('chartEquipeHeadcount', {
+      type:'bar',
+      data:{labels:agg.meses, datasets: TEAM_LABELS.map(t => ({
+        label:t, data:agg.teams[t].headcount, backgroundColor:TEAM_COLORS[t], borderRadius:6, datalabels:dl(TEAM_COLORS[t],'end','end')
+      }))},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
+    });
+
+    const pGrid = document.getElementById('equipe-p-grid'); pGrid.innerHTML='';
+    TEAM_LABELS.forEach(t => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const cid = 'chartEquipeP_'+t.replace(/[^A-Z]/g,'');
+      card.innerHTML = `<div class="card-head"><div><h3>${t}</h3><div class="sub">P real vs. estimado</div></div></div><div class="chart-wrap" style="height:240px"><canvas id="${cid}"></canvas></div>`;
+      pGrid.appendChild(card);
+      comboChart(cid, agg.meses, agg.teams[t].pReal, 'P real', TEAM_COLORS[t], agg.teams[t].estimado, 'Estimado', '#e8ecf5');
+    });
+
+    const sumBySigla = (codes) => codes.map(code => agg.meses.map((_,i) =>
+      TEAM_LABELS.reduce((s,t)=>s+(agg.teams[t].codeCounts[i][code]||0),0)));
+    const ativosData = sumBySigla(ATIVO_CODES_ORDER);
+    const outrasData = sumBySigla(OUTRAS_CODES_ORDER);
+    const stackedScales = { x:{...baseScales.x, stacked:true}, y:{...baseScales.y, stacked:true} };
+    mkChart('chartEquipeEventosAtivos', {
+      type:'bar',
+      data:{labels:agg.meses, datasets: ATIVO_CODES_ORDER.map((c,i) => ({
+        label:c+' · '+CODE_INFO[c].label, data:ativosData[i], backgroundColor:CODE_INFO[c].color, borderRadius:3,
+      }))},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20,right:14}},scales:stackedScales,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10}}}}
+    });
+    mkChart('chartEquipeEventosOutras', {
+      type:'bar',
+      data:{labels:agg.meses, datasets: OUTRAS_CODES_ORDER.map((c,i) => ({
+        label:c+' · '+CODE_INFO[c].label, data:outrasData[i], backgroundColor:CODE_INFO[c].color, borderRadius:3,
+      }))},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20,right:14}},scales:stackedScales,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10}}}}
+    });
+
+    let html = '<thead><tr><th>Mês</th><th>Equipe</th><th>Dias úteis</th><th>Disponíveis</th><th>P real</th><th>Estimado</th><th>Utilização</th></tr></thead><tbody>';
+    agg.keys.forEach((k,i) => {
+      TEAM_LABELS.forEach(t => {
+        const hc = agg.teams[t].headcount[i], pr = agg.teams[t].pReal[i], est = agg.teams[t].estimado[i];
+        const util = est ? (pr/est*100).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%' : '—';
+        html += `<tr><td>${agg.meses[i]}</td><td>${t}</td><td>${fmt(agg.businessDays[i])}</td><td>${fmt(hc)}</td><td>${fmt(pr)}</td><td>${fmt(est)}</td><td>${util}</td></tr>`;
+      });
+    });
+    html += '</tbody>';
+    document.getElementById('equipeDetailTable').innerHTML = html;
+
+    const dd = delta(utilCurr, utilPrev, true);
+    setInsight('colab_equipe', `<strong>Leitura do mês:</strong> equipe de ${fmt(tamanhoCurr)} pessoas em ${agg.meses[lastIdx]} (Líder ${fmt(agg.teams['LÍDER'].headcount[lastIdx])}, Conferente ${fmt(agg.teams['CONFERENTE'].headcount[lastIdx])}, Ajudante ${fmt(agg.teams['AJUDANTE'].headcount[lastIdx])}), com ${fmt(pRealCurr)} presenças reais de ${fmt(estimadoCurr)} estimadas (${utilCurr!=null?utilCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—'} de utilização, ${dd.arrow} ${dd.text} vs. ${agg.meses[prevIdx]||'—'}).`);
+  }
+
   // ============ PERÍODO CONFIGURÁVEL (compartilhado por todas as abas) ============
   let fullData = null;   // { D, meses } · dados JEM sem filtro de período
   let moFullData = null; // { mo, forn } · dados de Mão de Obra sem filtro de período
@@ -1353,6 +1934,14 @@ body.presentation .card > .card-head .sub{ display:none; }
     const range = getSelectedPeriodRange();
     renderMOAll(filterMOForPeriod(moFullData.mo, range), filterFornForPeriod(moFullData.forn, range));
   }
+  function renderColabFiltered(){
+    if(!colabFullData) return;
+    const range = getSelectedPeriodRange();
+    const agg = aggregateColabMonthly(colabFullData, range);
+    renderColabOverview(agg);
+    renderColabMensal(agg);
+    renderEquipeInterna(aggregateEquipeMonthly(colabFullData, range));
+  }
   function onPeriodChange(){
     if(!fullData) return;
     let s = parseInt(document.getElementById('periodStart').value, 10);
@@ -1361,20 +1950,23 @@ body.presentation .card > .card-head .sub{ display:none; }
     const { D, meses } = sliceData(fullData.D, fullData.meses, s, e);
     renderAll(D, meses);
     renderMOFiltered();
+    renderColabFiltered();
   }
   document.getElementById('periodStart').addEventListener('change', onPeriodChange);
   document.getElementById('periodEnd').addEventListener('change', onPeriodChange);
 
   // ============ INIT ============
-  // As duas abas são buscadas em paralelo (para não esperar uma pela outra),
-  // mas só renderizamos depois que AMBAS resolvem — a aba JEM é processada
-  // primeiro para popular o seletor de período, que a Mão de Obra usa em
-  // seguida para filtrar seus próprios dados pelo mesmo intervalo.
+  // As três abas são buscadas em paralelo (para não esperar uma pela outra),
+  // mas só renderizamos depois que TODAS resolvem — a aba JEM é processada
+  // primeiro para popular o seletor de período, que Mão de Obra e
+  // Colaboradores usam em seguida para filtrar seus próprios dados pelo
+  // mesmo intervalo.
   async function init(){
     setStatus('Carregando dados da planilha…', false);
-    const [jemResult, moResult] = await Promise.allSettled([
+    const [jemResult, moResult, colabResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
-      loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) }))
+      loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
+      loadRows(SHEET_NAME_COLAB, 'A1:BZ5000').then(buildColaboradores)
     ]);
     const errors = [];
     if(jemResult.status==='fulfilled'){
@@ -1392,6 +1984,13 @@ body.presentation .card > .card-head .sub{ display:none; }
     }else{
       console.error(moResult.reason);
       errors.push('aba "'+SHEET_NAME_MO+'": '+moResult.reason.message);
+    }
+    if(colabResult.status==='fulfilled'){
+      colabFullData = colabResult.value;
+      renderColabFiltered();
+    }else{
+      console.error(colabResult.reason);
+      errors.push('aba "'+SHEET_NAME_COLAB+'": '+colabResult.reason.message);
     }
     if(!errors.length){
       clearStatus();
