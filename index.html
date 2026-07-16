@@ -166,9 +166,51 @@ body.presentation .chart-wrap.tall,
 body.presentation .chart-wrap.short{ height:min(54vh,520px); }
 body.presentation .card > .card-head{ margin-bottom:10px; }
 body.presentation .card > .card-head .sub{ display:none; }
+
+/* ---- Tela de login ---- */
+#loginScreen{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(1200px 600px at 90% -10%, rgba(255,91,58,.10), transparent 60%),radial-gradient(900px 500px at -10% 10%, rgba(77,159,255,.09), transparent 60%),var(--bg);}
+#loginScreen.hidden{display:none}
+.login-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.login-brand{display:flex;align-items:center;gap:14px;margin-bottom:24px;}
+.login-title{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:600;margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--ink-muted)}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:10.5px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:6px}
+.login-field input{width:100%;background:var(--surface-2);color:var(--ink);border:1px solid var(--border-strong);border-radius:8px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;}
+.login-field input:focus{outline:none;border-color:var(--accent)}
+.login-btn{width:100%;appearance:none;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0b0f1a;font-family:inherit;font-size:13px;font-weight:700;padding:11px 14px;border-radius:8px;cursor:pointer;margin-top:6px;}
+.login-btn:hover{filter:brightness(1.05)}
+.login-error{display:none;margin-top:12px;padding:9px 12px;border-radius:8px;background:#3a1f24;color:#ff9b9b;border:1px solid #5a2a2f;font-size:12px}
+.login-error.show{display:block}
+body.locked > *:not(#loginScreen){display:none !important}
 </style>
 </head>
-<body>
+<body class="locked">
+
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">P</div>
+      <div>
+        <div class="login-title">Portoex · Expedição & Logística</div>
+        <div class="login-sub">Acesso restrito · informe usuário e senha</div>
+      </div>
+    </div>
+    <form id="loginForm" autocomplete="off">
+      <div class="login-field">
+        <label for="loginUser">Usuário</label>
+        <input type="text" id="loginUser" autocomplete="username" required>
+      </div>
+      <div class="login-field">
+        <label for="loginPass">Senha</label>
+        <input type="password" id="loginPass" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="login-btn">Entrar</button>
+      <div class="login-error" id="loginError">Usuário ou senha incorretos.</div>
+    </form>
+  </div>
+</div>
 
 <header class="header">
   <div class="header-inner">
@@ -2001,6 +2043,40 @@ body.presentation .card > .card-head .sub{ display:none; }
   document.getElementById('refreshBtn').addEventListener('click', init);
   init();
   setInterval(init, 5 * 60 * 1000);
+})();
+</script>
+
+<script>
+(function(){
+  const AUTH_USER = 'Portoex';
+  const AUTH_PASS = 'Portoex18';
+  const AUTH_KEY = 'portoex_dash_auth';
+
+  const loginScreen = document.getElementById('loginScreen');
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+
+  function unlock(){
+    document.body.classList.remove('locked');
+    loginScreen.classList.add('hidden');
+  }
+
+  if(sessionStorage.getItem(AUTH_KEY) === '1'){
+    unlock();
+  }
+
+  loginForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if(user === AUTH_USER && pass === AUTH_PASS){
+      sessionStorage.setItem(AUTH_KEY, '1');
+      loginError.classList.remove('show');
+      unlock();
+    }else{
+      loginError.classList.add('show');
+    }
+  });
 })();
 </script>
 </body>
