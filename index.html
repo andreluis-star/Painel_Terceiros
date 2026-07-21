@@ -302,10 +302,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-bipados"></div>
   </section>
 
-  <!-- 03 · AJUDANTES -->
+  <!-- 15 · AJUDANTES -->
   <section class="page" data-page="ajudantes">
     <div class="page-head">
-      <div class="eyebrow">03 · Equipe</div>
+      <div class="eyebrow">15 · Equipe</div>
       <h2>Ajudantes & eventos</h2>
       <p>Quantidade de ajudantes alocados versus eventos de ajudantes registrados no mês.</p>
     </div>
@@ -314,10 +314,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-ajudantes"></div>
   </section>
 
-  <!-- 04 · CONFERENTES -->
+  <!-- 16 · CONFERENTES -->
   <section class="page" data-page="conferentes">
     <div class="page-head">
-      <div class="eyebrow">04 · Equipe</div>
+      <div class="eyebrow">16 · Equipe</div>
       <h2>Conferentes & eventos</h2>
       <p>Carga operacional dos conferentes ao longo do período.</p>
     </div>
@@ -326,58 +326,34 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-conferentes"></div>
   </section>
 
-  <!-- 05 · ATRASO EXPRESSO -->
+  <!-- 04 · ATRASO EXPRESSO -->
   <section class="page" data-page="atraso_expresso">
     <div class="page-head">
-      <div class="eyebrow">05 · Tempos críticos</div>
+      <div class="eyebrow">04 · Tempos críticos</div>
       <h2>Atraso expresso</h2>
       <p>Tempo total de atraso e dias excedidos para saída de cargas expressas. Quanto menor, melhor.</p>
     </div>
     <div class="kpi-grid" id="kpi-atraso_expresso"></div>
-    <div class="view-toggle">
-      <button class="toggle-btn active" data-page="atraso_expresso" data-mode="separado">Separado</button>
-      <button class="toggle-btn" data-page="atraso_expresso" data-mode="combinado">Combinado</button>
-    </div>
-    <div class="chart-view" id="view-separado-atraso_expresso">
-      <div class="row cols-2">
-        <div class="card"><div class="card-head"><div><h3>Tempo atraso expresso (horas)</h3><div class="sub">Atraso acumulado por mês</div></div><span class="card-tag">EXPRESSO</span></div><div class="chart-wrap"><canvas id="chartExpresso"></canvas></div></div>
-        <div class="card"><div class="card-head"><div><h3>Dias excedidos · Expresso</h3></div></div><div class="chart-wrap"><canvas id="chartDiasExpresso"></canvas></div></div>
-      </div>
-    </div>
-    <div class="chart-view" id="view-combinado-atraso_expresso" style="display:none">
-      <div class="card"><div class="card-head"><div><h3>Atraso expresso × Dias excedidos</h3><div class="sub">Comparativo combinado</div></div><span class="card-tag">COMBINADO</span></div><div class="chart-wrap tall"><canvas id="chartExpressoCombo"></canvas></div></div>
-    </div>
+    <div class="card"><div class="card-head"><div><h3>Atraso expresso × Dias excedidos</h3><div class="sub">Comparativo combinado</div></div><span class="card-tag">COMBINADO</span></div><div class="chart-wrap tall"><canvas id="chartExpressoCombo"></canvas></div></div>
     <div class="insight" id="insight-atraso_expresso"></div>
   </section>
 
-  <!-- 06 · SAÍDA A+ -->
+  <!-- 05 · SAÍDA A+ -->
   <section class="page" data-page="saida_a">
     <div class="page-head">
-      <div class="eyebrow">06 · Tempos críticos</div>
+      <div class="eyebrow">05 · Tempos críticos</div>
       <h2>Saída A+</h2>
       <p>Tempo total de atraso e dias excedidos para saída de cargas regulares. Quanto menor, melhor.</p>
     </div>
     <div class="kpi-grid" id="kpi-saida_a"></div>
-    <div class="view-toggle">
-      <button class="toggle-btn active" data-page="saida_a" data-mode="separado">Separado</button>
-      <button class="toggle-btn" data-page="saida_a" data-mode="combinado">Combinado</button>
-    </div>
-    <div class="chart-view" id="view-separado-saida_a">
-      <div class="row cols-2">
-        <div class="card"><div class="card-head"><div><h3>Tempo de saída A+ (horas)</h3><div class="sub">Atraso acumulado por mês</div></div><span class="card-tag">SAÍDA</span></div><div class="chart-wrap"><canvas id="chartSaida"></canvas></div></div>
-        <div class="card"><div class="card-head"><div><h3>Dias excedidos · Saída A+</h3></div></div><div class="chart-wrap"><canvas id="chartDiasSaida"></canvas></div></div>
-      </div>
-    </div>
-    <div class="chart-view" id="view-combinado-saida_a" style="display:none">
-      <div class="card"><div class="card-head"><div><h3>Saída A+ × Dias excedidos</h3><div class="sub">Comparativo combinado</div></div><span class="card-tag">COMBINADO</span></div><div class="chart-wrap tall"><canvas id="chartSaidaCombo"></canvas></div></div>
-    </div>
+    <div class="card"><div class="card-head"><div><h3>Saída A+ × Dias excedidos</h3><div class="sub">Comparativo combinado</div></div><span class="card-tag">COMBINADO</span></div><div class="chart-wrap tall"><canvas id="chartSaidaCombo"></canvas></div></div>
     <div class="insight" id="insight-saida_a"></div>
   </section>
 
-  <!-- 07 · MANIFESTOS -->
+  <!-- 06 · MANIFESTOS -->
   <section class="page" data-page="manifestos">
     <div class="page-head">
-      <div class="eyebrow">07 · Operação fim</div>
+      <div class="eyebrow">06 · Operação fim</div>
       <h2>Manifestos & operação</h2>
       <p>Documentos manifestados versus o volume operacional total (entregas + coletas).</p>
     </div>
@@ -386,10 +362,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-manifestos"></div>
   </section>
 
-  <!-- 08 · PERSONALIZADOS -->
+  <!-- 07 · PERSONALIZADOS -->
   <section class="page" data-page="personalizados">
     <div class="page-head">
-      <div class="eyebrow">08 · Operação fim</div>
+      <div class="eyebrow">07 · Operação fim</div>
       <h2>Personalizados</h2>
       <p>Volumes personalizados frente ao total entregue/coletado no mês.</p>
     </div>
@@ -398,10 +374,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-personalizados"></div>
   </section>
 
-  <!-- 09 · CUBAGEM -->
+  <!-- 08 · CUBAGEM -->
   <section class="page" data-page="cubagem">
     <div class="page-head">
-      <div class="eyebrow">09 · Cubagem</div>
+      <div class="eyebrow">08 · Cubagem</div>
       <h2>Volumes cubados & NFs</h2>
       <p>Quantidade de notas fiscais cubadas e volume total medido. Indicador relevante para faturamento e ocupação do galpão.</p>
     </div>
@@ -422,10 +398,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-cubagem"></div>
   </section>
 
-  <!-- 10 · MÃO DE OBRA · VISÃO GERAL -->
+  <!-- 09 · MÃO DE OBRA · VISÃO GERAL -->
   <section class="page" data-page="mo_overview">
     <div class="page-head">
-      <div class="eyebrow">10 · Mão de Obra</div>
+      <div class="eyebrow">09 · Mão de Obra</div>
       <h2>Ajudantes terceiros · Visão geral</h2>
       <p>Quantidade de ajudantes terceiros alocados por mês, segmentados entre Rota e Expedição.</p>
     </div>
@@ -441,10 +417,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mo_overview"></div>
   </section>
 
-  <!-- 11 · ROTA X EXPEDIÇÃO -->
+  <!-- 10 · ROTA X EXPEDIÇÃO -->
   <section class="page" data-page="mo_rota_exp">
     <div class="page-head">
-      <div class="eyebrow">11 · Mão de Obra</div>
+      <div class="eyebrow">10 · Mão de Obra</div>
       <h2>Rota × Expedição</h2>
       <p>Comparativo mensal entre ajudantes alocados em Rota e em Expedição.</p>
     </div>
@@ -456,30 +432,30 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mo_rota_exp"></div>
   </section>
 
-  <!-- 12 · POR OPERAÇÃO -->
+  <!-- 11 · POR OPERAÇÃO -->
   <section class="page" data-page="mo_operacao">
     <div class="page-head">
-      <div class="eyebrow">12 · Mão de Obra</div>
+      <div class="eyebrow">11 · Mão de Obra</div>
       <h2>Ajudantes por operação</h2>
       <p>Todas as operações e meses com dados em uma única visão.</p>
     </div>
     <div class="op-months-grid" id="mo-op-grid"></div>
   </section>
 
-  <!-- 13 · POR FORNECEDOR -->
+  <!-- 12 · POR FORNECEDOR -->
   <section class="page" data-page="mo_fornecedor">
     <div class="page-head">
-      <div class="eyebrow">13 · Mão de Obra</div>
+      <div class="eyebrow">12 · Mão de Obra</div>
       <h2>Pessoas por fornecedor</h2>
       <p>Volume de ajudantes alocados por fornecedor, mês a mês.</p>
     </div>
     <div class="row cols-2" id="mo-forn-grid"></div>
   </section>
 
-  <!-- 14 · RESUMO ANUAL -->
+  <!-- 13 · RESUMO ANUAL -->
   <section class="page" data-page="mo_resumo">
     <div class="page-head">
-      <div class="eyebrow">14 · Mão de Obra</div>
+      <div class="eyebrow">13 · Mão de Obra</div>
       <h2>Resumo anual</h2>
       <p>Totais acumulados por operação e por tipo no período com dados.</p>
     </div>
@@ -490,10 +466,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
   </section>
 
-  <!-- 15 · COLABORADORES · VISÃO GERAL -->
+  <!-- 14 · COLABORADORES · VISÃO GERAL -->
   <section class="page" data-page="colab_overview">
     <div class="page-head">
-      <div class="eyebrow">15 · Colaboradores</div>
+      <div class="eyebrow">14 · Colaboradores</div>
       <h2>Expedição · Visão geral</h2>
       <p>Dias trabalhados e colaboradores disponíveis por mês. Ativo = FO, FE, FA, P, AT ou LT no dia; trabalhado = P.</p>
     </div>
@@ -513,10 +489,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-colab_overview"></div>
   </section>
 
-  <!-- 16 · COLABORADORES · ESTATÍSTICAS MENSAIS -->
+  <!-- 03 · COLABORADORES · ESTATÍSTICAS MENSAIS -->
   <section class="page" data-page="colab_mensal">
     <div class="page-head">
-      <div class="eyebrow">16 · Colaboradores</div>
+      <div class="eyebrow">03 · Colaboradores</div>
       <h2>Estatísticas mensais</h2>
       <p>Contagem de dias por sigla, mês a mês, para os colaboradores ativos e para as demais situações (home office, afastamento, não contratado, desligamento).</p>
     </div>
@@ -557,6 +533,45 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-colab_equipe"></div>
   </section>
+
+  <!-- 18 · OCORRÊNCIAS -->
+  <section class="page" data-page="ocorrencias">
+    <div class="page-head">
+      <div class="eyebrow">18 · Ocorrências</div>
+      <h2>Controle de ocorrências</h2>
+      <p>Ocorrências registradas na operação: responsáveis, tipos mais recorrentes e evolução mensal. Fonte: planilha de Controle de Ocorrências.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-ocorrencias"></div>
+    <div class="card">
+      <div class="card-head"><div><h3>Ocorrências por mês</h3><div class="sub">Evolução no período</div></div><span class="card-tag">OCORRÊNCIAS</span></div>
+      <div class="chart-wrap tall"><canvas id="chartOcorrenciasMes"></canvas></div>
+    </div>
+    <div class="row cols-2" style="margin-top:14px">
+      <div class="card"><div class="card-head"><div><h3>Por responsável</h3><div class="sub">Quem mais registrou ocorrências</div></div></div><div class="chart-wrap tall"><canvas id="chartOcorrenciasResp"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Por tipo de ocorrência</h3><div class="sub">Motivos mais recorrentes</div></div></div><div class="chart-wrap tall"><canvas id="chartOcorrenciasTipo"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Por responsável × Tipo de ocorrência</h3><div class="sub">Selecione um responsável e, opcionalmente, um mês para ver o detalhamento por tipo</div></div><span class="card-tag">CRUZAMENTO</span></div>
+      <div class="colab-filter-row">
+        <label>Responsável
+          <select id="ocorrRespFilter"></select>
+        </label>
+        <label>Mês
+          <select id="ocorrMesFilter"></select>
+        </label>
+      </div>
+      <div class="chart-wrap" id="ocorrRespTipoWrap" style="height:360px"><canvas id="chartOcorrenciasRespTipo"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Detalhamento responsável × tipo</h3><div class="sub">Contagem exata por combinação</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableOcorrenciasRespTipo"></table></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Detalhamento por responsável</h3><div class="sub">Contagem e participação no total</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableOcorrenciasResp"></table></div>
+    </div>
+    <div class="insight" id="insight-ocorrencias"></div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -570,11 +585,16 @@ body.locked > *:not(#loginScreen){display:none !important}
   const SHEET_NAME = 'MONTAGENS GRAF';
   const SHEET_NAME_MO = 'ACOMP M.O.3º';
   const SHEET_NAME_COLAB = 'ABS VERTICAL';
+  // Fonte externa (planilha separada) usada pela aba 18 · Ocorrências.
+  const SHEET_ID_OCORRENCIAS = '1D7C9_0iKZypa8F7nh_iOtxaTZArMchdj';
+  const SHEET_NAME_OCORRENCIAS = 'Ocorrências';
   // A busca sem "range" explícito às vezes traz um intervalo usado menor do
   // que o real (visto na aba "ABS VERTICAL": sem range, o gviz para na
   // coluna AA e nunca devolve os blocos de totais por equipe em AB:BL) —
   // por isso essa aba pede um range largo explicitamente.
-  const csvUrl = (sheetName, range) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}${range?('&range='+encodeURIComponent(range)):''}&_=${Date.now()}`;
+  // sheetId é opcional — por padrão usa a planilha principal (SHEET_ID), mas
+  // a aba de Ocorrências busca numa planilha externa (SHEET_ID_OCORRENCIAS).
+  const csvUrl = (sheetName, range, sheetId) => `https://docs.google.com/spreadsheets/d/${sheetId||SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}${range?('&range='+encodeURIComponent(range)):''}&_=${Date.now()}`;
 
   // ============ STATUS ============
   const statusEl = document.getElementById('status');
@@ -586,17 +606,17 @@ body.locked > *:not(#loginScreen){display:none !important}
   // file:// (double-click). JSONP via <script> tag is exempt from that
   // restriction (same reason the Chart.js CDN script above always works),
   // so it's used as a fallback that works no matter how the file is opened.
-  async function loadRows(sheetName, range){
-    try{ return await loadViaFetch(sheetName, range); }
-    catch(err){ console.warn('Fetch direto falhou, tentando via JSONP…', err.message); return await loadViaJSONP(sheetName, range); }
+  async function loadRows(sheetName, range, sheetId){
+    try{ return await loadViaFetch(sheetName, range, sheetId); }
+    catch(err){ console.warn('Fetch direto falhou, tentando via JSONP…', err.message); return await loadViaJSONP(sheetName, range, sheetId); }
   }
-  async function loadViaFetch(sheetName, range){
-    const res = await fetch(csvUrl(sheetName, range), { cache: 'no-store' });
+  async function loadViaFetch(sheetName, range, sheetId){
+    const res = await fetch(csvUrl(sheetName, range, sheetId), { cache: 'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
     return Papa.parse(text.trim(), { skipEmptyLines: false }).data;
   }
-  function loadViaJSONP(sheetName, range){
+  function loadViaJSONP(sheetName, range, sheetId){
     return new Promise((resolve, reject) => {
       const cbName = 'gvizCB_' + Math.random().toString(36).slice(2);
       const timeout = setTimeout(() => { cleanup(); reject(new Error('Tempo esgotado ao carregar os dados da planilha.')); }, 15000);
@@ -634,7 +654,7 @@ body.locked > *:not(#loginScreen){display:none !important}
         }catch(err){ reject(err); }
       };
       const script = document.createElement('script');
-      script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}${range?('&range='+encodeURIComponent(range)):''}&tqx=out:json;responseHandler:${cbName}&_=${Date.now()}`;
+      script.src = `https://docs.google.com/spreadsheets/d/${sheetId||SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}${range?('&range='+encodeURIComponent(range)):''}&tqx=out:json;responseHandler:${cbName}&_=${Date.now()}`;
       script.onerror = () => { cleanup(); reject(new Error('Falha ao carregar o script da planilha.')); };
       document.body.appendChild(script);
     });
@@ -716,6 +736,53 @@ body.locked > *:not(#loginScreen){display:none !important}
       entregas_coletas: nums('entregas_coletas'),
     };
     return { D, meses: genMeses(lastCol) };
+  }
+
+  // ============ OCORRÊNCIAS (planilha externa "Ocorrencias.xlsx") ============
+  // Colunas: A=DATA, B=PLACA, C=RESPONSÁVEL, D=TIPO DE OCORRÊNCIA. Calculamos
+  // os índices (total, por responsável, por tipo, por mês) direto das linhas
+  // brutas em vez de ler a tabela dinâmica já pronta na planilha de origem —
+  // assim o painel resiste a mudanças de layout/fórmulas na planilha externa.
+  function buildOcorrencias(rows){
+    let headerIdx = -1;
+    for(let i=0;i<Math.min(rows.length,6);i++){
+      if(((rows[i]&&rows[i][0])||'').trim().toUpperCase()==='DATA'){ headerIdx=i; break; }
+    }
+    if(headerIdx===-1) throw new Error('Não encontrei o cabeçalho "DATA" na aba "'+SHEET_NAME_OCORRENCIAS+'".');
+
+    const DATE_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/;
+    const byResp = new Map(), byTipo = new Map(), byMonth = new Map();
+    const cross = new Map(); // resp -> Map(tipo -> count), para o cruzamento responsável × tipo (todos os meses)
+    const records = []; // {resp, tipo, mes} de cada ocorrência, para filtrar o cruzamento por mês sob demanda
+    let total = 0;
+    for(let i=headerIdx+1;i<rows.length;i++){
+      const r = rows[i]||[];
+      const data = (r[0]||'').trim();
+      const m = data.match(DATE_RE);
+      if(!m) continue;
+      total++;
+      const resp = (r[2]||'').trim() || 'Sem responsável';
+      const tipo = (r[3]||'').trim() || 'Não especificado';
+      byResp.set(resp, (byResp.get(resp)||0) + 1);
+      byTipo.set(tipo, (byTipo.get(tipo)||0) + 1);
+      if(!cross.has(resp)) cross.set(resp, new Map());
+      const tMap = cross.get(resp);
+      tMap.set(tipo, (tMap.get(tipo)||0) + 1);
+      let year = parseInt(m[3],10); if(m[3].length===2) year += 2000;
+      const month = parseInt(m[2],10);
+      const mk = year + '-' + String(month).padStart(2,'0');
+      byMonth.set(mk, (byMonth.get(mk)||0) + 1);
+      const mesLabel = MES_ABBR[month-1]+'/'+String(year).slice(2);
+      records.push({ resp, tipo, mes: mesLabel });
+    }
+    if(total===0) throw new Error('Não encontrei nenhuma linha com data válida na aba "'+SHEET_NAME_OCORRENCIAS+'".');
+
+    const monthKeys = [...byMonth.keys()].sort();
+    const meses = monthKeys.map(k => { const [y,mm]=k.split('-'); return MES_ABBR[parseInt(mm,10)-1]+'/'+String(y).slice(2); });
+    const monthCounts = monthKeys.map(k => byMonth.get(k));
+    const respEntries = [...byResp.entries()].sort((a,b)=>b[1]-a[1]);
+    const tipoEntries = [...byTipo.entries()].sort((a,b)=>b[1]-a[1]);
+    return { total, respEntries, tipoEntries, meses, monthCounts, cross, records };
   }
 
   // ============ MÃO DE OBRA (aba "ACOMP M.O.3º") ============
@@ -852,70 +919,40 @@ body.locked > *:not(#loginScreen){display:none !important}
   // pegar os blocos de equipe além da coluna AA) fazem o gviz devolver
   // "DD/MM/AAAA" em vez de só "DD/MM" como no export CSV padrão.
   const DATE_DDMM_RE = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/;
-  function isCodeLikeText(s){
-    const t = (s||'').trim().toUpperCase();
-    return t==='' || CODE_LIST.includes(t) || DATE_DDMM_RE.test(t);
-  }
-  function cleanScore(list){
-    if(!list.length) return -1;
-    const bad = list.filter(e => isCodeLikeText(e.role) || isCodeLikeText(e.name)).length;
-    return list.length - bad;
-  }
-  function buildFromRoleNameRows(rows, roleRowIdx, nameRowIdx, dataStart){
-    const roleRow = rows[roleRowIdx] || [], nameRow = rows[nameRowIdx] || [];
-    const width = Math.max(roleRow.length, nameRow.length);
-    const out = [];
-    for(let c=2;c<width;c++){
-      const role = (roleRow[c]||'').trim(), name = (nameRow[c]||'').trim();
-      if(!role && !name) continue;
-      out.push({ col:c, role: role||'—', name: name||('Coluna '+c) });
-    }
-    return { employees: out, dataStart, score: cleanScore(out) };
-  }
-  // O cabeçalho da aba pode chegar de formas diferentes dependendo de como o
-  // Google Sheets exporta linhas congeladas/mescladas. A forma mais confiável
-  // de localizá-lo é ancorar na própria célula com o texto "DATA" (coluna B
-  // da linha do nome, conforme confirmado pelo usuário) — a linha logo acima
-  // é a de FUNÇÃO, a própria linha da âncora é a de NOME, e os dados começam
-  // na linha seguinte. Se essa âncora não existir, caímos para os dois modos
-  // antigos (combinado numa linha só, ou função/nome nas duas primeiras
-  // linhas) e, entre os candidatos válidos, ficamos com o que produzir
-  // nomes/funções "de verdade" — isto é, que não são iguais a nenhuma sigla
-  // de dado (P, NC, FE, ...) nem parecem uma data, o que indicaria que
-  // pegamos uma linha de dados por engano.
+  // Intervalos fixos de colunas na aba "ABS VERTICAL", confirmados pelo
+  // usuário: LÍDER = C:F, CONFERENTE = G:S, AJUDANTE = T:Z (índices de coluna
+  // 0-based: C=2 ... Z=25). Cada intervalo reserva colunas para futuras
+  // contratações — quando a vaga ainda não tem nome preenchido, a coluna é
+  // ignorada em vez de virar um colaborador fantasma (ex.: "Coluna 17").
+  const ROLE_COLUMN_RANGES = [
+    { role: 'LÍDER', startCol: 2, endCol: 5 },       // C:F
+    { role: 'CONFERENTE', startCol: 6, endCol: 18 }, // G:S
+    { role: 'AJUDANTE', startCol: 19, endCol: 25 },  // T:Z
+  ];
+  // O cabeçalho é ancorado na célula com o texto "DATA" (coluna B da linha do
+  // nome) — os dados começam na linha seguinte. A partir dessa linha de nomes,
+  // lemos cada intervalo de coluna acima e atribuímos o papel fixo (LÍDER/
+  // CONFERENTE/AJUDANTE) correspondente, em vez de tentar adivinhar pela
+  // linha de FUNÇÃO acima (frágil a mudanças de formatação/mesclagem).
   function parseColabHeader(rows){
-    const candidates = [];
-
     let anchorRow = -1;
     for(let r=0;r<Math.min(rows.length,10);r++){
       const cell = ((rows[r]||[])[1]||'').trim().toUpperCase();
       if(cell === 'DATA'){ anchorRow = r; break; }
     }
-    if(anchorRow >= 1){
-      candidates.push(buildFromRoleNameRows(rows, anchorRow-1, anchorRow, anchorRow+1));
-    }
+    if(anchorRow < 0) return null;
 
-    const header = rows[0] || [];
-    const combined = [];
-    for(let c=2;c<header.length;c++){
-      const raw = (header[c]||'').trim();
-      if(!raw) continue;
-      const sp = raw.indexOf(' ');
-      if(sp===-1) continue;
-      combined.push({ col:c, role: raw.slice(0,sp).trim(), name: raw.slice(sp+1).trim() });
-    }
-    if(combined.length && DATE_DDMM_RE.test(((rows[1]||[])[1]||'').trim())){
-      candidates.push({ employees: combined, dataStart: 1, score: cleanScore(combined) });
-    }
-
-    if(DATE_DDMM_RE.test(((rows[2]||[])[1]||'').trim())){
-      candidates.push(buildFromRoleNameRows(rows, 0, 1, 2));
-    }
-
-    const valid = candidates.filter(c => c.employees.length && c.score > 0);
-    if(!valid.length) return null;
-    valid.sort((a,b) => b.score - a.score);
-    return valid[0];
+    const nameRow = rows[anchorRow] || [];
+    const employees = [];
+    ROLE_COLUMN_RANGES.forEach(({role, startCol, endCol}) => {
+      for(let c=startCol; c<=endCol; c++){
+        const name = (nameRow[c]||'').trim();
+        if(!name) continue;
+        employees.push({ col:c, role, name });
+      }
+    });
+    if(!employees.length) return null;
+    return { employees, dataStart: anchorRow+1 };
   }
   // A planilha também mantém, à direita do bloco de colaboradores (a partir da
   // coluna AA), três blocos já agregados por equipe — LÍDER, CONFERENTE e
@@ -944,9 +981,9 @@ body.locked > *:not(#loginScreen){display:none !important}
   function buildColaboradores(rows){
     if(!rows.length) throw new Error('Aba "'+SHEET_NAME_COLAB+'" vazia.');
     const parsed = parseColabHeader(rows);
-    if(!parsed || !parsed.employees.length || parsed.score <= 0){
+    if(!parsed || !parsed.employees.length){
       const dump = [0,1,2].map(r => JSON.stringify((rows[r]||[]).slice(0,4))).join(' | ');
-      throw new Error('Não encontrei colaboradores no cabeçalho da aba "'+SHEET_NAME_COLAB+'". Confira se FUNÇÃO/NOME estão nas linhas 1-2 e se a coluna B tem datas "DD/MM" logo abaixo. [debug linhas 1-3: '+dump+']');
+      throw new Error('Não encontrei colaboradores na aba "'+SHEET_NAME_COLAB+'". Confira se a coluna B tem o texto "DATA" na linha de nomes e se LÍDER (C:F), CONFERENTE (G:S) e AJUDANTE (T:Z) têm nomes preenchidos. [debug linhas 1-3: '+dump+']');
     }
     const { employees, dataStart } = parsed;
 
@@ -1105,21 +1142,22 @@ body.locked > *:not(#loginScreen){display:none !important}
     {id:'overview', label:'Visão Geral', num:'00'},
     {id:'jem', label:'JEM', num:'01'},
     {id:'bipados', label:'Bipados x Erros', num:'02'},
-    {id:'ajudantes', label:'Ajudantes', num:'03'},
-    {id:'conferentes', label:'Conferentes', num:'04'},
-    {id:'atraso_expresso', label:'Atraso Expresso', num:'05'},
-    {id:'saida_a', label:'Saída A+', num:'06'},
-    {id:'manifestos', label:'Manifestos', num:'07'},
-    {id:'personalizados', label:'Personalizados', num:'08'},
-    {id:'cubagem', label:'Cubagem', num:'09'},
-    {id:'mo_overview', label:'Mão de Obra', num:'10'},
-    {id:'mo_rota_exp', label:'Rota x Expedição', num:'11'},
-    {id:'mo_operacao', label:'Por Operação', num:'12'},
-    {id:'mo_fornecedor', label:'Por Fornecedor', num:'13'},
-    {id:'mo_resumo', label:'Resumo Anual MO', num:'14'},
-    {id:'colab_overview', label:'Colaboradores', num:'15'},
-    {id:'colab_mensal', label:'Estatísticas Mensais', num:'16'},
+    {id:'colab_mensal', label:'Estatísticas Mensais', num:'03'},
+    {id:'atraso_expresso', label:'Atraso Expresso', num:'04'},
+    {id:'saida_a', label:'Saída A+', num:'05'},
+    {id:'manifestos', label:'Manifestos', num:'06'},
+    {id:'personalizados', label:'Personalizados', num:'07'},
+    {id:'cubagem', label:'Cubagem', num:'08'},
+    {id:'mo_overview', label:'Mão de Obra', num:'09'},
+    {id:'mo_rota_exp', label:'Rota x Expedição', num:'10'},
+    {id:'mo_operacao', label:'Por Operação', num:'11'},
+    {id:'mo_fornecedor', label:'Por Fornecedor', num:'12'},
+    {id:'mo_resumo', label:'Resumo Anual MO', num:'13'},
+    {id:'colab_overview', label:'Colaboradores', num:'14'},
+    {id:'ajudantes', label:'Ajudantes', num:'15'},
+    {id:'conferentes', label:'Conferentes', num:'16'},
     {id:'colab_verificacao', label:'Equipe Interna', num:'17'},
+    {id:'ocorrencias', label:'Ocorrências', num:'18'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -1260,7 +1298,7 @@ body.locked > *:not(#loginScreen){display:none !important}
         // A chart built while its container was display:none can end up
         // with a zero-size canvas; force a resize now that it's visible.
         if(mode==='combinado'){
-          const comboIds = { atraso_expresso:'chartExpressoCombo', saida_a:'chartSaidaCombo', cubagem:'chartCubagemCombo' };
+          const comboIds = { cubagem:'chartCubagemCombo' };
           const cid = comboIds[page];
           if(cid && charts[cid]) requestAnimationFrame(()=>charts[cid].resize());
         }
@@ -1474,12 +1512,6 @@ body.locked > *:not(#loginScreen){display:none !important}
     grid.appendChild(kpiCard('Pior mês', horaLabel(peak.value), peak.mes, {cls:'flat',arrow:'',text:'maior atraso'}, 'red'));
     grid.appendChild(kpiCard('Dias úteis no mês', fmt(D.dias_uteis[D.dias_uteis.length-1]), mAtual, {cls:'flat',arrow:'—',text:'referência'}));
 
-    mkChart('chartExpresso', {
-      type:'bar', data:{labels:meses,datasets:[{label:'Atraso expresso (h)',data:D.tempo_atraso_expresso_h,backgroundColor:'#4d9fff',borderRadius:6,
-        datalabels:{...dl('#4d9fff','end','end'),formatter:v=>(v===0||v==null)?'':horaLabel(v)}}]},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:50}},scales:baseScales,plugins:{legend:{display:false}}}
-    });
-    miniBar('chartDiasExpresso', meses, D.qtd_dias_excedidos_exp, '#a78bfa');
     comboChart('chartExpressoCombo', meses, D.tempo_atraso_expresso_h, 'Atraso expresso (h)', '#4d9fff',
       D.qtd_dias_excedidos_exp, 'Dias excedidos', '#a78bfa', v=>(v===0||v==null)?'':horaLabel(v));
     const d = delta(t.curr, t.prev, false);
@@ -1496,12 +1528,6 @@ body.locked > *:not(#loginScreen){display:none !important}
     grid.appendChild(kpiCard('Pior mês', horaLabel(peak.value), peak.mes, {cls:'flat',arrow:'',text:'maior atraso'}, 'red'));
     grid.appendChild(kpiCard('Dias úteis no mês', fmt(D.dias_uteis[D.dias_uteis.length-1]), mAtual, {cls:'flat',arrow:'—',text:'referência'}));
 
-    mkChart('chartSaida', {
-      type:'bar', data:{labels:meses,datasets:[{label:'Tempo saída A+ (h)',data:D.tempo_saida_h,backgroundColor:'#ff5b3a',borderRadius:6,
-        datalabels:{...dl('#ff5b3a','end','end'),formatter:v=>(v===0||v==null)?'':horaLabel(v)}}]},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:50}},scales:baseScales,plugins:{legend:{display:false}}}
-    });
-    miniBar('chartDiasSaida', meses, D.qtd_dias_excedidos_saida, '#ffd23f');
     comboChart('chartSaidaCombo', meses, D.tempo_saida_h, 'Saída A+ (h)', '#ff5b3a',
       D.qtd_dias_excedidos_saida, 'Dias excedidos', '#ffd23f', v=>(v===0||v==null)?'':horaLabel(v));
     const d = delta(t.curr, t.prev, false);
@@ -1572,6 +1598,110 @@ body.locked > *:not(#loginScreen){display:none !important}
       D.nfs_cubadas, 'NFs cubadas', '#4d9fff');
     const cls = periodChange!=null && periodChange<0 ? 'warn' : '';
     setInsight('cubagem', `<strong>Tendência:</strong> o volume cubado e a quantidade de NFs variaram ${periodChange!=null?(periodChange>=0?'+':'')+periodChange.toLocaleString('pt-BR',{maximumFractionDigits:0})+'%':'—'} entre ${meses[0]} e ${mAtual}.`, cls);
+  }
+
+  function renderOcorrencias(data){
+    const grid = document.getElementById('kpi-ocorrencias'); grid.innerHTML='';
+    const topResp = data.respEntries[0] || ['—',0];
+    const topTipo = data.tipoEntries[0] || ['—',0];
+    let peakIdx=-1, peakVal=-1;
+    data.monthCounts.forEach((v,i)=>{ if(v>peakVal){ peakVal=v; peakIdx=i; } });
+    const peakMonth = peakIdx>=0 ? data.meses[peakIdx] : '—';
+    const pct = (v) => data.total ? Math.round(v/data.total*100) : 0;
+
+    grid.appendChild(kpiCard('Total de ocorrências', fmt(data.total), 'no período', {cls:'flat',arrow:'—',text:'acumulado'}, 'accent'));
+    grid.appendChild(kpiCard('Responsável mais frequente', topResp[0], `${fmt(topResp[1])} ocorrências (${pct(topResp[1])}%)`, {cls:'flat',arrow:'',text:'—'}, 'red'));
+    grid.appendChild(kpiCard('Tipo mais frequente', topTipo[0], `${fmt(topTipo[1])} ocorrências (${pct(topTipo[1])}%)`, {cls:'flat',arrow:'',text:'—'}, 'yellow'));
+    grid.appendChild(kpiCard('Mês com mais ocorrências', peakMonth, `${fmt(peakVal)} registros`, {cls:'flat',arrow:'',text:'pico'}, 'purple'));
+
+    mkChart('chartOcorrenciasMes', {
+      type:'bar', data:{labels:data.meses,datasets:[{label:'Ocorrências',data:data.monthCounts,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+
+    const topN = 8;
+    function topPlusOutros(entries){
+      const top = entries.slice(0,topN);
+      const outros = entries.slice(topN).reduce((s,[,v])=>s+v,0);
+      const labels = top.map(([k])=>k).concat(outros>0?['Outros']:[]);
+      const vals = top.map(([,v])=>v).concat(outros>0?[outros]:[]);
+      return { labels, vals };
+    }
+    const respChart = topPlusOutros(data.respEntries);
+    mkChart('chartOcorrenciasResp', {
+      type:'bar', data:{labels:respChart.labels,datasets:[{label:'Ocorrências',data:respChart.vals,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    const tipoChart = topPlusOutros(data.tipoEntries);
+    mkChart('chartOcorrenciasTipo', {
+      type:'bar', data:{labels:tipoChart.labels,datasets:[{label:'Ocorrências',data:tipoChart.vals,backgroundColor:'#a78bfa',borderRadius:6,datalabels:dl('#a78bfa','end','end')}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+
+    // ---- Cruzamento: um responsável (e, opcionalmente, um mês) por vez ----
+    // Em vez de empilhar todos os responsáveis num único gráfico (o que deixa
+    // cada tipo minúsculo), o usuário escolhe um responsável — e pode também
+    // restringir a um mês — e o gráfico mostra só os tipos daquele filtro,
+    // com barras maiores e valores exatos. Calculado direto de "records" (uma
+    // linha por ocorrência) em vez do "cross" agregado, que não distingue mês.
+    const respAll = data.respEntries.map(([k])=>k);
+    const crossTipoN = 7;
+    const crossTipoTop = data.tipoEntries.slice(0,crossTipoN).map(([k])=>k);
+    const hasOutrosTipo = data.tipoEntries.length > crossTipoN;
+    const respSelect = document.getElementById('ocorrRespFilter');
+    const mesSelect = document.getElementById('ocorrMesFilter');
+    function renderRespTipoChart(){
+      const resp = respSelect.value;
+      const mes = mesSelect.value;
+      const tally = new Map();
+      data.records.forEach(rec => {
+        if(rec.resp !== resp) return;
+        if(mes && rec.mes !== mes) return;
+        tally.set(rec.tipo, (tally.get(rec.tipo)||0) + 1);
+      });
+      const entries = [...tally.entries()].sort((a,b)=>b[1]-a[1]);
+      const labels = entries.map(([k])=>k);
+      const vals = entries.map(([,v])=>v);
+      const h = Math.max(360, labels.length*38+80);
+      document.getElementById('ocorrRespTipoWrap').style.height = h+'px';
+      mkChart('chartOcorrenciasRespTipo', {
+        type:'bar',
+        data:{labels, datasets:[{label:'Ocorrências',data:vals,backgroundColor:'#ff5b3a',borderRadius:8,datalabels:dl('#ff5b3a','end','end')}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:56}},scales:baseScales,plugins:{legend:{display:false}}}
+      });
+    }
+    respSelect.innerHTML = respAll.map(r=>`<option value="${r}">${r} (${(data.cross.get(r)?[...data.cross.get(r).values()].reduce((a,b)=>a+b,0):0)})</option>`).join('');
+    mesSelect.innerHTML = '<option value="">Todos os meses</option>' + data.meses.map(m=>`<option value="${m}">${m}</option>`).join('');
+    respSelect.value = respAll[0];
+    mesSelect.value = '';
+    renderRespTipoChart();
+    respSelect.onchange = renderRespTipoChart;
+    mesSelect.onchange = renderRespTipoChart;
+
+    let htmlCross = '<thead><tr><th>Responsável</th>'+crossTipoTop.map(t=>`<th>${t}</th>`).join('')+(hasOutrosTipo?'<th>Outros</th>':'')+'<th>Total</th></tr></thead><tbody>';
+    respAll.forEach(resp => {
+      const tMap = data.cross.get(resp) || new Map();
+      const totalResp = tMap.size ? [...tMap.values()].reduce((a,b)=>a+b,0) : 0;
+      htmlCross += `<tr><td>${resp}</td>`;
+      crossTipoTop.forEach(t => { htmlCross += `<td>${tMap.get(t)||0}</td>`; });
+      if(hasOutrosTipo){
+        let outros = 0;
+        tMap.forEach((v,t) => { if(!crossTipoTop.includes(t)) outros += v; });
+        htmlCross += `<td>${outros}</td>`;
+      }
+      htmlCross += `<td>${totalResp}</td></tr>`;
+    });
+    htmlCross += '</tbody>';
+    document.getElementById('tableOcorrenciasRespTipo').innerHTML = htmlCross;
+
+    let html = '<thead><tr><th>Responsável</th><th>Ocorrências</th><th>% do total</th></tr></thead><tbody>';
+    data.respEntries.forEach(([k,v])=>{
+      html += `<tr><td>${k}</td><td>${fmt(v)}</td><td>${pct(v)}%</td></tr>`;
+    });
+    html += '</tbody>';
+    document.getElementById('tableOcorrenciasResp').innerHTML = html;
+
+    setInsight('ocorrencias', `<strong>Leitura do período:</strong> ${fmt(data.total)} ocorrências registradas. "${topResp[0]}" responde por ${fmt(topResp[1])} casos (${pct(topResp[1])}%), o tipo mais recorrente foi "${topTipo[0]}" (${fmt(topTipo[1])} casos) e o mês de maior volume foi ${peakMonth} (${fmt(peakVal)}).`);
   }
 
   // ============ MÃO DE OBRA · RENDER ============
@@ -2005,10 +2135,11 @@ body.locked > *:not(#loginScreen){display:none !important}
   // mesmo intervalo.
   async function init(){
     setStatus('Carregando dados da planilha…', false);
-    const [jemResult, moResult, colabResult] = await Promise.allSettled([
+    const [jemResult, moResult, colabResult, ocorrResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
       loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
-      loadRows(SHEET_NAME_COLAB, 'A1:BZ5000').then(buildColaboradores)
+      loadRows(SHEET_NAME_COLAB, 'A1:BZ5000').then(buildColaboradores),
+      loadRows(SHEET_NAME_OCORRENCIAS, 'A1:D5000', SHEET_ID_OCORRENCIAS).then(buildOcorrencias)
     ]);
     const errors = [];
     if(jemResult.status==='fulfilled'){
@@ -2033,6 +2164,12 @@ body.locked > *:not(#loginScreen){display:none !important}
     }else{
       console.error(colabResult.reason);
       errors.push('aba "'+SHEET_NAME_COLAB+'": '+colabResult.reason.message);
+    }
+    if(ocorrResult.status==='fulfilled'){
+      renderOcorrencias(ocorrResult.value);
+    }else{
+      console.error(ocorrResult.reason);
+      errors.push('aba "'+SHEET_NAME_OCORRENCIAS+'": '+ocorrResult.reason.message);
     }
     if(!errors.length){
       clearStatus();
