@@ -572,6 +572,25 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-ocorrencias"></div>
   </section>
+
+  <!-- 19 · OCORRÊNCIAS EXPEDIÇÃO -->
+  <section class="page" data-page="ocorr_exp">
+    <div class="page-head">
+      <div class="eyebrow">19 · Expedição</div>
+      <h2>Ocorrências da Expedição</h2>
+      <p>Detalhamento das ocorrências com responsável "Expedição" — mesma base que alimenta os erros de embarque do painel 02.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-ocorr_exp"></div>
+    <div class="row cols-2">
+      <div class="card"><div class="card-head"><div><h3>Expedição por mês</h3><div class="sub">Ocorrências de responsável Expedição</div></div><span class="card-tag">EMBARQUE</span></div><div class="chart-wrap tall"><canvas id="chartOcorrExpMes"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Por tipo de ocorrência</h3><div class="sub">Motivos mais recorrentes na Expedição</div></div></div><div class="chart-wrap tall"><canvas id="chartOcorrExpTipo"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Ocorrências detalhadas</h3><div class="sub">Cada ocorrência de Expedição no período</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableOcorrExp"></table></div>
+    </div>
+    <div class="insight" id="insight-ocorr_exp"></div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -773,16 +792,31 @@ body.locked > *:not(#loginScreen){display:none !important}
       const mk = year + '-' + String(month).padStart(2,'0');
       byMonth.set(mk, (byMonth.get(mk)||0) + 1);
       const mesLabel = MES_ABBR[month-1]+'/'+String(year).slice(2);
-      records.push({ resp, tipo, mes: mesLabel });
+      const placa = (r[1]||'').trim();
+      const ref = (r[4]||'').trim();
+      const day = parseInt(m[1],10);
+      records.push({ resp, tipo, mes: mesLabel, data, placa, ref, y: year, mo: month, d: day });
     }
     if(total===0) throw new Error('Não encontrei nenhuma linha com data válida na aba "'+SHEET_NAME_OCORRENCIAS+'".');
+
+    // Recorte de EXPEDIÇÃO: usado pelo painel 02 (contagem de erros de
+    // embarque = ocorrências de responsável "Expedição") e pela aba 19.
+    const expedRecords = records.filter(r => r.resp === 'Expedição')
+      .sort((a,b) => (a.y-b.y) || (a.mo-b.mo) || (a.d-b.d));
+    const expedByMonth = {};
+    expedRecords.forEach(r => { expedByMonth[r.mes] = (expedByMonth[r.mes]||0) + 1; });
+    const expedTipo = new Map();
+    expedRecords.forEach(r => { expedTipo.set(r.tipo, (expedTipo.get(r.tipo)||0) + 1); });
+    const expedTipoEntries = [...expedTipo.entries()].sort((a,b)=>b[1]-a[1]);
+    const expedTotal = expedRecords.length;
 
     const monthKeys = [...byMonth.keys()].sort();
     const meses = monthKeys.map(k => { const [y,mm]=k.split('-'); return MES_ABBR[parseInt(mm,10)-1]+'/'+String(y).slice(2); });
     const monthCounts = monthKeys.map(k => byMonth.get(k));
     const respEntries = [...byResp.entries()].sort((a,b)=>b[1]-a[1]);
     const tipoEntries = [...byTipo.entries()].sort((a,b)=>b[1]-a[1]);
-    return { total, respEntries, tipoEntries, meses, monthCounts, cross, records };
+    return { total, respEntries, tipoEntries, meses, monthCounts, cross, records,
+             expedRecords, expedByMonth, expedTipoEntries, expedTotal };
   }
 
   // ============ MÃO DE OBRA (aba "ACOMP M.O.3º") ============
@@ -1158,6 +1192,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     {id:'conferentes', label:'Conferentes', num:'16'},
     {id:'colab_verificacao', label:'Equipe Interna', num:'17'},
     {id:'ocorrencias', label:'Ocorrências', num:'18'},
+    {id:'ocorr_exp', label:'Ocorrências Expedição', num:'19'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -1442,19 +1477,23 @@ body.locked > *:not(#loginScreen){display:none !important}
 
   function renderBipados(D, meses, mAtual, mAnterior){
     const grid = document.getElementById('kpi-bipados'); grid.innerHTML='';
-    const bip=last2(D.veiculos_bipados), err=last2(D.erros_embarques);
+    // Erros de embarque = ocorrências de responsável "Expedição" (aba 18),
+    // alinhadas aos meses exibidos. Cai no valor antigo da MONTAGENS GRAF só
+    // se a base de Ocorrências não tiver carregado.
+    const errosExp = OCORR ? meses.map(m => OCORR.expedByMonth[m] || 0) : D.erros_embarques;
+    const bip=last2(D.veiculos_bipados), err=last2(errosExp);
     const taxaCurr = (bip.curr!=null&&bip.curr)?(err.curr/bip.curr)*100:null;
     const taxaPrev = (bip.prev!=null&&bip.prev)?(err.prev/bip.prev)*100:null;
     grid.appendChild(kpiCard(`Veículos bipados ${mAtual}`, fmt(bip.curr), `vs. ${mAnterior}: ${fmt(bip.prev)}`, delta(bip.curr,bip.prev,true), 'green'));
-    grid.appendChild(kpiCard('Erros de embarque', fmt(err.curr), `vs. ${mAnterior}: ${fmt(err.prev)}`, delta(err.curr,err.prev,false), 'red'));
+    grid.appendChild(kpiCard('Erros de embarque (Expedição)', fmt(err.curr), `vs. ${mAnterior}: ${fmt(err.prev)}`, delta(err.curr,err.prev,false), 'red'));
     grid.appendChild(kpiCard('Taxa de erro', taxaCurr!=null?taxaCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—', 'erros / bipados', delta(taxaCurr,taxaPrev,false), 'purple'));
-    const peak = peakInfo(D.erros_embarques, meses);
+    const peak = peakInfo(errosExp, meses);
     grid.appendChild(kpiCard('Pico de erros', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'atenção'}, 'yellow'));
 
     mkChart('chartBipados', {
       type:'bar', data:{labels:meses,datasets:[
         {label:'Veículos bipados',data:D.veiculos_bipados,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')},
-        {label:'Erros embarques',data:D.erros_embarques,backgroundColor:'#ff4d6d',borderRadius:6,datalabels:dl('#ff4d6d','end','end')}
+        {label:'Erros de embarque (Expedição)',data:errosExp,backgroundColor:'#ff4d6d',borderRadius:6,datalabels:dl('#ff4d6d','end','end')}
       ]},
       options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
     });
@@ -1702,6 +1741,45 @@ body.locked > *:not(#loginScreen){display:none !important}
     document.getElementById('tableOcorrenciasResp').innerHTML = html;
 
     setInsight('ocorrencias', `<strong>Leitura do período:</strong> ${fmt(data.total)} ocorrências registradas. "${topResp[0]}" responde por ${fmt(topResp[1])} casos (${pct(topResp[1])}%), o tipo mais recorrente foi "${topTipo[0]}" (${fmt(topTipo[1])} casos) e o mês de maior volume foi ${peakMonth} (${fmt(peakVal)}).`);
+  }
+
+  // ============ OCORRÊNCIAS EXPEDIÇÃO (aba 19) · RENDER ============
+  function renderOcorrExp(o){
+    const grid = document.getElementById('kpi-ocorr_exp'); if(!grid) return;
+    grid.innerHTML='';
+    if(!o || !o.expedRecords) return;
+    const meses = o.meses;
+    const vals = meses.map(m => o.expedByMonth[m] || 0);
+    let peakVal=-1, peakMes='—';
+    meses.forEach((m,i)=>{ if(vals[i]>peakVal){ peakVal=vals[i]; peakMes=m; } });
+    if(peakVal<0) peakVal=0;
+    const topTipo = o.expedTipoEntries[0] || ['—',0];
+    const ult = vals.length ? vals[vals.length-1] : 0;
+    grid.appendChild(kpiCard('Total Expedição', fmt(o.expedTotal), 'ocorrências no período', {cls:'flat',arrow:'—',text:'acumulado'}, 'red'));
+    grid.appendChild(kpiCard('Mês de pico', fmt(peakVal), peakMes, {cls:'flat',arrow:'',text:'atenção'}, 'yellow'));
+    grid.appendChild(kpiCard('Tipo mais recorrente', topTipo[0], `${fmt(topTipo[1])} ocorrências`, {cls:'flat',arrow:'',text:'—'}, 'purple'));
+    grid.appendChild(kpiCard(`Último mês (${meses[meses.length-1]||'—'})`, fmt(ult), 'ocorrências Expedição', {cls:'flat',arrow:'—',text:'mês atual'}, 'accent'));
+
+    mkChart('chartOcorrExpMes', {
+      type:'bar', data:{labels:meses,datasets:[{label:'Ocorrências Expedição',data:vals,backgroundColor:'#ff4d6d',borderRadius:6,datalabels:dl('#ff4d6d','end','end')}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    mkChart('chartOcorrExpTipo', {
+      type:'bar', data:{labels:o.expedTipoEntries.map(e=>e[0]),datasets:[{label:'Ocorrências',data:o.expedTipoEntries.map(e=>e[1]),backgroundColor:'#a78bfa',borderRadius:6,datalabels:dl('#a78bfa','end','end')}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+
+    let html = '<thead><tr><th>Data</th><th>Placa</th><th>Tipo de ocorrência</th><th>Referência</th><th>Mês</th></tr></thead><tbody>';
+    const rowsDesc = o.expedRecords.slice().reverse();
+    if(!rowsDesc.length){
+      html += '<tr><td colspan="5">Nenhuma ocorrência de Expedição no período.</td></tr>';
+    }else{
+      rowsDesc.forEach(r=>{ html += `<tr><td>${r.data||'—'}</td><td>${r.placa||'—'}</td><td>${r.tipo||'—'}</td><td>${r.ref||'—'}</td><td>${r.mes}</td></tr>`; });
+    }
+    html += '</tbody>';
+    document.getElementById('tableOcorrExp').innerHTML = html;
+
+    setInsight('ocorr_exp', `<strong>Expedição:</strong> ${fmt(o.expedTotal)} ocorrências no período. Mês de maior volume: ${peakMes} (${fmt(peakVal)}). Tipo mais recorrente: "${topTipo[0]}" (${fmt(topTipo[1])}).`);
   }
 
   // ============ MÃO DE OBRA · RENDER ============
@@ -2048,6 +2126,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   // ============ PERÍODO CONFIGURÁVEL (compartilhado por todas as abas) ============
   let fullData = null;   // { D, meses } · dados JEM sem filtro de período
   let moFullData = null; // { mo, forn } · dados de Mão de Obra sem filtro de período
+  let OCORR = null;      // dados de Ocorrências (inclui recorte de Expedição p/ painel 02 e aba 19)
   const MES_ABBR = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
   function monthKey(label){
     if(!label) return null;
@@ -2139,8 +2218,9 @@ body.locked > *:not(#loginScreen){display:none !important}
       loadRows(SHEET_NAME).then(buildMonthly),
       loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
       loadRows(SHEET_NAME_COLAB, 'A1:BZ5000').then(buildColaboradores),
-      loadRows(SHEET_NAME_OCORRENCIAS, 'A1:D5000', SHEET_ID_OCORRENCIAS).then(buildOcorrencias)
+      loadRows(SHEET_NAME_OCORRENCIAS, 'A1:E5000', SHEET_ID_OCORRENCIAS).then(buildOcorrencias)
     ]);
+    OCORR = (ocorrResult.status==='fulfilled') ? ocorrResult.value : null;
     const errors = [];
     if(jemResult.status==='fulfilled'){
       const { D, meses } = jemResult.value;
@@ -2167,6 +2247,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     }
     if(ocorrResult.status==='fulfilled'){
       renderOcorrencias(ocorrResult.value);
+      renderOcorrExp(ocorrResult.value);
     }else{
       console.error(ocorrResult.reason);
       errors.push('aba "'+SHEET_NAME_OCORRENCIAS+'": '+ocorrResult.reason.message);
