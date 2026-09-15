@@ -183,6 +183,14 @@ body.presentation .card > .card-head .sub{ display:none; }
 .login-btn:hover{filter:brightness(1.05)}
 .login-error{display:none;margin-top:12px;padding:9px 12px;border-radius:8px;background:#3a1f24;color:#ff9b9b;border:1px solid #5a2a2f;font-size:12px}
 .login-error.show{display:block}
+.pass-wrap{position:relative}
+.pass-wrap input{padding-right:42px !important}
+.pass-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;display:grid;place-items:center;color:var(--ink-muted);border-radius:6px;}
+.pass-toggle:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+.pass-toggle svg{width:18px;height:18px;display:block}
+.login-remember{display:flex;align-items:center;gap:8px;margin-bottom:16px;cursor:pointer;user-select:none;}
+.login-remember input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex:none;}
+.login-remember label{font-size:12px;color:var(--ink-dim);cursor:pointer;letter-spacing:0;text-transform:none;font-weight:500;margin:0;}
 body.locked > *:not(#loginScreen){display:none !important}
 </style>
 </head>
@@ -204,7 +212,17 @@ body.locked > *:not(#loginScreen){display:none !important}
       </div>
       <div class="login-field">
         <label for="loginPass">Senha</label>
-        <input type="password" id="loginPass" autocomplete="current-password" required>
+        <div class="pass-wrap">
+          <input type="password" id="loginPass" autocomplete="current-password" required>
+          <button type="button" class="pass-toggle" id="passToggle" aria-label="Mostrar senha" title="Mostrar senha">
+            <svg id="eyeShow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="eyeHide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="login-remember">
+        <input type="checkbox" id="loginRemember">
+        <label for="loginRemember">Lembrar senha neste dispositivo</label>
       </div>
       <button type="submit" class="login-btn">Entrar</button>
       <div class="login-error" id="loginError">Usuário ou senha incorretos.</div>
@@ -2269,15 +2287,43 @@ body.locked > *:not(#loginScreen){display:none !important}
   const AUTH_USER = 'Portoex';
   const AUTH_PASS = 'Portoex18';
   const AUTH_KEY = 'portoex_dash_auth';
+  const REMEMBER_KEY = 'portoex_dash_remember';
 
   const loginScreen = document.getElementById('loginScreen');
   const loginForm = document.getElementById('loginForm');
   const loginError = document.getElementById('loginError');
+  const loginUser = document.getElementById('loginUser');
+  const loginPass = document.getElementById('loginPass');
+  const loginRemember = document.getElementById('loginRemember');
+  const passToggle = document.getElementById('passToggle');
+  const eyeShow = document.getElementById('eyeShow');
+  const eyeHide = document.getElementById('eyeHide');
 
   function unlock(){
     document.body.classList.remove('locked');
     loginScreen.classList.add('hidden');
   }
+
+  /* ---- Visualizar senha ---- */
+  passToggle.addEventListener('click', function(){
+    const showing = loginPass.type === 'text';
+    loginPass.type = showing ? 'password' : 'text';
+    eyeShow.style.display = showing ? '' : 'none';
+    eyeHide.style.display = showing ? 'none' : '';
+    passToggle.setAttribute('aria-label', showing ? 'Mostrar senha' : 'Ocultar senha');
+    passToggle.setAttribute('title', showing ? 'Mostrar senha' : 'Ocultar senha');
+    loginPass.focus();
+  });
+
+  /* ---- Lembrar senha (preenche credenciais salvas) ---- */
+  try{
+    const saved = JSON.parse(localStorage.getItem(REMEMBER_KEY) || 'null');
+    if(saved && saved.user){
+      loginUser.value = saved.user;
+      loginPass.value = saved.pass || '';
+      loginRemember.checked = true;
+    }
+  }catch(err){ /* ignora storage indisponível */ }
 
   if(sessionStorage.getItem(AUTH_KEY) === '1'){
     unlock();
@@ -2285,10 +2331,17 @@ body.locked > *:not(#loginScreen){display:none !important}
 
   loginForm.addEventListener('submit', function(e){
     e.preventDefault();
-    const user = document.getElementById('loginUser').value.trim();
-    const pass = document.getElementById('loginPass').value;
+    const user = loginUser.value.trim();
+    const pass = loginPass.value;
     if(user === AUTH_USER && pass === AUTH_PASS){
       sessionStorage.setItem(AUTH_KEY, '1');
+      try{
+        if(loginRemember.checked){
+          localStorage.setItem(REMEMBER_KEY, JSON.stringify({user:user, pass:pass}));
+        }else{
+          localStorage.removeItem(REMEMBER_KEY);
+        }
+      }catch(err){ /* ignora storage indisponível */ }
       loginError.classList.remove('show');
       unlock();
     }else{
