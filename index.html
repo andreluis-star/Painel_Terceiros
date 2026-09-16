@@ -609,6 +609,42 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-ocorr_exp"></div>
   </section>
+
+  <!-- 20 · MATTEL (planilha NOTAS MATTEL 2026 × sistema ETIQUETAS-MATTEL) -->
+  <section class="page" data-page="mattel">
+    <div class="page-head">
+      <div class="eyebrow">20 · Mattel</div>
+      <h2>Expedição &amp; coleta Mattel</h2>
+      <p>Cruzamento entre a planilha <strong>NOTAS MATTEL 2026</strong> e o sistema <strong>ETIQUETAS-MATTEL</strong> (coleta/expedição e minutas), conectados pelo número da Nota Fiscal. Dados carregados ao vivo das duas fontes.</p>
+    </div>
+    <div id="mtl-status" class="insight" style="display:none"></div>
+    <div class="kpi-grid" id="kpi-mattel"></div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Notas sem processo registrado</h3><div class="sub">Notas da planilha que ainda não aparecem no ETIQUETAS-MATTEL</div></div><span class="card-tag" style="border-color:#E4002B;color:#ff6b7f">CRUZAMENTO</span></div>
+        <div id="mtl-cruz"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Coleta &amp; expedição</h3><div class="sub">Status por NF nos processos do sistema</div></div><span class="card-tag">SISTEMA</span></div>
+        <div class="chart-wrap"><canvas id="chartMtlExp"></canvas></div>
+      </div>
+    </div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Valor NF-e por situação da carga</h3><div class="sub">Distribuição financeira do acumulado 2026</div></div><span class="card-tag">FINANCEIRO</span></div>
+        <div class="chart-wrap"><canvas id="chartMtlSit"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Top destinos</h3><div class="sub">Ranking por número de notas</div></div><span class="card-tag">ROTA</span></div>
+        <div class="chart-wrap"><canvas id="chartMtlRota"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Notas fiscais pendentes de processo</h3><div class="sub">Lista de ação — notas sem coleta/expedição registrada no sistema</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableMtlPend"></table></div>
+    </div>
+    <div class="insight" id="insight-mattel"></div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -1211,6 +1247,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     {id:'colab_verificacao', label:'Equipe Interna', num:'17'},
     {id:'ocorrencias', label:'Ocorrências', num:'18'},
     {id:'ocorr_exp', label:'Ocorrências Expedição', num:'19'},
+    {id:'mattel', label:'Mattel', num:'20'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -2350,5 +2387,262 @@ body.locked > *:not(#loginScreen){display:none !important}
   });
 })();
 </script>
+
+<!-- ============ TELA MATTEL (independente) ============ -->
+<script>
+(function(){
+  "use strict";
+  var MTL_SHEET_ID = "14un2Ziy7t0Yo0n0lD4QWqkHTqWtFmbHzKQdgd1Ji0Ak";
+  var MTL_SHEET_NAME = "";            // 1ª aba (deixe o nome se a planilha tiver várias)
+  var FB_BASE = "https://cargas-mattel-default-rtdb.firebaseio.com/cargas";
+  var REFRESH_MS = 5*60*1000;
+  var loaded = false, charts = {};
+
+  function $(s,r){ return (r||document).querySelector(s); }
+  function norm(s){ return s==null?"":String(s).trim(); }
+  function up(s){ return norm(s).toUpperCase(); }
+  function clean(s){ return up(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim(); }
+  function nfKey(s){ return up(s).replace(/[^0-9A-Z]/g,""); }
+  function fmtInt(n){ return (n||0).toLocaleString("pt-BR"); }
+  function fmtBRL(n){ return (n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0}); }
+  function parseNum(v){ if(v==null) return 0; var s=String(v).trim().replace(/[R$\s.]/g,"").replace(",","."); var n=parseFloat(s); return isNaN(n)?0:n; }
+  function setStatus(msg,err){ var el=$("#mtl-status"); if(!el) return; if(!msg){el.style.display="none";return;} el.style.display="block"; el.className="insight"+(err?" warn":""); el.textContent=msg; }
+
+  // ---- CSV via gviz (mesmo endpoint estável do dash) + fallback JSONP ----
+  function csvUrl(){
+    return "https://docs.google.com/spreadsheets/d/"+MTL_SHEET_ID+"/gviz/tq?tqx=out:csv"+
+           (MTL_SHEET_NAME?("&sheet="+encodeURIComponent(MTL_SHEET_NAME)):"")+"&_="+Date.now();
+  }
+  function loadCSV(){
+    return loadViaFetch().catch(function(err){ console.warn("[Mattel] fetch falhou, tentando JSONP…",err.message); return loadViaJSONP(); });
+  }
+  function loadViaFetch(){
+    return fetch(csvUrl()).then(function(res){
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      return res.text();
+    }).then(function(text){ return Papa.parse(text.trim(),{skipEmptyLines:false}).data; });
+  }
+  function loadViaJSONP(){
+    return new Promise(function(resolve,reject){
+      var cb="mtlCB_"+Math.random().toString(36).slice(2);
+      var to=setTimeout(function(){ cleanup(); reject(new Error("Tempo esgotado ao carregar a planilha.")); },15000);
+      function cleanup(){ clearTimeout(to); delete window[cb]; if(sc.parentNode) sc.parentNode.removeChild(sc); }
+      window[cb]=function(dt){
+        cleanup();
+        try{
+          var RE=/^Date\((\d+),\s*(\d+),\s*(\d+)/;
+          var rows=(dt.table.rows||[]).map(function(row){
+            return (row.c||[]).map(function(cell){
+              if(!cell) return "";
+              var v=(cell.v!==undefined&&cell.v!==null)?String(cell.v):"";
+              var dm=v.match(RE);
+              if(dm) return String(+dm[3]).padStart(2,"0")+"/"+String(+dm[2]+1).padStart(2,"0")+"/"+dm[1];
+              if(cell.f!==undefined&&cell.f!==null) return String(cell.f);
+              return v;
+            });
+          });
+          var cols=dt.table.cols||[];
+          if(cols.length&&cols.some(function(c){return c&&c.label;})) rows.unshift(cols.map(function(c){return (c&&c.label)?String(c.label):"";}));
+          resolve(rows);
+        }catch(e){ reject(e); }
+      };
+      var sc=document.createElement("script");
+      sc.src="https://docs.google.com/spreadsheets/d/"+MTL_SHEET_ID+"/gviz/tq?"+(MTL_SHEET_NAME?("sheet="+encodeURIComponent(MTL_SHEET_NAME)+"&"):"")+"tqx=out:json;responseHandler:"+cb+"&_="+Date.now();
+      sc.onerror=function(){ cleanup(); reject(new Error("Falha ao carregar o script da planilha.")); };
+      document.body.appendChild(sc);
+    });
+  }
+  function loadFB(block){
+    return fetch(FB_BASE+"/"+block+".json").then(function(r){
+      if(!r.ok) throw new Error("Firebase "+block+" "+r.status);
+      return r.json();
+    }).then(function(d){ if(typeof d==="string"){ try{d=JSON.parse(d);}catch(e){} } return d; });
+  }
+
+  // rows (array de arrays) -> array de objetos por cabeçalho
+  function rowsToObjs(rows){
+    if(!rows||!rows.length) return [];
+    var head=(rows[0]||[]).map(norm);
+    return rows.slice(1).filter(function(r){return r&&r.some(function(c){return norm(c);});}).map(function(r){
+      var o={}; head.forEach(function(h,i){ o[h]=r[i]!=null?r[i]:""; }); return o;
+    });
+  }
+  function col(obj){
+    var names=[].slice.call(arguments,1), keys=Object.keys(obj);
+    for(var i=0;i<names.length;i++){
+      var t=clean(names[i]);
+      var k=keys.filter(function(k){return clean(k)===t;})[0] || keys.filter(function(k){return clean(k).indexOf(t)>=0;})[0];
+      if(k) return obj[k];
+    }
+    return "";
+  }
+  function extractNFs(item){
+    var raw=item&&(item.nfs!=null?item.nfs:(item.NFs!=null?item.NFs:(item.notas!=null?item.notas:item.nf)));
+    if(!raw) return [];
+    if(Array.isArray(raw)) return raw.map(function(x){return (x&&typeof x==="object")?(x.nf||x.numero||x.nota||""):x;});
+    if(typeof raw==="string") return raw.split(/[,;\s]+/);
+    if(typeof raw==="object") return Object.keys(raw).map(function(k){var x=raw[k];return (x&&typeof x==="object")?(x.nf||x.numero||""):x;});
+    return [];
+  }
+  function asArr(x){ return Array.isArray(x)?x:(x&&typeof x==="object"?Object.keys(x).map(function(k){return x[k];}):[]); }
+
+  function analyze(notas, processos, minutas){
+    var sit={}, valorTotal=0, rota={};
+    notas.forEach(function(n){
+      var s=up(col(n,"Situação da Carga","Situacao da Carga"))||"SEM STATUS";
+      sit[s]=(sit[s]||0)+1;
+      valorTotal+=parseNum(col(n,"Valor NF-e","Valor NFe"));
+      var dst=norm(col(n,"Destino"))||norm(col(n,"Rota da Carga"))||norm(col(n,"Rota"))||"—";
+      if(dst!=="—") rota[dst]=(rota[dst]||0)+1;
+    });
+
+    var procArr=asArr(processos), minArr=asArr(minutas);
+    var comProcSet={}, expedida=0, aguardando=0;
+    procArr.forEach(function(p){
+      var st=up(p.status||p.situacao||"");
+      var nfs=extractNFs(p);
+      nfs.forEach(function(nf){ var k=nfKey(nf); if(k) comProcSet[k]=1; });
+      var perNF=p.statusPorNF||p.nfsStatus||null;
+      if(perNF&&typeof perNF==="object"){
+        Object.keys(perNF).forEach(function(k){ var v=up(perNF[k]); if(v.indexOf("EXPED")>=0)expedida++; else if(v.indexOf("AGUARD")>=0)aguardando++; });
+      }else{
+        var qt=nfs.length||1;
+        if(st.indexOf("EXPED")>=0) expedida+=qt; else if(st.indexOf("AGUARD")>=0) aguardando+=qt;
+      }
+    });
+    minArr.forEach(function(m){ extractNFs(m).forEach(function(nf){ var k=nfKey(nf); if(k) comProcSet[k]=1; }); });
+
+    var semProcesso=[];
+    notas.forEach(function(n){
+      var nf=col(n,"Nota Fiscal","Numero Pedido NFe","Número Pedido NFe");
+      var k=nfKey(nf); if(!k) return;
+      if(!comProcSet[k]) semProcesso.push({ nf:norm(nf), dst:norm(col(n,"Destino"))||"—", sit:up(col(n,"Situação da Carga","Situacao da Carga")) });
+    });
+    var totalNotas=notas.length, comProc=totalNotas-semProcesso.length;
+
+    var entOK=0, entPend=0;
+    minArr.forEach(function(m){
+      var s=up(m.status||m.statusEntrega||m.situacao||"");
+      if(s.indexOf("REALIZADA")>=0||s.indexOf("ENTREGUE")>=0) entOK++; else entPend++;
+    });
+
+    var topRota=Object.keys(rota).map(function(k){return [k,rota[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+
+    return { totalNotas:totalNotas, valorTotal:valorTotal, sit:sit, comProc:comProc, semProcesso:semProcesso,
+             expedida:expedida, aguardando:aguardando, procCount:procArr.length, minCount:minArr.length,
+             topRota:topRota, entOK:entOK, entPend:entPend };
+  }
+
+  var MTL_RED="#E4002B";
+  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  var SIT_COLOR={ "FINALIZADA":"#3ddc97","EM TRANSPORTE":"#ffd23f","NOVA CARGA":"#4d9fff","CANCELADA":"#ff4d6d" };
+
+  function kpi(label,value,sub){
+    return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
+  }
+
+  function render(a){
+    // KPIs
+    var pctSem=Math.round(a.semProcesso.length/(a.totalNotas||1)*100);
+    var totalExp=a.expedida+a.aguardando||1, pctExp=Math.round(a.expedida/totalExp*100);
+    var k=$("#kpi-mattel");
+    if(k) k.innerHTML =
+      kpi("Notas na planilha", fmtInt(a.totalNotas), "período 2026") +
+      kpi("Sem processo", '<span style="color:'+MTL_RED+'">'+fmtInt(a.semProcesso.length)+'</span>', pctSem+"% do total") +
+      kpi("Expedidas", fmtInt(a.expedida), pctExp+"% dos itens") +
+      kpi("Aguardando exp.", fmtInt(a.aguardando), a.procCount+" processos") +
+      kpi("Valor NF-e", fmtBRL(a.valorTotal), "acumulado") +
+      kpi("Minutas", fmtInt(a.minCount), a.entOK+" entregues");
+
+    // Painel cruzamento (barra + resumo)
+    var pctCom=100-pctSem;
+    var cruz=$("#mtl-cruz");
+    if(cruz) cruz.innerHTML =
+      '<div style="display:flex;align-items:flex-end;gap:14px;margin:6px 0 14px">'+
+        '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-weight:800;font-size:54px;line-height:.9;color:'+MTL_RED+'">'+fmtInt(a.semProcesso.length)+'</div>'+
+        '<div style="color:var(--ink-dim);padding-bottom:6px">de '+fmtInt(a.totalNotas)+' notas<br><span style="color:var(--ink-muted);font-size:12px">ainda sem coleta/expedição no sistema</span></div>'+
+      '</div>'+
+      '<div style="height:12px;background:var(--bg);border-radius:8px;overflow:hidden;display:flex">'+
+        '<i style="display:block;height:100%;width:'+pctCom+'%;background:var(--green)"></i>'+
+        '<i style="display:block;height:100%;width:'+pctSem+'%;background:'+MTL_RED+'"></i>'+
+      '</div>'+
+      '<div style="display:flex;gap:20px;margin-top:10px;font-size:13px;color:var(--ink-dim)">'+
+        '<span><b style="color:var(--ink)">'+fmtInt(a.comProc)+'</b> com processo ('+pctCom+'%)</span>'+
+        '<span><b style="color:var(--ink)">'+fmtInt(a.semProcesso.length)+'</b> pendentes ('+pctSem+'%)</span>'+
+      '</div>';
+
+    // Tabela de pendentes
+    var tb=$("#tableMtlPend");
+    if(tb){
+      var rowsHtml = a.semProcesso.slice(0,40).map(function(x){
+        return '<tr><td style="text-align:left">NF '+x.nf+'</td><td style="text-align:left">'+x.dst+'</td><td style="text-align:left">'+(x.sit||"—")+'</td></tr>';
+      }).join("");
+      if(!rowsHtml) rowsHtml='<tr><td colspan="3" style="text-align:left;color:var(--green)">Todas as notas da planilha já têm processo registrado ✔</td></tr>';
+      tb.innerHTML='<thead><tr><th style="text-align:left">Nota Fiscal</th><th style="text-align:left">Destino</th><th style="text-align:left">Situação</th></tr></thead><tbody>'+rowsHtml+'</tbody>';
+    }
+
+    // Insight
+    var ins=$("#insight-mattel");
+    if(ins){
+      ins.className = "insight"+(pctSem>20?" warn":" good");
+      ins.innerHTML = pctSem>0
+        ? '<b>'+fmtInt(a.semProcesso.length)+' notas</b> ('+pctSem+'%) da planilha ainda não têm processo de coleta/expedição registrado no ETIQUETAS-MATTEL. A lista acima é a fila de ação.'
+        : 'Todas as notas da planilha já estão refletidas no sistema de coleta/expedição.';
+    }
+
+    // ---- Charts ----
+    if(typeof Chart==="undefined") return;
+    var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    var baseOpts={ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:ink}},datalabels:{display:false}}, scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{ticks:{color:ink},grid:{color:gridC}}} };
+
+    // expedição (doughnut)
+    mk("chartMtlExp",{ type:"doughnut",
+      data:{ labels:["Expedidas","Aguardando"], datasets:[{ data:[a.expedida,a.aguardando], backgroundColor:["#3ddc97","#ffd23f"], borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"62%", plugins:{legend:{position:"right",labels:{color:ink}},datalabels:{display:false}} } });
+
+    // valor por situação (bar horizontal)
+    var sitK=Object.keys(a.sit).sort(function(x,y){return a.sit[y]-a.sit[x];});
+    mk("chartMtlSit",{ type:"bar",
+      data:{ labels:sitK.map(function(s){return s[0]+s.slice(1).toLowerCase();}),
+        datasets:[{ label:"Notas", data:sitK.map(function(s){return a.sit[s];}), backgroundColor:sitK.map(function(s){return SIT_COLOR[s]||"#6b7691";}), borderRadius:6 }] },
+      options:Object.assign({},baseOpts,{indexAxis:"y",plugins:{legend:{display:false},datalabels:{display:false}}}) });
+
+    // top rotas (bar)
+    mk("chartMtlRota",{ type:"bar",
+      data:{ labels:a.topRota.map(function(r){return r[0];}),
+        datasets:[{ label:"Notas", data:a.topRota.map(function(r){return r[1];}),
+          backgroundColor:function(){var g=$("#chartMtlRota").getContext("2d").createLinearGradient(0,0,0,300);g.addColorStop(0,MTL_RED);g.addColorStop(1,"#B00020");return g;}(), borderRadius:6 }] },
+      options:Object.assign({},baseOpts,{plugins:{legend:{display:false},datalabels:{display:false}}}) });
+  }
+
+  function loadAll(){
+    setStatus("Carregando dados Mattel…",false);
+    Promise.all([ loadCSV(), loadFB("processos-data"), loadFB("minutas-data") ]).then(function(res){
+      var notas=rowsToObjs(res[0]);
+      var a=analyze(notas,res[1],res[2]);
+      render(a);
+      setStatus("",false);
+      loaded=true;
+    }).catch(function(e){
+      console.error("[Mattel]",e);
+      setStatus("Falha ao carregar dados Mattel: "+(e.message||e)+". Nova tentativa no próximo ciclo.",true);
+    });
+  }
+
+  // Carrega quando a aba Mattel for aberta pela 1ª vez (lazy), e revalida por intervalo.
+  function maybeLoad(){
+    var sec=document.querySelector('.page[data-page="mattel"]');
+    if(sec&&sec.classList.contains("active")&&!loaded) loadAll();
+  }
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
+  document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
+  // Se o display estiver em rotação automática, garante recarga periódica.
+  setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
+  // Primeira chance (caso a aba já entre ativa por algum motivo).
+  setTimeout(maybeLoad, 300);
+})();
+</script>
+
 </body>
 </html>
