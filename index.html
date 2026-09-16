@@ -640,6 +640,14 @@ body.locked > *:not(#loginScreen){display:none !important}
       </div>
     </div>
     <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Volumes e quantidades por mês</h3><div class="sub">Notas (barras) e volumes (linha) por mês de emissão da NF-e — 2026</div></div><span class="card-tag" style="border-color:#E4002B;color:#ff6b7f">MENSAL</span></div>
+      <div class="chart-wrap tall"><canvas id="chartMtlMensal"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Consolidado mensal</h3><div class="sub">Totais gerais por mês de emissão</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableMtlMensal"></table></div>
+    </div>
+    <div class="card" style="margin-top:14px">
       <div class="card-head"><div><h3>Notas fiscais pendentes de processo</h3><div class="sub">Lista de ação — notas sem coleta/expedição registrada no sistema</div></div><span class="card-tag">DADOS BRUTOS</span></div>
       <div class="table-wrap"><table class="data" id="tableMtlPend"></table></div>
     </div>
@@ -2598,13 +2606,40 @@ body.locked > *:not(#loginScreen){display:none !important}
       if(ocorrenciaEntregaOK(m.ocorrencia||m.status||m.situacao)) entOK++; else entPend++;
     });
 
+    // ---- Agregação MENSAL por Data Emissão NF-e (notas + volumes) ----
+    // volumes: usa "Quantidade Volumes"; se vazio, cai para "Vol."
+    var MES_LBL=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+    function mesDe(v){
+      var s=norm(v); if(!s) return -1;
+      // aceita DD/MM/AAAA, D/M/AAAA, AAAA-MM-DD
+      var m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+      if(m){ var mm=parseInt(m[2],10); return (mm>=1&&mm<=12)?mm-1:-1; }
+      var iso=s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+      if(iso){ var mi=parseInt(iso[2],10); return (mi>=1&&mi<=12)?mi-1:-1; }
+      return -1;
+    }
+    var mensal=[]; for(var mi=0;mi<12;mi++) mensal.push({mes:MES_LBL[mi],notas:0,volumes:0,peso:0,valor:0});
+    var mensalSemData=0;
+    notas.forEach(function(n){
+      var idx=mesDe(col(n,"Data Emissão NF-e","Data Emissao NF-e","Data Emissão NFe","Data Emissao NFe"));
+      if(idx<0){ mensalSemData++; return; }
+      var vol=parseNum(col(n,"Quantidade Volumes")); if(!vol) vol=parseNum(col(n,"Vol.","Vol"));
+      mensal[idx].notas+=1;
+      mensal[idx].volumes+=vol;
+      mensal[idx].peso+=parseNum(col(n,"Peso"));
+      mensal[idx].valor+=parseNum(col(n,"Valor NF-e","Valor NFe"));
+    });
+    // mantém só meses com movimento (evita meses zerados no fim do ano)
+    var mensalAtivo=mensal.filter(function(x){return x.notas>0||x.volumes>0;});
+
     var topRota=Object.keys(rota).map(function(k){return [k,rota[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
 
     return { totalNotas:totalNotas, valorTotal:valorTotal, sit:sit, comProc:comProc, semProcesso:semProcesso,
              expedida:expedida, aguardando:aguardando, emProcesso:emProcesso, statusCount:statusCount,
              nfsNoSistema:Object.keys(comProcSet).length,
              procCount:procArr.length, minCount:minArr.length,
-             topRota:topRota, entOK:entOK, entPend:entPend };
+             topRota:topRota, entOK:entOK, entPend:entPend,
+             mensal:mensalAtivo, mensalSemData:mensalSemData };
   }
 
   var MTL_RED="#E4002B";
@@ -2688,6 +2723,38 @@ body.locked > *:not(#loginScreen){display:none !important}
         datasets:[{ label:"Notas", data:a.topRota.map(function(r){return r[1];}),
           backgroundColor:function(){var g=$("#chartMtlRota").getContext("2d").createLinearGradient(0,0,0,300);g.addColorStop(0,MTL_RED);g.addColorStop(1,"#B00020");return g;}(), borderRadius:6 }] },
       options:Object.assign({},baseOpts,{plugins:{legend:{display:false},datalabels:{display:false}}}) });
+
+    // ---- MENSAL: combo (barras=notas, linha=volumes) ----
+    var mm=a.mensal||[];
+    mk("chartMtlMensal",{ type:"bar",
+      data:{ labels:mm.map(function(x){return x.mes;}),
+        datasets:[
+          { type:"bar", label:"Notas", yAxisID:"y", data:mm.map(function(x){return x.notas;}),
+            backgroundColor:function(){var c=$("#chartMtlMensal");if(!c)return MTL_RED;var g=c.getContext("2d").createLinearGradient(0,0,0,320);g.addColorStop(0,MTL_RED);g.addColorStop(1,"#B00020");return g;}(),
+            borderRadius:6, order:2 },
+          { type:"line", label:"Volumes", yAxisID:"y1", data:mm.map(function(x){return x.volumes;}),
+            borderColor:"#ffd23f", backgroundColor:"#ffd23f", borderWidth:2, tension:.3,
+            pointRadius:3, pointBackgroundColor:"#ffd23f", order:1 }
+        ] },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{labels:{color:ink}}, datalabels:{display:false} },
+        scales:{
+          x:{ ticks:{color:ink}, grid:{color:gridC} },
+          y:{ position:"left", beginAtZero:true, ticks:{color:ink}, grid:{color:gridC}, title:{display:true,text:"Notas",color:ink} },
+          y1:{ position:"right", beginAtZero:true, ticks:{color:"#ffd23f"}, grid:{drawOnChartArea:false}, title:{display:true,text:"Volumes",color:"#ffd23f"} }
+        } } });
+
+    // ---- tabela mensal ----
+    var tm=$("#tableMtlMensal");
+    if(tm){
+      var totN=0,totV=0,totP=0,totVal=0;
+      var body=mm.map(function(x){
+        totN+=x.notas; totV+=x.volumes; totP+=x.peso; totVal+=x.valor;
+        return "<tr><td style=\"text-align:left\">"+x.mes+"</td><td>"+fmtInt(x.notas)+"</td><td>"+fmtInt(Math.round(x.volumes))+"</td><td>"+fmtInt(Math.round(x.peso))+"</td><td>"+fmtBRL(x.valor)+"</td></tr>";
+      }).join("");
+      var foot="<tr style=\"font-weight:700\"><td style=\"text-align:left\">Total</td><td>"+fmtInt(totN)+"</td><td>"+fmtInt(Math.round(totV))+"</td><td>"+fmtInt(Math.round(totP))+"</td><td>"+fmtBRL(totVal)+"</td></tr>";
+      tm.innerHTML="<thead><tr><th style=\"text-align:left\">Mês</th><th>Notas</th><th>Volumes</th><th>Peso (kg)</th><th>Valor NF-e</th></tr></thead><tbody>"+body+foot+"</tbody>";
+    }
   }
 
   function loadAll(){
