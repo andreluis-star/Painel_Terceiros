@@ -2395,6 +2395,16 @@ body.locked > *:not(#loginScreen){display:none !important}
   var MTL_SHEET_ID = "14un2Ziy7t0Yo0n0lD4QWqkHTqWtFmbHzKQdgd1Ji0Ak";
   var MTL_SHEET_NAME = "";            // 1ª aba (deixe o nome se a planilha tiver várias)
   var FB_BASE = "https://cargas-mattel-default-rtdb.firebaseio.com/cargas";
+  var FB_DBURL = "https://cargas-mattel-default-rtdb.firebaseio.com";
+  var FB_CONFIG = {
+    apiKey: "AIzaSyCSdcc_-NHMjIno3teJdFGJ6dSJR5bUqls",
+    authDomain: "cargas-mattel.firebaseapp.com",
+    databaseURL: FB_DBURL,
+    projectId: "cargas-mattel",
+    storageBucket: "cargas-mattel.firebasestorage.app",
+    messagingSenderId: "835464722375",
+    appId: "1:835464722375:web:d312edfda4c1e063e54be2"
+  };
   var REFRESH_MS = 5*60*1000;
   var loaded = false, charts = {};
 
@@ -2452,11 +2462,57 @@ body.locked > *:not(#loginScreen){display:none !important}
       document.body.appendChild(sc);
     });
   }
-  function loadFB(block){
+  function parseFB(d){
+    // dados chegam como STRING JSON dentro de /cargas/<block>
+    if(typeof d==="string"){ try{d=JSON.parse(d);}catch(e){ console.warn("[Mattel] valor não é JSON:",e.message); } }
+    return d;
+  }
+  // Via 1: REST (.json) — rápida, funciona se as regras permitem leitura anônima.
+  function loadFBrest(block){
     return fetch(FB_BASE+"/"+block+".json").then(function(r){
-      if(!r.ok) throw new Error("Firebase "+block+" "+r.status);
+      if(!r.ok) throw new Error("HTTP "+r.status);
       return r.json();
-    }).then(function(d){ if(typeof d==="string"){ try{d=JSON.parse(d);}catch(e){} } return d; });
+    }).then(parseFB);
+  }
+  // Via 2: SDK do Firebase — mesmo caminho que o ETIQUETAS-MATTEL usa
+  // (firebase.database().ref('cargas/<block>')). Usado se a REST falhar.
+  var _fbApp=null;
+  function ensureFbSDK(){
+    return new Promise(function(resolve,reject){
+      if(typeof firebase!=="undefined" && firebase.database){ resolve(); return; }
+      // carrega o SDK compat sob demanda (só se precisar do fallback)
+      var urls=[
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"
+      ];
+      var i=0;
+      (function next(){
+        if(i>=urls.length){ resolve(); return; }
+        var s=document.createElement("script"); s.src=urls[i++];
+        s.onload=next; s.onerror=function(){ reject(new Error("SDK Firebase não carregou")); };
+        document.head.appendChild(s);
+      })();
+    }).then(function(){
+      if(typeof firebase==="undefined"||!firebase.database) throw new Error("SDK Firebase indisponível");
+      if(!_fbApp){ _fbApp = (firebase.apps&&firebase.apps.length)? firebase.app() : firebase.initializeApp(FB_CONFIG); }
+    });
+  }
+  function loadFBsdk(block){
+    return ensureFbSDK().then(function(){
+      return firebase.database().ref("cargas/"+block).get().then(function(snap){
+        return parseFB(snap.exists()?snap.val():null);
+      });
+    });
+  }
+  function loadFB(block){
+    return loadFBrest(block).then(function(d){
+      // REST OK mas vazio? tenta SDK (algumas regras devolvem null via REST anônima)
+      if(d==null){ return loadFBsdk(block).catch(function(){ return null; }); }
+      return d;
+    }).catch(function(err){
+      console.warn("[Mattel] REST falhou para "+block+" ("+(err.message||err)+"), tentando SDK…");
+      return loadFBsdk(block);
+    });
   }
 
   // rows (array de arrays) -> array de objetos por cabeçalho
@@ -2486,6 +2542,14 @@ body.locked > *:not(#loginScreen){display:none !important}
   }
   function asArr(x){ return Array.isArray(x)?x:(x&&typeof x==="object"?Object.keys(x).map(function(k){return x[k];}):[]); }
 
+  // Status reais por NF no ETIQUETAS-MATTEL (proc.statusNfs[nf]):
+  //   NAO_COLETADA, NAO_PROCESSADA, SEPARANDO, AGUARDANDO_EXP, EXPEDIDA
+  var STATUS_KEYS = ["NAO_COLETADA","NAO_PROCESSADA","SEPARANDO","AGUARDANDO_EXP","EXPEDIDA"];
+  function ocorrenciaEntregaOK(oc){
+    var t=String(oc||"").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim();
+    return /^1\s*[-–]\s*ENTREGA REALIZADA NORMALMENTE$/.test(t) || t.indexOf("ENTREGA REALIZADA")>=0;
+  }
+
   function analyze(notas, processos, minutas){
     var sit={}, valorTotal=0, rota={};
     notas.forEach(function(n){
@@ -2496,21 +2560,29 @@ body.locked > *:not(#loginScreen){display:none !important}
       if(dst!=="—") rota[dst]=(rota[dst]||0)+1;
     });
 
+    // processos e minutas são OBJETOS {chave:{...}} no Firebase deste sistema
     var procArr=asArr(processos), minArr=asArr(minutas);
-    var comProcSet={}, expedida=0, aguardando=0;
+    var comProcSet={};
+    var statusCount={NAO_COLETADA:0,NAO_PROCESSADA:0,SEPARANDO:0,AGUARDANDO_EXP:0,EXPEDIDA:0};
+
     procArr.forEach(function(p){
-      var st=up(p.status||p.situacao||"");
       var nfs=extractNFs(p);
-      nfs.forEach(function(nf){ var k=nfKey(nf); if(k) comProcSet[k]=1; });
-      var perNF=p.statusPorNF||p.nfsStatus||null;
-      if(perNF&&typeof perNF==="object"){
-        Object.keys(perNF).forEach(function(k){ var v=up(perNF[k]); if(v.indexOf("EXPED")>=0)expedida++; else if(v.indexOf("AGUARD")>=0)aguardando++; });
-      }else{
-        var qt=nfs.length||1;
-        if(st.indexOf("EXPED")>=0) expedida+=qt; else if(st.indexOf("AGUARD")>=0) aguardando+=qt;
-      }
+      var stMap=(p.statusNfs&&typeof p.statusNfs==="object")?p.statusNfs:null;
+      nfs.forEach(function(nf){
+        var k=nfKey(nf); if(k) comProcSet[k]=1;
+        // status por NF: usa o mapa statusNfs; default NAO_COLETADA
+        var raw = stMap ? up(stMap[nf]||stMap[String(nf)]||"") : "";
+        var key = STATUS_KEYS.indexOf(raw)>=0 ? raw : "NAO_COLETADA";
+        statusCount[key]++;
+      });
     });
+    // minutas também confirmam que a NF passou pelo sistema
     minArr.forEach(function(m){ extractNFs(m).forEach(function(nf){ var k=nfKey(nf); if(k) comProcSet[k]=1; }); });
+
+    var expedida=statusCount.EXPEDIDA;
+    var aguardando=statusCount.AGUARDANDO_EXP;
+    // "em processamento" = tudo que já entrou mas ainda não expediu
+    var emProcesso=statusCount.NAO_COLETADA+statusCount.NAO_PROCESSADA+statusCount.SEPARANDO+statusCount.AGUARDANDO_EXP;
 
     var semProcesso=[];
     notas.forEach(function(n){
@@ -2520,16 +2592,18 @@ body.locked > *:not(#loginScreen){display:none !important}
     });
     var totalNotas=notas.length, comProc=totalNotas-semProcesso.length;
 
+    // entregas via minutas (campo ocorrencia)
     var entOK=0, entPend=0;
     minArr.forEach(function(m){
-      var s=up(m.status||m.statusEntrega||m.situacao||"");
-      if(s.indexOf("REALIZADA")>=0||s.indexOf("ENTREGUE")>=0) entOK++; else entPend++;
+      if(ocorrenciaEntregaOK(m.ocorrencia||m.status||m.situacao)) entOK++; else entPend++;
     });
 
     var topRota=Object.keys(rota).map(function(k){return [k,rota[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
 
     return { totalNotas:totalNotas, valorTotal:valorTotal, sit:sit, comProc:comProc, semProcesso:semProcesso,
-             expedida:expedida, aguardando:aguardando, procCount:procArr.length, minCount:minArr.length,
+             expedida:expedida, aguardando:aguardando, emProcesso:emProcesso, statusCount:statusCount,
+             nfsNoSistema:Object.keys(comProcSet).length,
+             procCount:procArr.length, minCount:minArr.length,
              topRota:topRota, entOK:entOK, entPend:entPend };
   }
 
@@ -2618,15 +2692,34 @@ body.locked > *:not(#loginScreen){display:none !important}
 
   function loadAll(){
     setStatus("Carregando dados Mattel…",false);
-    Promise.all([ loadCSV(), loadFB("processos-data"), loadFB("minutas-data") ]).then(function(res){
+    // Cada fonte é resolvida separadamente para diagnosticar qual falhou.
+    var diag={csv:null,proc:null,min:null};
+    var pCSV = loadCSV().then(function(rows){ diag.csv=(rows?rows.length:0); return rows; })
+                        .catch(function(e){ diag.csv="ERRO: "+(e.message||e); return []; });
+    var pPROC= loadFB("processos-data").then(function(d){ var n=d?Object.keys(d).length:0; diag.proc=n; return d; })
+                        .catch(function(e){ diag.proc="ERRO: "+(e.message||e); return {}; });
+    var pMIN = loadFB("minutas-data").then(function(d){ var n=d?Object.keys(d).length:0; diag.min=n; return d; })
+                        .catch(function(e){ diag.min="ERRO: "+(e.message||e); return {}; });
+
+    Promise.all([pCSV,pPROC,pMIN]).then(function(res){
       var notas=rowsToObjs(res[0]);
       var a=analyze(notas,res[1],res[2]);
       render(a);
-      setStatus("",false);
       loaded=true;
+      // Diagnóstico: se alguma fonte do sistema veio vazia/erro, avisa em vez de esconder.
+      var probFB = (typeof diag.proc!=="number"||diag.proc===0) && (typeof diag.min!=="number"||diag.min===0);
+      if(probFB){
+        setStatus("Planilha OK ("+(a.totalNotas)+" notas), mas o sistema ETIQUETAS-MATTEL não retornou dados "+
+                  "[processos: "+diag.proc+" · minutas: "+diag.min+"]. Verifique o acesso ao Firebase.", true);
+      }else if(typeof diag.proc!=="number" || typeof diag.min!=="number"){
+        setStatus("Carregado com aviso — processos: "+diag.proc+" · minutas: "+diag.min+".", true);
+      }else{
+        setStatus("",false);
+      }
+      console.log("[Mattel] diagnóstico de carga:", diag, "| NFs no sistema:", a.nfsNoSistema);
     }).catch(function(e){
       console.error("[Mattel]",e);
-      setStatus("Falha ao carregar dados Mattel: "+(e.message||e)+". Nova tentativa no próximo ciclo.",true);
+      setStatus("Falha ao carregar dados Mattel: "+(e.message||e),true);
     });
   }
 
