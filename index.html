@@ -652,6 +652,28 @@ body.locked > *:not(#loginScreen){display:none !important}
       <div class="table-wrap"><table class="data" id="tableMtlPend"></table></div>
     </div>
     <div class="insight" id="insight-mattel"></div>
+
+    <!-- ===== DASHBOARD OPERACIONAL (importado do ETIQUETAS-MATTEL, só leitura) ===== -->
+    <div class="page-head" style="margin-top:26px;border-top:1px solid var(--line);padding-top:22px">
+      <div class="eyebrow">Dashboard operacional</div>
+      <h2>Da coleta à expedição</h2>
+      <p>Fotografia atual (visão geral, todos os processos) — processos, notas, minutas, volumes e status, direto do sistema ETIQUETAS-MATTEL.</p>
+    </div>
+    <div class="kpi-grid" id="kpi-dashop"></div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Distribuição por status (notas)</h3><div class="sub">Situação de cada NF nos processos</div></div><span class="card-tag">STATUS</span></div>
+        <div class="chart-wrap"><canvas id="chartDashStatus"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Volumes por data de coleta</h3><div class="sub">Coletado × Expedido (peças)</div></div><span class="card-tag">VOLUMES</span></div>
+        <div class="chart-wrap tall"><canvas id="chartDashVol"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Detalhamento por data de coleta</h3><div class="sub">Processos, NFs, volumes e status por dia</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableDashData"></table></div>
+    </div>
   </section>
   <!-- 21 · PALETES (sistema Conferência Geral — Firestore conferenciaptx) -->
   <section class="page" data-page="paletes">
@@ -2839,6 +2861,142 @@ body.locked > *:not(#loginScreen){display:none !important}
     }
   }
 
+  // ===== DASHBOARD OPERACIONAL (só leitura) — replica o Dashboard do ETIQUETAS-MATTEL =====
+  var SEP_ORDER=["NAO_COLETADA","NAO_PROCESSADA","SEPARANDO","AGUARDANDO_EXP","EXPEDIDA"];
+  var SEP_INFO={
+    NAO_COLETADA:{label:"NÃO COLETADA",cor:"#c7cce0"},
+    NAO_PROCESSADA:{label:"NÃO PROCESSADA",cor:"#ef4444"},
+    SEPARANDO:{label:"SEPARANDO",cor:"#f59e0b"},
+    AGUARDANDO_EXP:{label:"AGUARDANDO EXP",cor:"#7c8cff"},
+    EXPEDIDA:{label:"EXPEDIDA",cor:"#22c55e"}
+  };
+  var dashXmlCache=null, dashXmlTried=false;
+
+  // Volumes por NF a partir do notas-xml-data (4MB) — carregado sob demanda, com timeout.
+  function loadDashXML(){
+    if(dashXmlTried) return Promise.resolve(dashXmlCache);
+    dashXmlTried=true;
+    var to=new Promise(function(res){ setTimeout(function(){res(null);}, 12000); });
+    var fetchXml=loadFB("notas-xml-data").then(function(d){ dashXmlCache=d||null; return dashXmlCache; })
+                                         .catch(function(){ return null; });
+    return Promise.race([fetchXml,to]);
+  }
+
+  // Extrai quantidade de peças/volumes de uma NF no notas-xml-data (tolerante a formatos)
+  function volDaNF(xml, nf){
+    if(!xml) return 0;
+    var rec = xml[nf] || xml[String(nf)] || null;
+    if(!rec) return 0;
+    if(typeof rec==="number") return rec;
+    // soma quantidades de itens, se houver
+    var itens = rec.itens || rec.items || rec.produtos || rec.det || null;
+    if(Array.isArray(itens)){
+      return itens.reduce(function(s,it){ return s + (parseFloat(it.qCom||it.qtd||it.quantidade||it.qTrib||0)||0); },0);
+    }
+    // campos diretos de volume/quantidade
+    return parseFloat(rec.qVol||rec.volumes||rec.qtdVolumes||rec.quantidade||rec.qtd||0)||0;
+  }
+
+  function renderDashOperacional(processos, minutas, xml){
+    var procArr = asArr(processos), minArr = asArr(minutas);
+    if(!procArr.length){
+      var kp=$("#kpi-dashop"); if(kp) kp.innerHTML='<div class="kpi"><div class="kpi-value" style="font-size:1rem;color:var(--ink-muted)">Sem processos no sistema</div></div>';
+      return;
+    }
+    // normaliza processos ao formato do dashboard
+    var procs = procArr.map(function(p){
+      var dia=p.dia, mes=p.mes, ano=p.ano;
+      var nfs = extractNFs(p);
+      var stMap = (p.statusNfs&&typeof p.statusNfs==="object")?p.statusNfs:{};
+      var statusPorNf={};
+      nfs.forEach(function(nf){ var v=up(stMap[nf]||stMap[String(nf)]||""); statusPorNf[nf]=(SEP_ORDER.indexOf(v)>=0)?v:"NAO_COLETADA"; });
+      var dateKey=(ano&&mes&&dia)?(ano+"-"+String(mes).padStart(2,"0")+"-"+String(dia).padStart(2,"0")):"—";
+      var data=(ano&&mes&&dia)?(String(dia).padStart(2,"0")+"/"+String(mes).padStart(2,"0")+"/"+ano):"—";
+      return {codigo:p.codigo||p.id||"", nfs:nfs, statusPorNf:statusPorNf, dateKey:dateKey, data:data};
+    });
+
+    // conjuntos globais
+    var nfsSet={}, minutasSet={}, statusCount={}, totalVol=0, temVol=!!xml;
+    SEP_ORDER.forEach(function(k){ statusCount[k]=0; });
+    procs.forEach(function(p){
+      p.nfs.forEach(function(nf){
+        nfsSet[nfKey(nf)]=1;
+        var st=p.statusPorNf[nf]||"NAO_COLETADA";
+        if(st in statusCount) statusCount[st]++;
+        if(xml) totalVol += volDaNF(xml, nf);
+      });
+    });
+    var nfsGlobais={}; procs.forEach(function(p){p.nfs.forEach(function(nf){nfsGlobais[nfKey(nf)]=1;});});
+    minArr.forEach(function(m){ if(extractNFs(m).some(function(nf){return nfsGlobais[nfKey(nf)];})) minutasSet[m.id||m.codigo||JSON.stringify(m).slice(0,20)]=1; });
+
+    // KPIs
+    var kp=$("#kpi-dashop");
+    if(kp) kp.innerHTML =
+      kpiBox("Processos", fmtInt(procs.length)) +
+      kpiBox("Notas fiscais", fmtInt(Object.keys(nfsSet).length)) +
+      kpiBox("Minutas", fmtInt(Object.keys(minutasSet).length)) +
+      kpiBox("Volumes (peças)", temVol?fmtInt(Math.round(totalVol)):"—", temVol?"":"XML indisponível") +
+      kpiBox("Expedidas", fmtInt(statusCount.EXPEDIDA)) +
+      kpiBox("Aguardando", fmtInt(statusCount.AGUARDANDO_EXP));
+
+    if(typeof Chart==="undefined") return;
+    var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+
+    // Status (doughnut)
+    mk("chartDashStatus",{ type:"doughnut",
+      data:{ labels:SEP_ORDER.map(function(k){return SEP_INFO[k].label;}),
+        datasets:[{ data:SEP_ORDER.map(function(k){return statusCount[k];}), backgroundColor:SEP_ORDER.map(function(k){return SEP_INFO[k].cor;}), borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"58%", plugins:{legend:{position:"bottom",labels:{color:ink,font:{size:11}}},datalabels:{display:false}} } });
+
+    // Volumes por data (coletado x expedido) — só se houver XML
+    var porData={};
+    procs.forEach(function(p){
+      p.nfs.forEach(function(nf){
+        var v = xml? volDaNF(xml,nf) : 0;
+        if(!porData[p.dateKey]) porData[p.dateKey]={col:0,exp:0};
+        porData[p.dateKey].col += v;
+        if((p.statusPorNf[nf]||"")==="EXPEDIDA") porData[p.dateKey].exp += v;
+      });
+    });
+    var datas=Object.keys(porData).filter(function(k){return k!=="—";}).sort();
+    mk("chartDashVol",{ type:"bar",
+      data:{ labels:datas.map(function(k){var p=k.split("-");return p[2]+"/"+p[1];}),
+        datasets:[
+          { label:"Coletado", data:datas.map(function(k){return Math.round(porData[k].col);}), backgroundColor:"#4f6ef7", borderRadius:4 },
+          { label:"Expedido", data:datas.map(function(k){return Math.round(porData[k].exp);}), backgroundColor:"#22c55e", borderRadius:4 }
+        ] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
+        scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} } });
+
+    // Tabela por data de coleta
+    var porTab={};
+    procs.forEach(function(p){
+      if(p.dateKey==="—") return;
+      if(!porTab[p.dateKey]) porTab[p.dateKey]={data:p.data,procs:{},nfs:{},vol:0,status:{}};
+      var e=porTab[p.dateKey]; e.procs[p.codigo]=1;
+      p.nfs.forEach(function(nf){ e.nfs[nfKey(nf)]=1; if(xml) e.vol+=volDaNF(xml,nf); var st=p.statusPorNf[nf]; e.status[st]=(e.status[st]||0)+1; });
+    });
+    var chaves=Object.keys(porTab).sort();
+    var tb=$("#tableDashData");
+    if(tb){
+      var thead="<thead><tr><th style=\"text-align:left\">Data coleta</th><th>Proc.</th><th>NFs</th>"+(temVol?"<th>Volumes</th>":"")+SEP_ORDER.map(function(k){return "<th>"+SEP_INFO[k].label+"</th>";}).join("")+"</tr></thead>";
+      var tP=0,tN=0,tV=0,tSt={}; SEP_ORDER.forEach(function(k){tSt[k]=0;});
+      var body=chaves.map(function(k){
+        var e=porTab[k]; var np=Object.keys(e.procs).length, nn=Object.keys(e.nfs).length;
+        tP+=np; tN+=nn; tV+=e.vol;
+        var row="<tr><td style=\"text-align:left\">"+e.data+"</td><td>"+np+"</td><td>"+nn+"</td>"+(temVol?"<td>"+fmtInt(Math.round(e.vol))+"</td>":"");
+        SEP_ORDER.forEach(function(kk){ var v=e.status[kk]||0; tSt[kk]+=v; row+="<td>"+(v||"—")+"</td>"; });
+        return row+"</tr>";
+      }).join("");
+      var foot="<tr style=\"font-weight:700\"><td style=\"text-align:left\">TOTAL</td><td>"+tP+"</td><td>"+tN+"</td>"+(temVol?"<td>"+fmtInt(Math.round(tV))+"</td>":"")+SEP_ORDER.map(function(k){return "<td>"+(tSt[k]||"—")+"</td>";}).join("")+"</tr>";
+      tb.innerHTML=thead+"<tbody>"+body+foot+"</tbody>";
+    }
+  }
+  function kpiBox(label,value,sub){
+    return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
+  }
+
   function loadAll(){
     setStatus("Carregando dados Mattel…",false);
     // Cada fonte é resolvida separadamente para diagnosticar qual falhou.
@@ -2854,6 +3012,10 @@ body.locked > *:not(#loginScreen){display:none !important}
       var notas=rowsToObjs(res[0]);
       var a=analyze(notas,res[1],res[2]);
       render(a);
+      // Dashboard operacional (abaixo): usa os mesmos processos/minutas.
+      // Volumes/SKUs dependem do notas-xml-data (pesado) — carregado sob demanda.
+      renderDashOperacional(res[1], res[2], null);
+      loadDashXML().then(function(xml){ if(xml) renderDashOperacional(res[1], res[2], xml); });
       loaded=true;
       // Diagnóstico: se alguma fonte do sistema veio vazia/erro, avisa em vez de esconder.
       var probFB = (typeof diag.proc!=="number"||diag.proc===0) && (typeof diag.min!=="number"||diag.min===0);
