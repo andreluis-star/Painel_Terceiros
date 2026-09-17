@@ -665,6 +665,10 @@ body.locked > *:not(#loginScreen){display:none !important}
       </div>
     </div>
     <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Volumes por data de coleta</h3><div class="sub">Coletado × Expedido por dia (peças)</div></div><span class="card-tag">VOLUMES · DIÁRIO</span></div>
+      <div class="chart-wrap tall"><canvas id="chartDashVolDia"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
       <div class="card-head"><div><h3>Detalhamento por data de coleta</h3><div class="sub">Processos, NFs, volumes e status por dia</div></div><span class="card-tag">DADOS BRUTOS</span></div>
       <div class="table-wrap"><table class="data" id="tableDashData"></table></div>
     </div>
@@ -2971,14 +2975,40 @@ body.locked > *:not(#loginScreen){display:none !important}
     });
     var mesesVol=Object.keys(porMesVol).filter(function(k){return k!=="—";}).sort();
     var MESES_DASH=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+    // rótulo numérico acima de cada barra (esconde zeros p/ não poluir)
+    var dlTop={ display:function(c){ return (c.dataset.data[c.dataIndex]||0)>0; },
+      anchor:"end", align:"end", color:ink, font:{size:10,weight:"600"},
+      formatter:function(v){ return v? v.toLocaleString("pt-BR") : ""; } };
     mk("chartDashVol",{ type:"bar",
       data:{ labels:mesesVol.map(function(k){ return (MESES_DASH[+k.split("-")[1]-1]||k); }),
         datasets:[
           { label:"Coletado", data:mesesVol.map(function(k){return Math.round(porMesVol[k].col);}), backgroundColor:"#4f6ef7", borderRadius:5 },
           { label:"Expedido", data:mesesVol.map(function(k){return Math.round(porMesVol[k].exp);}), backgroundColor:"#22c55e", borderRadius:5 }
         ] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:18}},
+        plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlTop},
         scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} } });
+
+    // Volumes por DIA de coleta (coletado x expedido) — visão detalhada diária
+    var porDiaVol={};
+    procs.forEach(function(p){
+      if(p.dateKey==="—") return;
+      p.nfs.forEach(function(nf){
+        var v = temVol? volDaNF(xi,nf) : 0;
+        if(!porDiaVol[p.dateKey]) porDiaVol[p.dateKey]={col:0,exp:0};
+        porDiaVol[p.dateKey].col += v;
+        if((p.statusPorNf[nf]||"")==="EXPEDIDA") porDiaVol[p.dateKey].exp += v;
+      });
+    });
+    var diasVol=Object.keys(porDiaVol).sort();
+    mk("chartDashVolDia",{ type:"bar",
+      data:{ labels:diasVol.map(function(k){var p=k.split("-");return p[2]+"/"+p[1];}),
+        datasets:[
+          { label:"Coletado", data:diasVol.map(function(k){return Math.round(porDiaVol[k].col);}), backgroundColor:"#4f6ef7", borderRadius:4 },
+          { label:"Expedido", data:diasVol.map(function(k){return Math.round(porDiaVol[k].exp);}), backgroundColor:"#22c55e", borderRadius:4 }
+        ] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
+        scales:{x:{ticks:{color:ink,maxRotation:90,minRotation:45},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} } });
 
     // Tabela por data de coleta
     var porTab={};
