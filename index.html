@@ -647,12 +647,6 @@ body.locked > *:not(#loginScreen){display:none !important}
       <div class="card-head"><div><h3>Consolidado mensal</h3><div class="sub">Totais gerais por mês de emissão</div></div><span class="card-tag">DADOS BRUTOS</span></div>
       <div class="table-wrap"><table class="data" id="tableMtlMensal"></table></div>
     </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Notas fiscais pendentes de processo</h3><div class="sub">Lista de ação — notas sem coleta/expedição registrada no sistema</div></div><span class="card-tag">DADOS BRUTOS</span></div>
-      <div class="table-wrap"><table class="data" id="tableMtlPend"></table></div>
-    </div>
-    <div class="insight" id="insight-mattel"></div>
-
     <!-- ===== DASHBOARD OPERACIONAL (importado do ETIQUETAS-MATTEL, só leitura) ===== -->
     <div class="page-head" style="margin-top:26px;border-top:1px solid var(--line);padding-top:22px">
       <div class="eyebrow">Dashboard operacional</div>
@@ -666,7 +660,7 @@ body.locked > *:not(#loginScreen){display:none !important}
         <div class="chart-wrap"><canvas id="chartDashStatus"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-head"><div><h3>Volumes por data de coleta</h3><div class="sub">Coletado × Expedido (peças)</div></div><span class="card-tag">VOLUMES</span></div>
+        <div class="card-head"><div><h3>Volumes por mês de coleta</h3><div class="sub">Coletado × Expedido por mês (peças)</div></div><span class="card-tag">VOLUMES</span></div>
         <div class="chart-wrap tall"><canvas id="chartDashVol"></canvas></div>
       </div>
     </div>
@@ -674,6 +668,12 @@ body.locked > *:not(#loginScreen){display:none !important}
       <div class="card-head"><div><h3>Detalhamento por data de coleta</h3><div class="sub">Processos, NFs, volumes e status por dia</div></div><span class="card-tag">DADOS BRUTOS</span></div>
       <div class="table-wrap"><table class="data" id="tableDashData"></table></div>
     </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Notas fiscais pendentes de processo</h3><div class="sub">Lista de ação — notas sem coleta/expedição registrada no sistema</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableMtlPend"></table></div>
+    </div>
+    <div class="insight" id="insight-mattel"></div>
+
   </section>
   <!-- 21 · PALETES (sistema Conferência Geral — Firestore conferenciaptx) -->
   <section class="page" data-page="paletes">
@@ -2958,22 +2958,24 @@ body.locked > *:not(#loginScreen){display:none !important}
         datasets:[{ data:SEP_ORDER.map(function(k){return statusCount[k];}), backgroundColor:SEP_ORDER.map(function(k){return SEP_INFO[k].cor;}), borderWidth:0 }] },
       options:{ responsive:true, maintainAspectRatio:false, cutout:"58%", plugins:{legend:{position:"bottom",labels:{color:ink,font:{size:11}}},datalabels:{display:false}} } });
 
-    // Volumes por data (coletado x expedido) — só se houver XML
-    var porData={};
+    // Volumes por MÊS de coleta (coletado x expedido) — condensado por mês. Só se houver XML.
+    var porMesVol={};  // "AAAA-MM" -> {col,exp}
     procs.forEach(function(p){
+      var mk2 = (p.dateKey&&p.dateKey!=="—") ? p.dateKey.slice(0,7) : "—";  // AAAA-MM
       p.nfs.forEach(function(nf){
         var v = temVol? volDaNF(xi,nf) : 0;
-        if(!porData[p.dateKey]) porData[p.dateKey]={col:0,exp:0};
-        porData[p.dateKey].col += v;
-        if((p.statusPorNf[nf]||"")==="EXPEDIDA") porData[p.dateKey].exp += v;
+        if(!porMesVol[mk2]) porMesVol[mk2]={col:0,exp:0};
+        porMesVol[mk2].col += v;
+        if((p.statusPorNf[nf]||"")==="EXPEDIDA") porMesVol[mk2].exp += v;
       });
     });
-    var datas=Object.keys(porData).filter(function(k){return k!=="—";}).sort();
+    var mesesVol=Object.keys(porMesVol).filter(function(k){return k!=="—";}).sort();
+    var MESES_DASH=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
     mk("chartDashVol",{ type:"bar",
-      data:{ labels:datas.map(function(k){var p=k.split("-");return p[2]+"/"+p[1];}),
+      data:{ labels:mesesVol.map(function(k){ return (MESES_DASH[+k.split("-")[1]-1]||k); }),
         datasets:[
-          { label:"Coletado", data:datas.map(function(k){return Math.round(porData[k].col);}), backgroundColor:"#4f6ef7", borderRadius:4 },
-          { label:"Expedido", data:datas.map(function(k){return Math.round(porData[k].exp);}), backgroundColor:"#22c55e", borderRadius:4 }
+          { label:"Coletado", data:mesesVol.map(function(k){return Math.round(porMesVol[k].col);}), backgroundColor:"#4f6ef7", borderRadius:5 },
+          { label:"Expedido", data:mesesVol.map(function(k){return Math.round(porMesVol[k].exp);}), backgroundColor:"#22c55e", borderRadius:5 }
         ] },
       options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
         scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} } });
