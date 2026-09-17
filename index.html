@@ -688,6 +688,41 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-paletes"></div>
   </section>
+  <!-- 22 · PALETES SP (planilha CONTROLE PBR1 · ITJ → SP) -->
+  <section class="page" data-page="paletes_sp">
+    <div class="page-head">
+      <div class="eyebrow">22 · Paletes SP</div>
+      <h2>Paletes PBR1 · Itajaí &rarr; São Paulo</h2>
+      <p>Controle de envios de paletes PBR1 de Itajaí para São Paulo, com destaque para os <strong>envios à BRAFT</strong> por dia e por mês. O retorno de paletes vem consolidado (sem separação por destino), então é exibido como total geral.</p>
+    </div>
+    <div id="psp-status" class="insight" style="display:none"></div>
+    <div class="kpi-grid" id="kpi-psp"></div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Envios BRAFT por dia</h3><div class="sub">Paletes PBR1 enviados à BRAFT, por data de envio</div></div><span class="card-tag" style="border-color:#6c3483;color:#a569bd">BRAFT · DIÁRIO</span></div>
+        <div class="chart-wrap tall"><canvas id="chartPspBraftDia"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Envios BRAFT por mês</h3><div class="sub">Total de paletes à BRAFT por mês</div></div><span class="card-tag" style="border-color:#6c3483;color:#a569bd">BRAFT · MENSAL</span></div>
+        <div class="chart-wrap"><canvas id="chartPspBraftMes"></canvas></div>
+      </div>
+    </div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Destino dos envios</h3><div class="sub">BRAFT vs. Filial SP — total de paletes enviados</div></div><span class="card-tag">DESTINO</span></div>
+        <div class="chart-wrap"><canvas id="chartPspDestino"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Envios &times; devoluções por mês</h3><div class="sub">Saídas (todos destinos) e retornos consolidados</div></div><span class="card-tag">FLUXO</span></div>
+        <div class="chart-wrap"><canvas id="chartPspFluxo"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Últimos envios à BRAFT</h3><div class="sub">Registro mais recente de envios PBR1 para a BRAFT</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tablePspBraft"></table></div>
+    </div>
+    <div class="insight" id="insight-psp"></div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -1292,6 +1327,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     {id:'ocorr_exp', label:'Ocorrências Expedição', num:'19'},
     {id:'mattel', label:'Mattel', num:'20'},
     {id:'paletes', label:'Paletes', num:'21'},
+    {id:'paletes_sp', label:'Paletes SP', num:'22'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -3056,6 +3092,207 @@ body.locked > *:not(#loginScreen){display:none !important}
 
   function maybeLoad(){
     var sec=document.querySelector('.page[data-page="paletes"]');
+    if(sec&&sec.classList.contains("active")&&!loaded) loadAll();
+  }
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
+  document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
+  setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
+  setTimeout(maybeLoad, 300);
+})();
+</script>
+
+
+<!-- ============ ABA PALETES SP (independente) ============ -->
+<script>
+(function(){
+  "use strict";
+  var SHEET_ID="1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I";
+  var GID="1100141065";
+  var REFRESH_MS=5*60*1000;
+  var loaded=false, charts={};
+
+  function $(s,r){ return (r||document).querySelector(s); }
+  function norm(s){ return s==null?"":String(s).trim(); }
+  function up(s){ return norm(s).toUpperCase(); }
+  function fmtInt(n){ return (n||0).toLocaleString("pt-BR"); }
+  function parseNum(v){ if(v==null) return 0; var s=String(v).trim().replace(/\./g,"").replace(",","."); var n=parseFloat(s); return isNaN(n)?0:n; }
+  function setStatus(msg,err){ var el=$("#psp-status"); if(!el) return; if(!msg){el.style.display="none";return;} el.style.display="block"; el.className="insight"+(err?" warn":""); el.textContent=msg; }
+  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  var MES_LBL=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  function parseData(s){
+    var m=norm(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m) return {d:+m[1],mes:+m[2]-1,ano:+m[3], dia:m[1].padStart(2,"0")+"/"+m[2].padStart(2,"0"), mesKey:m[3]+"-"+m[2].padStart(2,"0")};
+    return null;
+  }
+
+  // ---- CSV via gviz + fallback JSONP (mesmo padrão da Mattel) ----
+  function csvUrl(){ return "https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:csv&gid="+GID+"&_="+Date.now(); }
+  function loadCSV(){ return loadFetch().catch(function(e){ console.warn("[PaletesSP] fetch falhou, JSONP…",e.message); return loadJSONP(); }); }
+  function loadFetch(){
+    return fetch(csvUrl()).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); })
+      .then(function(t){ return Papa.parse(t,{skipEmptyLines:false}).data; });
+  }
+  function loadJSONP(){
+    return new Promise(function(resolve,reject){
+      var cb="pspCB_"+Math.random().toString(36).slice(2);
+      var to=setTimeout(function(){cleanup();reject(new Error("Tempo esgotado ao carregar a planilha."));},15000);
+      function cleanup(){ clearTimeout(to); delete window[cb]; if(sc.parentNode) sc.parentNode.removeChild(sc); }
+      window[cb]=function(dt){
+        cleanup();
+        try{
+          var RE=/^Date\((\d+),\s*(\d+),\s*(\d+)/;
+          var rows=(dt.table.rows||[]).map(function(row){
+            return (row.c||[]).map(function(cell){
+              if(!cell) return "";
+              var v=(cell.v!==undefined&&cell.v!==null)?String(cell.v):"";
+              var dm=v.match(RE);
+              if(dm) return String(+dm[3]).padStart(2,"0")+"/"+String(+dm[2]+1).padStart(2,"0")+"/"+dm[1];
+              if(cell.f!==undefined&&cell.f!==null) return String(cell.f);
+              return v;
+            });
+          });
+          resolve(rows);
+        }catch(e){ reject(e); }
+      };
+      var sc=document.createElement("script");
+      sc.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?gid="+GID+"&tqx=out:json;responseHandler:"+cb+"&_="+Date.now();
+      sc.onerror=function(){ cleanup(); reject(new Error("Falha ao carregar o script da planilha.")); };
+      document.body.appendChild(sc);
+    });
+  }
+
+  // A planilha tem cabeçalho na linha 4 (idx 3). Colunas de ENVIO: 0 DATA, 1 PLACA,
+  // 2 MOTORISTA, 3 QTD, 4 RESPONSÁVEL(destino). DEVOLUÇÃO: 7 DATA, 10 QTD.
+  function analyze(rows){
+    var braftDia={}, braftMes={}, fluxoMes={}, braftLista=[];
+    var totBraft=0, totFilial=0, totDevol=0, enviosBraft=0;
+
+    for(var i=4;i<rows.length;i++){
+      var r=rows[i]; if(!r) continue;
+      // ENVIO
+      var de=norm(r[0]); var pd=parseData(de);
+      var resp=up(r[4]); var q=parseNum(r[3]);
+      if(pd && q>0 && (resp==="BRAFT"||resp==="FILIAL SP")){
+        (fluxoMes[pd.mesKey]=fluxoMes[pd.mesKey]||{env:0,dev:0}).env+=q;
+        if(resp==="BRAFT"){
+          totBraft+=q; enviosBraft++;
+          braftDia[pd.dia]=(braftDia[pd.dia]||0)+q;
+          braftMes[pd.mesKey]=(braftMes[pd.mesKey]||0)+q;
+          braftLista.push({data:de, placa:norm(r[1]), motorista:norm(r[2]), qtd:q, mesKey:pd.mesKey, ord:pd.ano*10000+(pd.mes+1)*100+pd.d});
+        }else{ totFilial+=q; }
+      }
+      // DEVOLUÇÃO (consolidada, sem destino)
+      var dd=parseData(r[7]); var qd=parseNum(r[10]);
+      if(dd && qd>0){
+        totDevol+=qd;
+        (fluxoMes[dd.mesKey]=fluxoMes[dd.mesKey]||{env:0,dev:0}).dev+=qd;
+      }
+    }
+
+    var diasArr=Object.keys(braftDia).map(function(k){
+      var p=k.split("/"); return {dia:k, qtd:braftDia[k], ord:+p[1]*100+ +p[0]};
+    }).sort(function(a,b){return a.ord-b.ord;});
+
+    var mesesArr=Object.keys(braftMes).sort().map(function(k){
+      return {mes:MES_LBL[+k.split("-")[1]-1]||k, qtd:braftMes[k]};
+    });
+
+    var fluxoArr=Object.keys(fluxoMes).sort().map(function(k){
+      return {mes:MES_LBL[+k.split("-")[1]-1]||k, env:fluxoMes[k].env, dev:fluxoMes[k].dev};
+    });
+
+    braftLista.sort(function(a,b){return b.ord-a.ord;});
+
+    return { diasBraft:diasArr, mesesBraft:mesesArr, fluxo:fluxoArr, braftLista:braftLista,
+             totBraft:totBraft, totFilial:totFilial, totDevol:totDevol, enviosBraft:enviosBraft,
+             totEnvios:totBraft+totFilial };
+  }
+
+  function kpi(label,value,sub){
+    return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
+  }
+  var C_BRAFT="#8e44ad", C_FILIAL="#2980b9", C_DEV="#1a7a3c";
+
+  function render(a){
+    var k=$("#kpi-psp");
+    if(k) k.innerHTML =
+      kpi("Enviados à BRAFT", '<span style="color:#a569bd">'+fmtInt(a.totBraft)+'</span>', a.enviosBraft+" envios") +
+      kpi("Enviados à Filial SP", fmtInt(a.totFilial), "PBR1") +
+      kpi("Total enviado", fmtInt(a.totEnvios), "Itajaí → SP") +
+      kpi("Devolvido (retorno)", fmtInt(a.totDevol), "consolidado") +
+      kpi("Saldo em SP", (a.totEnvios-a.totDevol>=0?"":"")+fmtInt(a.totEnvios-a.totDevol), "enviado − devolvido") +
+      kpi("% BRAFT", (a.totEnvios? Math.round(a.totBraft/a.totEnvios*100):0)+"%", "do total enviado");
+
+    if(typeof Chart==="undefined") return;
+    var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    var base={ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:ink}},datalabels:{display:false}},
+      scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
+
+    // BRAFT por dia (barras roxas)
+    mk("chartPspBraftDia",{ type:"bar",
+      data:{ labels:a.diasBraft.map(function(x){return x.dia;}),
+        datasets:[{ label:"Paletes BRAFT", data:a.diasBraft.map(function(x){return x.qtd;}),
+          backgroundColor:function(){var c=$("#chartPspBraftDia");if(!c)return C_BRAFT;var g=c.getContext("2d").createLinearGradient(0,0,0,320);g.addColorStop(0,C_BRAFT);g.addColorStop(1,"#5b2c6f");return g;}(), borderRadius:4 }] },
+      options:Object.assign({},base,{plugins:{legend:{display:false},datalabels:{display:false}}}) });
+
+    // BRAFT por mês
+    mk("chartPspBraftMes",{ type:"bar",
+      data:{ labels:a.mesesBraft.map(function(x){return x.mes;}),
+        datasets:[{ label:"Paletes BRAFT", data:a.mesesBraft.map(function(x){return x.qtd;}), backgroundColor:C_BRAFT, borderRadius:6 }] },
+      options:Object.assign({},base,{plugins:{legend:{display:false},datalabels:{display:false}}}) });
+
+    // Destino (doughnut BRAFT vs Filial)
+    mk("chartPspDestino",{ type:"doughnut",
+      data:{ labels:["BRAFT","Filial SP"], datasets:[{ data:[a.totBraft,a.totFilial], backgroundColor:[C_BRAFT,C_FILIAL], borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"62%", plugins:{legend:{position:"right",labels:{color:ink}},datalabels:{display:false}} } });
+
+    // Fluxo envios x devoluções por mês
+    mk("chartPspFluxo",{ type:"bar",
+      data:{ labels:a.fluxo.map(function(x){return x.mes;}),
+        datasets:[
+          { label:"Enviados", data:a.fluxo.map(function(x){return x.env;}), backgroundColor:C_FILIAL, borderRadius:4 },
+          { label:"Devolvidos", data:a.fluxo.map(function(x){return x.dev;}), backgroundColor:C_DEV, borderRadius:4 }
+        ] },
+      options:base });
+
+    // Tabela últimos envios BRAFT
+    var tb=$("#tablePspBraft");
+    if(tb){
+      var rows=a.braftLista.slice(0,20).map(function(x){
+        return "<tr><td style=\"text-align:left\">"+x.data+"</td><td style=\"text-align:left\">"+(x.placa||"—")+"</td><td style=\"text-align:left\">"+(x.motorista||"—")+"</td><td>"+fmtInt(x.qtd)+"</td></tr>";
+      }).join("");
+      if(!rows) rows='<tr><td colspan="4" style="text-align:left;color:var(--ink-muted)">Nenhum envio à BRAFT encontrado</td></tr>';
+      tb.innerHTML='<thead><tr><th style="text-align:left">Data envio</th><th style="text-align:left">Placa</th><th style="text-align:left">Motorista</th><th>Qtd PBR1</th></tr></thead><tbody>'+rows+'</tbody>';
+    }
+
+    var ins=$("#insight-psp");
+    if(ins){
+      ins.className="insight good";
+      ins.innerHTML="Foram enviados <b>"+fmtInt(a.totBraft)+" paletes PBR1</b> à BRAFT em "+a.enviosBraft+" envios ("+
+        (a.totEnvios?Math.round(a.totBraft/a.totEnvios*100):0)+"% do total). O retorno de "+fmtInt(a.totDevol)+
+        " paletes vem consolidado, sem separação por destino.";
+    }
+  }
+
+  function loadAll(){
+    setStatus("Carregando dados de Paletes SP…",false);
+    loadCSV().then(function(rows){
+      var a=analyze(rows||[]);
+      render(a);
+      loaded=true;
+      if(!a.totEnvios){ setStatus("Planilha carregada, mas nenhum envio foi reconhecido. Verifique se a aba (gid) está correta.",true); }
+      else setStatus("",false);
+      console.log("[PaletesSP] linhas:",(rows||[]).length,"| BRAFT:",a.totBraft);
+    }).catch(function(e){
+      console.error("[PaletesSP]",e);
+      setStatus("Falha ao carregar Paletes SP: "+(e.message||e),true);
+    });
+  }
+
+  function maybeLoad(){
+    var sec=document.querySelector('.page[data-page="paletes_sp"]');
     if(sec&&sec.classList.contains("active")&&!loaded) loadAll();
   }
   document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
