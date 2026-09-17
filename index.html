@@ -653,6 +653,41 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-mattel"></div>
   </section>
+  <!-- 21 · PALETES (sistema Conferência Geral — Firestore conferenciaptx) -->
+  <section class="page" data-page="paletes">
+    <div class="page-head">
+      <div class="eyebrow">21 · Paletes</div>
+      <h2>Controle de paletes</h2>
+      <p>Movimentação de paletes (enviados e recebidos) do sistema <strong>Conferência Geral</strong>, por dia e por mês, com transferências SC&times;SP, modelos e controle por cliente. Dados ao vivo do Firestore.</p>
+    </div>
+    <div id="pal-status" class="insight" style="display:none"></div>
+    <div class="kpi-grid" id="kpi-paletes"></div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Enviados &amp; recebidos por dia</h3><div class="sub">Últimos 30 dias — entradas e saídas de paletes</div></div><span class="card-tag" style="border-color:#f0a500;color:#f0a500">DIÁRIO</span></div>
+        <div class="chart-wrap tall"><canvas id="chartPalDia"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Por modelo</h3><div class="sub">PBR · Descartável · Outros</div></div><span class="card-tag">MODELO</span></div>
+        <div class="chart-wrap"><canvas id="chartPalModelo"></canvas></div>
+      </div>
+    </div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Enviados &amp; recebidos por mês</h3><div class="sub">Entradas e saídas de paletes por mês</div></div><span class="card-tag">MENSAL</span></div>
+        <div class="chart-wrap"><canvas id="chartPalMes"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Transferências SC&times;SP</h3><div class="sub">Paletes em transferência vs. operação normal</div></div><span class="card-tag" style="border-color:#0c7c8c;color:#0c7c8c">TRANSFERÊNCIA</span></div>
+        <div class="chart-wrap"><canvas id="chartPalTransf"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Controle paralelo por cliente</h3><div class="sub">Paletes por cliente de destino (BRAFT, MATTEL, THOMPSON…)</div></div><span class="card-tag">CLIENTE</span></div>
+      <div class="table-wrap"><table class="data" id="tablePalCliente"></table></div>
+    </div>
+    <div class="insight" id="insight-paletes"></div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -1256,6 +1291,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     {id:'ocorrencias', label:'Ocorrências', num:'18'},
     {id:'ocorr_exp', label:'Ocorrências Expedição', num:'19'},
     {id:'mattel', label:'Mattel', num:'20'},
+    {id:'paletes', label:'Paletes', num:'21'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -2800,6 +2836,231 @@ body.locked > *:not(#loginScreen){display:none !important}
   // Se o display estiver em rotação automática, garante recarga periódica.
   setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
   // Primeira chance (caso a aba já entre ativa por algum motivo).
+  setTimeout(maybeLoad, 300);
+})();
+</script>
+
+
+<!-- ============ ABA PALETES (independente) ============ -->
+<script>
+(function(){
+  "use strict";
+  var FS_PROJECT = "conferenciaptx";
+  var FS_BASE = "https://firestore.googleapis.com/v1/projects/"+FS_PROJECT+"/databases/(default)/documents";
+  var FS_QUERY = "https://firestore.googleapis.com/v1/projects/"+FS_PROJECT+"/databases/(default)/documents:runQuery";
+  var DIAS_JANELA = 30;
+  var REFRESH_MS = 5*60*1000;
+  var loaded=false, charts={};
+
+  function $(s,r){ return (r||document).querySelector(s); }
+  function fmtInt(n){ return (n||0).toLocaleString("pt-BR"); }
+  function setStatus(msg,err){ var el=$("#pal-status"); if(!el) return; if(!msg){el.style.display="none";return;} el.style.display="block"; el.className="insight"+(err?" warn":""); el.textContent=msg; }
+  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  // ---- Firestore REST: converte um "fields" tipado em objeto JS simples ----
+  function fsVal(v){
+    if(v==null) return null;
+    if("stringValue" in v) return v.stringValue;
+    if("integerValue" in v) return parseInt(v.integerValue,10);
+    if("doubleValue" in v) return v.doubleValue;
+    if("booleanValue" in v) return v.booleanValue;
+    if("timestampValue" in v) return v.timestampValue;
+    if("nullValue" in v) return null;
+    if("mapValue" in v) return fsFields((v.mapValue&&v.mapValue.fields)||{});
+    if("arrayValue" in v){ var a=(v.arrayValue&&v.arrayValue.values)||[]; return a.map(fsVal); }
+    return null;
+  }
+  function fsFields(f){ var o={}; Object.keys(f||{}).forEach(function(k){ o[k]=fsVal(f[k]); }); return o; }
+
+  // Busca operações dos últimos N dias via runQuery (filtra por timestamp)
+  function fetchOperacoes(){
+    var desde=new Date(); desde.setDate(desde.getDate()-DIAS_JANELA); desde.setHours(0,0,0,0);
+    var body={ structuredQuery:{
+      from:[{collectionId:"operacoes"}],
+      where:{ fieldFilter:{ field:{fieldPath:"timestamp"}, op:"GREATER_THAN_OR_EQUAL",
+        value:{ timestampValue: desde.toISOString() } } },
+      orderBy:[{ field:{fieldPath:"timestamp"}, direction:"DESCENDING" }]
+    }};
+    return fetch(FS_QUERY,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) })
+      .then(function(r){
+        if(r.status===403) throw new Error("permission-denied");
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        return r.json();
+      })
+      .then(function(arr){
+        // runQuery devolve [{document:{fields}}, ...]; linhas sem "document" são ignoradas
+        return (arr||[]).filter(function(x){return x.document;}).map(function(x){
+          var o=fsFields(x.document.fields||{});
+          o._ts = x.document.fields && x.document.fields.timestamp ? x.document.fields.timestamp.timestampValue : null;
+          return o;
+        });
+      });
+  }
+
+  // ---- Helpers de palete (espelham a lógica do admin.html) ----
+  function palLabel(p){
+    if(!p) return "Outros";
+    if(p.tipo==="PBR") return "PBR";
+    if(p.tipo==="DESCARTAVEL") return "Descartável";
+    if(p.tipo==="OUTROS") return (p.tipoCustom&&String(p.tipoCustom).trim())?String(p.tipoCustom).trim():"Outros";
+    return p.tipo||"Outros";
+  }
+  function dataDaOp(op){
+    var d = op._ts ? new Date(op._ts) : null;
+    if(d && !isNaN(d)) return d;
+    // fallback: dataRef DD/MM/AAAA
+    var dr=op.dataRef; if(dr && /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dr)){ var p=dr.split("/"); return new Date(+p[2],+p[1]-1,+p[0]); }
+    return null;
+  }
+  var MES_LBL=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+  function analyze(ops){
+    var modelo={PBR:{e:0,s:0},DESCARTAVEL:{e:0,s:0},OUTROS:{e:0,s:0}};
+    var porDia={}, porMes={}, transf={normal:0,transf:0}, cliente={};
+    var totalEnv=0, totalReb=0, opsComPalete=0;
+
+    ops.forEach(function(op){
+      var pals=Array.isArray(op.paletes)?op.paletes:[];
+      if(!pals.length) return;
+      opsComPalete++;
+      var dir = (op.tipoExecucao==="SAIDA")?"s":"e";
+      var d=dataDaOp(op);
+      var diaKey = d? (String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")) : "—";
+      var mesKey = d? (d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")) : "—";
+
+      pals.forEach(function(p){
+        var q=parseInt(p.quantidade,10)||0; if(!q) return;
+        // Totais por direção
+        if(dir==="s") totalEnv+=q; else totalReb+=q;
+        // Por dia / mês (exclui transferência do fluxo normal, como no admin)
+        if(!op.transferencia){
+          (porDia[diaKey]=porDia[diaKey]||{e:0,s:0})[dir]+=q;
+          (porMes[mesKey]=porMes[mesKey]||{e:0,s:0})[dir]+=q;
+          var mk = p.tipo==="PBR"?"PBR":p.tipo==="DESCARTAVEL"?"DESCARTAVEL":"OUTROS";
+          modelo[mk][dir]+=q;
+        }
+        // Transferência
+        if(op.transferencia) transf.transf+=q; else transf.normal+=q;
+        // Cliente (controle paralelo)
+        if(p.destino){ var c=cliente[p.destino]=cliente[p.destino]||{e:0,s:0,t:0}; c[dir]+=q; if(op.transferencia)c.t+=q; }
+      });
+    });
+
+    // dias ordenados (últimos ~30, ordem cronológica)
+    var diasArr=Object.keys(porDia).filter(function(k){return k!=="—";})
+      .sort(function(a,b){ var pa=a.split("/"),pb=b.split("/"); return (pa[1]+pa[0]).localeCompare(pb[1]+pb[0]); })
+      .map(function(k){ return {dia:k, e:porDia[k].e, s:porDia[k].s}; });
+
+    var mesesArr=Object.keys(porMes).filter(function(k){return k!=="—";}).sort()
+      .map(function(k){ var mm=parseInt(k.split("-")[1],10)-1; return {mes:MES_LBL[mm]||k, e:porMes[k].e, s:porMes[k].s}; });
+
+    var cliArr=Object.keys(cliente).map(function(k){ return {nome:k, e:cliente[k].e, s:cliente[k].s, t:cliente[k].t}; })
+      .filter(function(x){return x.e||x.s;}).sort(function(a,b){return (b.e+b.s)-(a.e+a.s);});
+
+    return { modelo:modelo, dias:diasArr, meses:mesesArr, transf:transf, cliente:cliArr,
+             totalEnv:totalEnv, totalReb:totalReb, opsComPalete:opsComPalete, saldo:totalReb-totalEnv };
+  }
+
+  function kpi(label,value,sub){
+    return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
+  }
+
+  var C_ENV="#c0392b", C_REB="#1a7a3c", C_TRANSF="#0c7c8c";
+
+  function render(a){
+    var k=$("#kpi-paletes");
+    if(k) k.innerHTML =
+      kpi("Enviados (saída)", '<span style="color:'+C_ENV+'">'+fmtInt(a.totalEnv)+'</span>', "últimos "+DIAS_JANELA+" dias") +
+      kpi("Recebidos (entrada)", '<span style="color:'+C_REB+'">'+fmtInt(a.totalReb)+'</span>', "últimos "+DIAS_JANELA+" dias") +
+      kpi("Saldo líquido", (a.saldo>=0?"+":"")+fmtInt(a.saldo), "entrada − saída") +
+      kpi("Em transferência", fmtInt(a.transf.transf), "SC×SP") +
+      kpi("Operações c/ palete", fmtInt(a.opsComPalete), "no período") +
+      kpi("Clientes", fmtInt(a.cliente.length), "controle paralelo");
+
+    if(typeof Chart==="undefined") return;
+    var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    var base={ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:ink}},datalabels:{display:false}},
+      scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
+
+    // Por dia (barras agrupadas enviados/recebidos)
+    mk("chartPalDia",{ type:"bar",
+      data:{ labels:a.dias.map(function(x){return x.dia;}),
+        datasets:[
+          { label:"Recebidos", data:a.dias.map(function(x){return x.e;}), backgroundColor:C_REB, borderRadius:4 },
+          { label:"Enviados",  data:a.dias.map(function(x){return x.s;}), backgroundColor:C_ENV, borderRadius:4 }
+        ] },
+      options:base });
+
+    // Por modelo (barras: entrada/saída por tipo)
+    var modK=["PBR","DESCARTAVEL","OUTROS"], modL=["PBR","Descartável","Outros"];
+    mk("chartPalModelo",{ type:"bar",
+      data:{ labels:modL,
+        datasets:[
+          { label:"Recebidos", data:modK.map(function(m){return a.modelo[m].e;}), backgroundColor:C_REB, borderRadius:4 },
+          { label:"Enviados",  data:modK.map(function(m){return a.modelo[m].s;}), backgroundColor:C_ENV, borderRadius:4 }
+        ] },
+      options:base });
+
+    // Por mês
+    mk("chartPalMes",{ type:"bar",
+      data:{ labels:a.meses.map(function(x){return x.mes;}),
+        datasets:[
+          { label:"Recebidos", data:a.meses.map(function(x){return x.e;}), backgroundColor:C_REB, borderRadius:4 },
+          { label:"Enviados",  data:a.meses.map(function(x){return x.s;}), backgroundColor:C_ENV, borderRadius:4 }
+        ] },
+      options:base });
+
+    // Transferências (doughnut normal vs transferência)
+    mk("chartPalTransf",{ type:"doughnut",
+      data:{ labels:["Operação normal","Transferência SC×SP"],
+        datasets:[{ data:[a.transf.normal,a.transf.transf], backgroundColor:["#4d9fff",C_TRANSF], borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"62%", plugins:{legend:{position:"right",labels:{color:ink}},datalabels:{display:false}} } });
+
+    // Tabela por cliente
+    var tb=$("#tablePalCliente");
+    if(tb){
+      var rows=a.cliente.map(function(c){
+        return "<tr><td style=\"text-align:left\">"+c.nome+"</td><td>"+fmtInt(c.e)+"</td><td>"+fmtInt(c.s)+"</td><td>"+fmtInt(c.t)+"</td></tr>";
+      }).join("");
+      if(!rows) rows='<tr><td colspan="4" style="text-align:left;color:var(--ink-muted)">Nenhum palete destinado a cliente no período</td></tr>';
+      tb.innerHTML='<thead><tr><th style="text-align:left">Cliente</th><th>Recebidos</th><th>Enviados</th><th>Em transf.</th></tr></thead><tbody>'+rows+'</tbody>';
+    }
+
+    var ins=$("#insight-paletes");
+    if(ins){
+      ins.className="insight"+(a.saldo<0?" warn":" good");
+      ins.innerHTML = "No período, entraram <b>"+fmtInt(a.totalReb)+"</b> e saíram <b>"+fmtInt(a.totalEnv)+"</b> paletes"+
+        " (saldo "+(a.saldo>=0?"+":"")+fmtInt(a.saldo)+"), com <b>"+fmtInt(a.transf.transf)+"</b> em transferência SC×SP.";
+    }
+  }
+
+  function loadAll(){
+    setStatus("Carregando dados de paletes…",false);
+    fetchOperacoes().then(function(ops){
+      var a=analyze(ops);
+      render(a);
+      loaded=true;
+      if(!ops.length){ setStatus("Nenhuma operação encontrada nos últimos "+DIAS_JANELA+" dias.",true); }
+      else setStatus("",false);
+      console.log("[Paletes] operações:",ops.length);
+    }).catch(function(e){
+      console.error("[Paletes]",e);
+      if(String(e.message).indexOf("permission-denied")>=0){
+        setStatus("Acesso negado ao Firestore. Publique a regra que libera leitura pública da coleção 'operacoes' (veja instruções).",true);
+      }else{
+        setStatus("Falha ao carregar dados de paletes: "+(e.message||e),true);
+      }
+    });
+  }
+
+  function maybeLoad(){
+    var sec=document.querySelector('.page[data-page="paletes"]');
+    if(sec&&sec.classList.contains("active")&&!loaded) loadAll();
+  }
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
+  document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
+  setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
   setTimeout(maybeLoad, 300);
 })();
 </script>
