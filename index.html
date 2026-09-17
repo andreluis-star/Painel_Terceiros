@@ -694,7 +694,17 @@ body.locked > *:not(#loginScreen){display:none !important}
       <div class="eyebrow">22 · Paletes SP</div>
       <h2>Paletes PBR1 · Itajaí &rarr; São Paulo</h2>
       <p>Controle de envios de paletes PBR1 de Itajaí para São Paulo, com destaque para os <strong>envios à BRAFT</strong> por dia e por mês. O retorno de paletes vem consolidado (sem separação por destino), então é exibido como total geral.</p>
+      <a class="psp-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=1100141065#gid=1100141065" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:6px"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>PESQUISAR BASE
+      </a>
     </div>
+    <style>
+      .page[data-page="paletes_sp"] .psp-btn-base{ display:inline-flex; align-items:center; margin-top:12px;
+        background:#6c3483; color:#fff; text-decoration:none; font-weight:700; font-size:0.8rem; letter-spacing:.03em;
+        padding:9px 16px; border-radius:8px; box-shadow:0 4px 14px -6px rgba(108,52,131,.8); transition:filter .15s, transform .1s; }
+      .page[data-page="paletes_sp"] .psp-btn-base:hover{ filter:brightness(1.12); }
+      .page[data-page="paletes_sp"] .psp-btn-base:active{ transform:translateY(1px); }
+    </style>
     <div id="psp-status" class="insight" style="display:none"></div>
     <div class="kpi-grid" id="kpi-psp"></div>
     <div class="row cols-2">
