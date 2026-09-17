@@ -2882,20 +2882,26 @@ body.locked > *:not(#loginScreen){display:none !important}
     return Promise.race([fetchXml,to]);
   }
 
-  // Extrai quantidade de peças/volumes de uma NF no notas-xml-data (tolerante a formatos)
-  function volDaNF(xml, nf){
-    if(!xml) return 0;
-    var rec = xml[nf] || xml[String(nf)] || null;
-    if(!rec) return 0;
-    if(typeof rec==="number") return rec;
-    // soma quantidades de itens, se houver
-    var itens = rec.itens || rec.items || rec.produtos || rec.det || null;
+  // O notas-xml-data é {items:[{nf,cod,sku,item,qtd},...], meta, minutas, files}.
+  // A quantidade por NF é a SOMA de it.qtd dos itens dessa NF (igual ao getNfeQtdBatch
+  // do sistema); os SKUs são os it.cod distintos. Construímos os dois índices aqui.
+  function indexarXML(xml){
+    var itens = xml && (Array.isArray(xml)?xml:(xml.items||xml.itens||null));
+    var qtdPorNf={}, skusPorNf={}, skusGlobal={};
     if(Array.isArray(itens)){
-      return itens.reduce(function(s,it){ return s + (parseFloat(it.qCom||it.qtd||it.quantidade||it.qTrib||0)||0); },0);
+      itens.forEach(function(it){
+        if(!it) return;
+        var nf=it.nf!=null?String(it.nf):"";
+        if(!nf) return;
+        var q=parseFloat(it.qtd!=null?it.qtd:(it.qCom!=null?it.qCom:(it.quantidade!=null?it.quantidade:0)))||0;
+        qtdPorNf[nf]=(qtdPorNf[nf]||0)+q;
+        var cod=it.cod!=null?it.cod:(it.sku!=null?it.sku:null);
+        if(cod!=null){ (skusPorNf[nf]=skusPorNf[nf]||{})[cod]=1; skusGlobal[cod]=1; }
+      });
     }
-    // campos diretos de volume/quantidade
-    return parseFloat(rec.qVol||rec.volumes||rec.qtdVolumes||rec.quantidade||rec.qtd||0)||0;
+    return { qtdPorNf:qtdPorNf, skusPorNf:skusPorNf, totalSkus:Object.keys(skusGlobal).length, temItens:!!(itens&&itens.length) };
   }
+  function volDaNF(xi, nf){ if(!xi) return 0; return xi.qtdPorNf[String(nf)]||xi.qtdPorNf[nfKey(nf)]||0; }
 
   function renderDashOperacional(processos, minutas, xml){
     var procArr = asArr(processos), minArr = asArr(minutas);
@@ -2915,15 +2921,17 @@ body.locked > *:not(#loginScreen){display:none !important}
       return {codigo:p.codigo||p.id||"", nfs:nfs, statusPorNf:statusPorNf, dateKey:dateKey, data:data};
     });
 
-    // conjuntos globais
-    var nfsSet={}, minutasSet={}, statusCount={}, totalVol=0, temVol=!!xml;
+    // índice de volumes/SKUs a partir do XML (se veio)
+    var xi = indexarXML(xml);
+    var temVol = xi.temItens;
+    var nfsSet={}, minutasSet={}, statusCount={}, totalVol=0;
     SEP_ORDER.forEach(function(k){ statusCount[k]=0; });
     procs.forEach(function(p){
       p.nfs.forEach(function(nf){
         nfsSet[nfKey(nf)]=1;
         var st=p.statusPorNf[nf]||"NAO_COLETADA";
         if(st in statusCount) statusCount[st]++;
-        if(xml) totalVol += volDaNF(xml, nf);
+        if(temVol) totalVol += volDaNF(xi, nf);
       });
     });
     var nfsGlobais={}; procs.forEach(function(p){p.nfs.forEach(function(nf){nfsGlobais[nfKey(nf)]=1;});});
@@ -2935,7 +2943,8 @@ body.locked > *:not(#loginScreen){display:none !important}
       kpiBox("Processos", fmtInt(procs.length)) +
       kpiBox("Notas fiscais", fmtInt(Object.keys(nfsSet).length)) +
       kpiBox("Minutas", fmtInt(Object.keys(minutasSet).length)) +
-      kpiBox("Volumes (peças)", temVol?fmtInt(Math.round(totalVol)):"—", temVol?"":"XML indisponível") +
+      kpiBox("Volumes (peças)", temVol?fmtInt(Math.round(totalVol)):"—", temVol?"":"carregando XML…") +
+      kpiBox("SKUs distintos", temVol?fmtInt(xi.totalSkus):"—", temVol?"":"carregando XML…") +
       kpiBox("Expedidas", fmtInt(statusCount.EXPEDIDA)) +
       kpiBox("Aguardando", fmtInt(statusCount.AGUARDANDO_EXP));
 
@@ -2953,7 +2962,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     var porData={};
     procs.forEach(function(p){
       p.nfs.forEach(function(nf){
-        var v = xml? volDaNF(xml,nf) : 0;
+        var v = temVol? volDaNF(xi,nf) : 0;
         if(!porData[p.dateKey]) porData[p.dateKey]={col:0,exp:0};
         porData[p.dateKey].col += v;
         if((p.statusPorNf[nf]||"")==="EXPEDIDA") porData[p.dateKey].exp += v;
@@ -2975,7 +2984,7 @@ body.locked > *:not(#loginScreen){display:none !important}
       if(p.dateKey==="—") return;
       if(!porTab[p.dateKey]) porTab[p.dateKey]={data:p.data,procs:{},nfs:{},vol:0,status:{}};
       var e=porTab[p.dateKey]; e.procs[p.codigo]=1;
-      p.nfs.forEach(function(nf){ e.nfs[nfKey(nf)]=1; if(xml) e.vol+=volDaNF(xml,nf); var st=p.statusPorNf[nf]; e.status[st]=(e.status[st]||0)+1; });
+      p.nfs.forEach(function(nf){ e.nfs[nfKey(nf)]=1; if(temVol) e.vol+=volDaNF(xi,nf); var st=p.statusPorNf[nf]; e.status[st]=(e.status[st]||0)+1; });
     });
     var chaves=Object.keys(porTab).sort();
     var tb=$("#tableDashData");
