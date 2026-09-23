@@ -893,15 +893,32 @@ body.locked > *:not(#loginScreen){display:none !important}
     const raw = {};
     ROW_SEQUENCE.forEach((key, idx) => { raw[key] = rows[start + idx] || []; });
 
-    // Count only CONSECUTIVE populated columns starting at column 1 — the
-    // sheet has an unrelated reference/target block further to the right
-    // that can contain stray non-empty cells, which would otherwise be
-    // mistaken for extra months.
-    const diasUteisRow = raw['dias_uteis'];
-    let lastCol = 0;
-    for(let c = 1; c < diasUteisRow.length; c++){
-      if((diasUteisRow[c]||'').trim() !== '') lastCol = c;
-      else break;
+    // Conta as colunas de mês de forma robusta. A régua antiga parava na
+    // PRIMEIRA célula vazia da linha "dias úteis" — então um único mês com
+    // "dias úteis" em branco cortava todos os meses seguintes do painel.
+    //
+    // Nova regra: uma coluna é um "mês real" quando VÁRIAS linhas de dados
+    // têm valor nela (um mês de verdade preenche vários campos). O bloco de
+    // referência/metas à direita costuma preencher só 1–2 linhas soltas, então
+    // não é confundido com mês. Paramos após uma sequência de colunas vazias
+    // (o vão entre os dados e o bloco de referência).
+    const LINHAS_REGUA = ROW_SEQUENCE;                 // todas as linhas de dados
+    const maxColunas = Math.max.apply(null, LINHAS_REGUA.map(k => (raw[k]||[]).length));
+    const MIN_LINHAS_PREENCHIDAS = 3;                  // coluna vale como mês se ≥3 linhas têm valor
+    const MAX_VAOS = 2;                                // para após 2 colunas "fracas" seguidas
+    let lastCol = 0, vaos = 0;
+    for(let c = 1; c < maxColunas; c++){
+      let preenchidas = 0;
+      for(const k of LINHAS_REGUA){
+        const cell = ((raw[k]||[])[c] || '').toString().trim();
+        if(cell !== '') preenchidas++;
+      }
+      if(preenchidas >= MIN_LINHAS_PREENCHIDAS){
+        lastCol = c; vaos = 0;                         // mês real
+      }else{
+        vaos++;
+        if(lastCol > 0 && vaos >= MAX_VAOS) break;     // fim do bloco de dados
+      }
     }
     if(lastCol === 0) throw new Error('Não encontrei meses preenchidos na aba "MONTAGENS GRAF".');
 
