@@ -784,7 +784,7 @@ body.locked > *:not(#loginScreen){display:none !important}
         <div class="chart-wrap tall"><canvas id="chartBraftMes"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-head"><div><h3>Enviado × Ficou lá por mês</h3><div class="sub">Paletes que retornaram vs. que ficaram na BRAFT</div></div><span class="card-tag">FLUXO</span></div>
+        <div class="card-head"><div><h3>Enviado × Saldo na TAC por mês</h3><div class="sub">Paletes que retornaram vs. que ficaram na BRAFT</div></div><span class="card-tag">FLUXO</span></div>
         <div class="chart-wrap tall"><canvas id="chartBraftFluxo"></canvas></div>
       </div>
     </div>
@@ -3745,7 +3745,7 @@ body.locked > *:not(#loginScreen){display:none !important}
       var d=chart.data, ds=d.datasets[0];
       return d.labels.map(function(lab,i){
         var val=ds.data[i]||0;
-        return { text:lab+": "+val.toLocaleString("pt-BR"), fillStyle:ds.backgroundColor[i], strokeStyle:ds.backgroundColor[i], lineWidth:0, index:i };
+        return { text:lab+": "+val.toLocaleString("pt-BR"), fillStyle:ds.backgroundColor[i], strokeStyle:ds.backgroundColor[i], lineWidth:0, fontColor:"#ffffff", index:i };
       });
     }
     var base={ responsive:true, maintainAspectRatio:false, layout:{padding:{top:16}}, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
@@ -3763,14 +3763,14 @@ body.locked > *:not(#loginScreen){display:none !important}
       data:{ labels:a.fluxo.map(function(x){return x.mes;}),
         datasets:[
           { label:"Enviados", data:a.fluxo.map(function(x){return x.env;}), backgroundColor:C_ENV, borderRadius:4 },
-          { label:"Ficou lá", data:a.fluxo.map(function(x){return x.ficou;}), backgroundColor:C_FICOU, borderRadius:4 }
+          { label:"Saldo na TAC", data:a.fluxo.map(function(x){return x.ficou;}), backgroundColor:C_FICOU, borderRadius:4 }
         ] },
       options:Object.assign({},base,{plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlIn}}) });
 
     // Envios por destino (doughnut)
     mk("chartBraftDestino",{ type:"doughnut",
       data:{ labels:["Guarulhos","SP Filial","Sul"], datasets:[{ data:[a.destino.gua,a.destino.sp,a.destino.sul], backgroundColor:["#8e44ad","#2980b9","#16a085"], borderWidth:0 }] },
-      options:{ responsive:true, maintainAspectRatio:false, cutout:"60%", plugins:{legend:{position:"right",labels:{color:ink,generateLabels:legendaComValor}},datalabels:{display:false}} } });
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"60%", plugins:{legend:{position:"right",labels:{color:"#ffffff",generateLabels:legendaComValor}},datalabels:{display:false}} } });
 
     // Volumes e NFs por mês (barras volume + linha NFs)
     mk("chartBraftVol",{ type:"bar",
@@ -3779,7 +3779,7 @@ body.locked > *:not(#loginScreen){display:none !important}
           { type:"bar", label:"Volumes", yAxisID:"y", data:a.volNF.map(function(x){return x.vol;}), backgroundColor:C_VOL, borderRadius:4, order:2 },
           { type:"line", label:"NFs", yAxisID:"y1", data:a.volNF.map(function(x){return x.nf;}), borderColor:C_NF, backgroundColor:C_NF, borderWidth:2, tension:.3, pointRadius:3, order:1 }
         ] },
-      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:16}}, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlIn},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:18}}, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlTop},
         scales:{x:{ticks:{color:ink},grid:{color:gridC}},
           y:{position:"left",beginAtZero:true,ticks:{color:ink},grid:{color:gridC},title:{display:true,text:"Volumes",color:ink}},
           y1:{position:"right",beginAtZero:true,ticks:{color:C_NF},grid:{drawOnChartArea:false},title:{display:true,text:"NFs",color:C_NF}}} } });
@@ -3827,7 +3827,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     var ins=$("#insight-braft");
     if(ins){
       ins.className="insight"+(a.totFicou>0?" warn":" good");
-      ins.innerHTML="Foram enviados <b>"+fmtInt(a.totEnv)+" paletes</b> à BRAFT em "+a.nReg+" registros. Atualmente <b>"+fmtInt(a.totFicou)+" paletes</b> constam como \u2018ficou lá\u2019 (a devolver). Carga acumulada: "+fmtInt(a.totNF)+" NFs, "+fmtInt(a.totVol)+" volumes, "+fmtInt(a.totPeso)+" kg.";
+      ins.innerHTML="Foram enviados <b>"+fmtInt(a.totEnv)+" paletes</b> à BRAFT em "+a.nReg+" registros. Atualmente o <b>saldo na TAC</b> é de <b>"+fmtInt(a.totFicou)+" paletes</b> (a devolver). Carga acumulada: "+fmtInt(a.totNF)+" NFs, "+fmtInt(a.totVol)+" volumes, "+fmtInt(a.totPeso)+" kg.";
     }
   }
 
