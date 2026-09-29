@@ -759,6 +759,51 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-psp"></div>
   </section>
+  <!-- 23 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
+  <section class="page" data-page="braft">
+    <div class="page-head">
+      <div class="eyebrow">23 · BRAFT</div>
+      <h2>Fluxo de paletes BRAFT</h2>
+      <p>Checklist completo da BRAFT: paletes enviados (por destino), o que <strong>ficou lá</strong>, stretch, e o resumo de NFs, volumes e peso atualizados pelo grupo. Dados ao vivo da aba BRAFT da planilha.</p>
+      <a class="braft-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=574891819#gid=574891819" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:6px"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>PESQUISAR BASE
+      </a>
+    </div>
+    <style>
+      .page[data-page="braft"] .braft-btn-base{ display:inline-flex; align-items:center; margin-top:12px;
+        background:#8e44ad; color:#fff; text-decoration:none; font-weight:700; font-size:0.8rem; letter-spacing:.03em;
+        padding:9px 16px; border-radius:8px; box-shadow:0 4px 14px -6px rgba(142,68,173,.8); transition:filter .15s, transform .1s; }
+      .page[data-page="braft"] .braft-btn-base:hover{ filter:brightness(1.12); }
+      .page[data-page="braft"] .braft-btn-base:active{ transform:translateY(1px); }
+    </style>
+    <div id="braft-status" class="insight" style="display:none"></div>
+    <div class="kpi-grid" id="kpi-braft"></div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Paletes enviados por mês</h3><div class="sub">Total de paletes enviados à BRAFT por mês</div></div><span class="card-tag" style="border-color:#8e44ad;color:#a569bd">ENVIOS</span></div>
+        <div class="chart-wrap tall"><canvas id="chartBraftMes"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Enviado × Ficou lá por mês</h3><div class="sub">Paletes que retornaram vs. que ficaram na BRAFT</div></div><span class="card-tag">FLUXO</span></div>
+        <div class="chart-wrap tall"><canvas id="chartBraftFluxo"></canvas></div>
+      </div>
+    </div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Envios por destino</h3><div class="sub">Guarulhos · SP Filial · Sul</div></div><span class="card-tag">DESTINO</span></div>
+        <div class="chart-wrap"><canvas id="chartBraftDestino"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Volumes e NFs por mês</h3><div class="sub">Atualizados pelo grupo (WhatsApp)</div></div><span class="card-tag">CARGA</span></div>
+        <div class="chart-wrap tall"><canvas id="chartBraftVol"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Últimos registros</h3><div class="sub">Movimentações mais recentes da BRAFT</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableBraft"></table></div>
+    </div>
+    <div class="insight" id="insight-braft"></div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -1381,6 +1426,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     {id:'mattel', label:'Mattel', num:'20'},
     {id:'paletes', label:'Paletes', num:'21'},
     {id:'paletes_sp', label:'Paletes SP', num:'22'},
+    {id:'braft', label:'BRAFT', num:'23'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -3523,6 +3569,210 @@ body.locked > *:not(#loginScreen){display:none !important}
 
   function maybeLoad(){
     var sec=document.querySelector('.page[data-page="paletes_sp"]');
+    if(sec&&sec.classList.contains("active")&&!loaded) loadAll();
+  }
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
+  document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
+  setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
+  setTimeout(maybeLoad, 300);
+})();
+</script>
+
+
+<!-- ============ ABA BRAFT (independente) ============ -->
+<script>
+(function(){
+  "use strict";
+  var SHEET_ID="1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I";
+  var GID="574891819";
+  var REFRESH_MS=5*60*1000;
+  var loaded=false, charts={};
+
+  function $(s,r){ return (r||document).querySelector(s); }
+  function norm(s){ return s==null?"":String(s).trim(); }
+  function fmtInt(n){ return Math.round(n||0).toLocaleString("pt-BR"); }
+  function num(v){ if(v==null) return 0; var s=String(v).trim().replace(/\s*kg\s*$/i,"").replace(/\./g,"").replace(",","."); var n=parseFloat(s); return isNaN(n)?0:n; }
+  function setStatus(msg,err){ var el=$("#braft-status"); if(!el) return; if(!msg){el.style.display="none";return;} el.style.display="block"; el.className="insight"+(err?" warn":""); el.textContent=msg; }
+  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  var MES_LBL=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+  function parseData(s){
+    var m=norm(s).match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);
+    if(!m) return null;
+    var yy=m[3]||"2026"; if(yy.length===2) yy="20"+yy;
+    return { dia:m[1].padStart(2,"0"), mesNum:+m[2], ano:+yy, data:m[1].padStart(2,"0")+"/"+m[2].padStart(2,"0")+"/"+yy.slice(2), mesKey:yy+"-"+m[2].padStart(2,"0") };
+  }
+
+  function csvUrl(){ return "https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:csv&gid="+GID+"&_="+Date.now(); }
+  function loadCSV(){ return loadFetch().catch(function(e){ console.warn("[BRAFT] fetch falhou, JSONP…",e.message); return loadJSONP(); }); }
+  function loadFetch(){
+    return fetch(csvUrl()).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); })
+      .then(function(t){ return Papa.parse(t,{skipEmptyLines:false}).data; });
+  }
+  function loadJSONP(){
+    return new Promise(function(resolve,reject){
+      var cb="braftCB_"+Math.random().toString(36).slice(2);
+      var to=setTimeout(function(){cleanup();reject(new Error("Tempo esgotado ao carregar a planilha."));},15000);
+      function cleanup(){ clearTimeout(to); delete window[cb]; if(sc.parentNode) sc.parentNode.removeChild(sc); }
+      window[cb]=function(dt){
+        cleanup();
+        try{
+          var RE=/^Date\((\d+),\s*(\d+),\s*(\d+)/;
+          var rows=(dt.table.rows||[]).map(function(row){
+            return (row.c||[]).map(function(cell){
+              if(!cell) return "";
+              var v=(cell.v!==undefined&&cell.v!==null)?String(cell.v):"";
+              var dm=v.match(RE);
+              if(dm) return String(+dm[3]).padStart(2,"0")+"/"+String(+dm[2]+1).padStart(2,"0")+"/"+dm[1];
+              if(cell.f!==undefined&&cell.f!==null) return String(cell.f);
+              return v;
+            });
+          });
+          resolve(rows);
+        }catch(e){ reject(e); }
+      };
+      var sc=document.createElement("script");
+      sc.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?gid="+GID+"&tqx=out:json;responseHandler:"+cb+"&_="+Date.now();
+      sc.onerror=function(){ cleanup(); reject(new Error("Falha ao carregar o script da planilha.")); };
+      document.body.appendChild(sc);
+    });
+  }
+
+  // Colunas A:M — A0 DATA, B1/C2/D3 paletes(Guarulhos/SP Filial/Sul), E4 veículo,
+  // F5/G6 ENVIADOS(paletes/stretch), H7/I8 FICOU LÁ(paletes/stretch), J9 conferente,
+  // K10 NFs, L11 Volumes, M12 Peso. Cabeçalho ocupa as 2 primeiras linhas.
+  function analyze(rows){
+    var mesEnv={}, mesFicou={}, mesStretch={}, mesVol={}, mesNF={}, mesPeso={};
+    var destino={gua:0,sp:0,sul:0};
+    var totEnv=0, totFicou=0, totStretchEnv=0, totStretchFicou=0, totNF=0, totVol=0, totPeso=0, nReg=0;
+    var lista=[];
+
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i]; if(!r) continue;
+      var pd=parseData(r[0]);
+      if(!pd) continue;               // pula cabeçalho e linhas sem data válida
+      var gua=num(r[1]), sp=num(r[2]), sul=num(r[3]);
+      var envP=num(r[5]), envS=num(r[6]);
+      var ficP=num(r[7]), ficS=num(r[8]);
+      var veic=norm(r[4]), conf=norm(r[9]);
+      var nf=num(r[10]), vol=num(r[11]), peso=num(r[12]);
+      var palEnv = gua+sp+sul;        // total de paletes enviados nesta linha
+
+      destino.gua+=gua; destino.sp+=sp; destino.sul+=sul;
+      totEnv+=palEnv; totFicou+=ficP; totStretchEnv+=envS; totStretchFicou+=ficS;
+      totNF+=nf; totVol+=vol; totPeso+=peso; nReg++;
+
+      (mesEnv[pd.mesKey]=(mesEnv[pd.mesKey]||0))+0; mesEnv[pd.mesKey]+=palEnv;
+      mesFicou[pd.mesKey]=(mesFicou[pd.mesKey]||0)+ficP;
+      mesStretch[pd.mesKey]=(mesStretch[pd.mesKey]||0)+envS;
+      mesVol[pd.mesKey]=(mesVol[pd.mesKey]||0)+vol;
+      mesNF[pd.mesKey]=(mesNF[pd.mesKey]||0)+nf;
+      mesPeso[pd.mesKey]=(mesPeso[pd.mesKey]||0)+peso;
+
+      lista.push({ data:pd.data, ord:pd.ano*10000+pd.mesNum*100+ +pd.dia, palEnv:palEnv, veic:veic, ficou:ficP, conf:conf, nf:nf, vol:vol, peso:peso });
+    }
+
+    function serie(obj){ return Object.keys(obj).sort().map(function(k){ return {mes:MES_LBL[+k.split("-")[1]-1]||k, key:k, v:obj[k]}; }); }
+    var meses=Object.keys(mesEnv).sort();
+    var fluxo=meses.map(function(k){ return {mes:MES_LBL[+k.split("-")[1]-1]||k, env:mesEnv[k]||0, ficou:mesFicou[k]||0}; });
+    var volNF=meses.map(function(k){ return {mes:MES_LBL[+k.split("-")[1]-1]||k, vol:mesVol[k]||0, nf:mesNF[k]||0}; });
+
+    lista.sort(function(a,b){return b.ord-a.ord;});
+
+    return { envMes:serie(mesEnv), fluxo:fluxo, volNF:volNF, destino:destino, lista:lista,
+             totEnv:totEnv, totFicou:totFicou, totStretchEnv:totStretchEnv, totStretchFicou:totStretchFicou,
+             totNF:totNF, totVol:totVol, totPeso:totPeso, nReg:nReg };
+  }
+
+  function kpi(label,value,sub){
+    return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
+  }
+  var C_ENV="#8e44ad", C_FICOU="#e67e22", C_VOL="#2980b9", C_NF="#16a085";
+
+  function render(a){
+    var k=$("#kpi-braft");
+    if(k) k.innerHTML =
+      kpi("Paletes enviados", '<span style="color:#a569bd">'+fmtInt(a.totEnv)+'</span>', a.nReg+" registros") +
+      kpi("Ficou na BRAFT", '<span style="color:#e59866">'+fmtInt(a.totFicou)+'</span>', "paletes a devolver") +
+      kpi("Stretch enviado", fmtInt(a.totStretchEnv), "un.") +
+      kpi("NFs", fmtInt(a.totNF), "acumulado") +
+      kpi("Volumes", fmtInt(a.totVol), "peças") +
+      kpi("Peso total", fmtInt(a.totPeso), "kg");
+
+    if(typeof Chart==="undefined") return;
+    var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    var dlTop={ display:function(c){ return (c.dataset.data[c.dataIndex]||0)>0; }, anchor:"end", align:"end", color:ink, font:{size:10,weight:"600"}, formatter:function(v){ return v? v.toLocaleString("pt-BR"):""; } };
+    var base={ responsive:true, maintainAspectRatio:false, layout:{padding:{top:16}}, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
+      scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
+
+    // Paletes enviados por mês (com rótulo em cima)
+    mk("chartBraftMes",{ type:"bar",
+      data:{ labels:a.envMes.map(function(x){return x.mes;}),
+        datasets:[{ label:"Paletes enviados", data:a.envMes.map(function(x){return x.v;}),
+          backgroundColor:function(){var c=$("#chartBraftMes");if(!c)return C_ENV;var g=c.getContext("2d").createLinearGradient(0,0,0,320);g.addColorStop(0,C_ENV);g.addColorStop(1,"#5b2c6f");return g;}(), borderRadius:5 }] },
+      options:Object.assign({},base,{plugins:{legend:{display:false},datalabels:dlTop}}) });
+
+    // Enviado x Ficou lá por mês
+    mk("chartBraftFluxo",{ type:"bar",
+      data:{ labels:a.fluxo.map(function(x){return x.mes;}),
+        datasets:[
+          { label:"Enviados", data:a.fluxo.map(function(x){return x.env;}), backgroundColor:C_ENV, borderRadius:4 },
+          { label:"Ficou lá", data:a.fluxo.map(function(x){return x.ficou;}), backgroundColor:C_FICOU, borderRadius:4 }
+        ] },
+      options:base });
+
+    // Envios por destino (doughnut)
+    mk("chartBraftDestino",{ type:"doughnut",
+      data:{ labels:["Guarulhos","SP Filial","Sul"], datasets:[{ data:[a.destino.gua,a.destino.sp,a.destino.sul], backgroundColor:["#8e44ad","#2980b9","#16a085"], borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"60%", plugins:{legend:{position:"right",labels:{color:ink}},datalabels:{display:false}} } });
+
+    // Volumes e NFs por mês (barras volume + linha NFs)
+    mk("chartBraftVol",{ type:"bar",
+      data:{ labels:a.volNF.map(function(x){return x.mes;}),
+        datasets:[
+          { type:"bar", label:"Volumes", yAxisID:"y", data:a.volNF.map(function(x){return x.vol;}), backgroundColor:C_VOL, borderRadius:4, order:2 },
+          { type:"line", label:"NFs", yAxisID:"y1", data:a.volNF.map(function(x){return x.nf;}), borderColor:C_NF, backgroundColor:C_NF, borderWidth:2, tension:.3, pointRadius:3, order:1 }
+        ] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
+        scales:{x:{ticks:{color:ink},grid:{color:gridC}},
+          y:{position:"left",beginAtZero:true,ticks:{color:ink},grid:{color:gridC},title:{display:true,text:"Volumes",color:ink}},
+          y1:{position:"right",beginAtZero:true,ticks:{color:C_NF},grid:{drawOnChartArea:false},title:{display:true,text:"NFs",color:C_NF}}} } });
+
+    // Tabela últimos registros
+    var tb=$("#tableBraft");
+    if(tb){
+      var rows=a.lista.slice(0,20).map(function(x){
+        return "<tr><td style=\"text-align:left\">"+x.data+"</td><td>"+fmtInt(x.palEnv)+"</td><td style=\"text-align:left\">"+(x.veic||"—")+"</td><td>"+(x.ficou?fmtInt(x.ficou):"—")+"</td><td>"+(x.nf?fmtInt(x.nf):"—")+"</td><td>"+(x.vol?fmtInt(x.vol):"—")+"</td><td>"+(x.peso?fmtInt(x.peso)+" kg":"—")+"</td><td style=\"text-align:left\">"+(x.conf||"—")+"</td></tr>";
+      }).join("");
+      if(!rows) rows='<tr><td colspan="8" style="text-align:left;color:var(--ink-muted)">Nenhum registro</td></tr>';
+      tb.innerHTML='<thead><tr><th style="text-align:left">Data</th><th>Paletes</th><th style="text-align:left">Veículo</th><th>Ficou lá</th><th>NFs</th><th>Volumes</th><th>Peso</th><th style="text-align:left">Conferente</th></tr></thead><tbody>'+rows+'</tbody>';
+    }
+
+    var ins=$("#insight-braft");
+    if(ins){
+      ins.className="insight"+(a.totFicou>0?" warn":" good");
+      ins.innerHTML="Foram enviados <b>"+fmtInt(a.totEnv)+" paletes</b> à BRAFT em "+a.nReg+" registros. Atualmente <b>"+fmtInt(a.totFicou)+" paletes</b> constam como \u2018ficou lá\u2019 (a devolver). Carga acumulada: "+fmtInt(a.totNF)+" NFs, "+fmtInt(a.totVol)+" volumes, "+fmtInt(a.totPeso)+" kg.";
+    }
+  }
+
+  function loadAll(){
+    setStatus("Carregando dados BRAFT…",false);
+    loadCSV().then(function(rows){
+      var a=analyze(rows||[]);
+      render(a);
+      loaded=true;
+      if(!a.nReg){ setStatus("Planilha carregada, mas nenhum registro reconhecido. Verifique a aba (gid).",true); }
+      else setStatus("",false);
+      console.log("[BRAFT] registros:",a.nReg,"| enviados:",a.totEnv);
+    }).catch(function(e){
+      console.error("[BRAFT]",e);
+      setStatus("Falha ao carregar BRAFT: "+(e.message||e),true);
+    });
+  }
+
+  function maybeLoad(){
+    var sec=document.querySelector('.page[data-page="braft"]');
     if(sec&&sec.classList.contains("active")&&!loaded) loadAll();
   }
   document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
