@@ -553,59 +553,49 @@ body.locked > *:not(#loginScreen){display:none !important}
   </section>
 
   <!-- 18 · OCORRÊNCIAS -->
+  <!-- 18 · OCORRÊNCIAS (Não Conformidades — todos os setores) -->
   <section class="page" data-page="ocorrencias">
     <div class="page-head">
       <div class="eyebrow">18 · Ocorrências</div>
-      <h2>Controle de ocorrências</h2>
-      <p>Ocorrências registradas na operação: responsáveis, tipos mais recorrentes e evolução mensal. Fonte: planilha de Controle de Ocorrências.</p>
+      <h2>Não conformidades — geral</h2>
+      <p>Todas as não conformidades registradas no período, de todos os setores. Fonte: sistema Não Conformidades (Portoex).</p>
     </div>
+    <div id="ocg-status" class="insight" style="display:none"></div>
     <div class="kpi-grid" id="kpi-ocorrencias"></div>
-    <div class="card">
-      <div class="card-head"><div><h3>Ocorrências por mês</h3><div class="sub">Evolução no período</div></div><span class="card-tag">OCORRÊNCIAS</span></div>
-      <div class="chart-wrap tall"><canvas id="chartOcorrenciasMes"></canvas></div>
+    <div class="row cols-2">
+      <div class="card"><div class="card-head"><div><h3>Por setor</h3><div class="sub">Não conformidades por setor de origem</div></div><span class="card-tag">SETOR</span></div><div class="chart-wrap tall"><canvas id="chartOcgSetor"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Abertas × Finalizadas</h3><div class="sub">Situação atual das ocorrências</div></div><span class="card-tag">STATUS</span></div><div class="chart-wrap tall"><canvas id="chartOcgStatus"></canvas></div></div>
     </div>
     <div class="row cols-2" style="margin-top:14px">
-      <div class="card"><div class="card-head"><div><h3>Por responsável</h3><div class="sub">Quem mais registrou ocorrências</div></div></div><div class="chart-wrap tall"><canvas id="chartOcorrenciasResp"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Por tipo de ocorrência</h3><div class="sub">Motivos mais recorrentes</div></div></div><div class="chart-wrap tall"><canvas id="chartOcorrenciasTipo"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Por tipo de erro</h3><div class="sub">Motivos mais recorrentes</div></div></div><div class="chart-wrap tall"><canvas id="chartOcgTipo"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Por responsável</h3><div class="sub">Quem responde por cada ocorrência</div></div></div><div class="chart-wrap tall"><canvas id="chartOcgResp"></canvas></div></div>
     </div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Por responsável × Tipo de ocorrência</h3><div class="sub">Selecione um responsável e, opcionalmente, um mês para ver o detalhamento por tipo</div></div><span class="card-tag">CRUZAMENTO</span></div>
-      <div class="colab-filter-row">
-        <label>Responsável
-          <select id="ocorrRespFilter"></select>
-        </label>
-        <label>Mês
-          <select id="ocorrMesFilter"></select>
-        </label>
-      </div>
-      <div class="chart-wrap" id="ocorrRespTipoWrap" style="height:360px"><canvas id="chartOcorrenciasRespTipo"></canvas></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Detalhamento responsável × tipo</h3><div class="sub">Contagem exata por combinação</div></div><span class="card-tag">DADOS BRUTOS</span></div>
-      <div class="table-wrap"><table class="data" id="tableOcorrenciasRespTipo"></table></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Detalhamento por responsável</h3><div class="sub">Contagem e participação no total</div></div><span class="card-tag">DADOS BRUTOS</span></div>
-      <div class="table-wrap"><table class="data" id="tableOcorrenciasResp"></table></div>
+      <div class="card-head"><div><h3>Ocorrências detalhadas</h3><div class="sub">Cada não conformidade do período</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableOcg"></table></div>
     </div>
     <div class="insight" id="insight-ocorrencias"></div>
   </section>
 
-  <!-- 19 · OCORRÊNCIAS EXPEDIÇÃO -->
+  <!-- 19 · EXPEDIÇÃO (Não Conformidades — só LOGISTICA INTERNA) -->
   <section class="page" data-page="ocorr_exp">
     <div class="page-head">
       <div class="eyebrow">19 · Expedição</div>
-      <h2>Ocorrências da Expedição</h2>
-      <p>Detalhamento das ocorrências com responsável "Expedição" — mesma base que alimenta os erros de embarque do painel 02.</p>
+      <h2>Não conformidades — Expedição</h2>
+      <p>Não conformidades da Logística Interna (Expedição). Mesma fonte da aba 18, filtrada por setor. Fonte: sistema Não Conformidades (Portoex).</p>
     </div>
+    <div id="oce-status" class="insight" style="display:none"></div>
     <div class="kpi-grid" id="kpi-ocorr_exp"></div>
     <div class="row cols-2">
-      <div class="card"><div class="card-head"><div><h3>Expedição por mês</h3><div class="sub">Ocorrências de responsável Expedição</div></div><span class="card-tag">EMBARQUE</span></div><div class="chart-wrap tall"><canvas id="chartOcorrExpMes"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Por tipo de ocorrência</h3><div class="sub">Motivos mais recorrentes na Expedição</div></div></div><div class="chart-wrap tall"><canvas id="chartOcorrExpTipo"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Abertas × Finalizadas</h3><div class="sub">Situação das ocorrências da Expedição</div></div><span class="card-tag">STATUS</span></div><div class="chart-wrap tall"><canvas id="chartOceStatus"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Por tipo de erro</h3><div class="sub">Motivos mais recorrentes na Expedição</div></div></div><div class="chart-wrap tall"><canvas id="chartOceTipo"></canvas></div></div>
     </div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Ocorrências detalhadas</h3><div class="sub">Cada ocorrência de Expedição no período</div></div><span class="card-tag">DADOS BRUTOS</span></div>
-      <div class="table-wrap"><table class="data" id="tableOcorrExp"></table></div>
+      <div class="card-head"><div><h3>Por responsável</h3><div class="sub">Responsáveis pelas ocorrências da Expedição</div></div></div><div class="chart-wrap tall"><canvas id="chartOceResp"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Ocorrências detalhadas</h3><div class="sub">Cada não conformidade da Expedição no período</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableOce"></table></div>
     </div>
     <div class="insight" id="insight-ocorr_exp"></div>
   </section>
@@ -2462,13 +2452,11 @@ body.locked > *:not(#loginScreen){display:none !important}
   // mesmo intervalo.
   async function init(){
     setStatus('Carregando dados da planilha…', false);
-    const [jemResult, moResult, colabResult, ocorrResult] = await Promise.allSettled([
+    const [jemResult, moResult, colabResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
       loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
-      loadRows(SHEET_NAME_COLAB, 'A1:BZ5000').then(buildColaboradores),
-      loadRows(SHEET_NAME_OCORRENCIAS, 'A1:E5000', SHEET_ID_OCORRENCIAS).then(buildOcorrencias)
+      loadRows(SHEET_NAME_COLAB, 'A1:BZ5000').then(buildColaboradores)
     ]);
-    OCORR = (ocorrResult.status==='fulfilled') ? ocorrResult.value : null;
     const errors = [];
     if(jemResult.status==='fulfilled'){
       const { D, meses } = jemResult.value;
@@ -2492,13 +2480,6 @@ body.locked > *:not(#loginScreen){display:none !important}
     }else{
       console.error(colabResult.reason);
       errors.push('aba "'+SHEET_NAME_COLAB+'": '+colabResult.reason.message);
-    }
-    if(ocorrResult.status==='fulfilled'){
-      renderOcorrencias(ocorrResult.value);
-      renderOcorrExp(ocorrResult.value);
-    }else{
-      console.error(ocorrResult.reason);
-      errors.push('aba "'+SHEET_NAME_OCORRENCIAS+'": '+ocorrResult.reason.message);
     }
     if(!errors.length){
       clearStatus();
@@ -3854,6 +3835,224 @@ body.locked > *:not(#loginScreen){display:none !important}
   document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
   setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
   setTimeout(maybeLoad, 300);
+})();
+</script>
+
+
+<!-- ============ ABAS 18/19 · NÃO CONFORMIDADES (independente) ============ -->
+<script>
+(function(){
+  "use strict";
+  // Lê o sistema Não Conformidades e faz parse da tabela HTML embutida.
+  var NC_URL="https://franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html";
+  var SETOR_EXP="LOGISTICA INTERNA";     // filtro da aba 19 (Expedição)
+  var REFRESH_MS=10*60*1000;
+  var loaded=false, charts={};
+
+  function $(s,r){ return (r||document).querySelector(s); }
+  function norm(s){ return s==null?"":String(s).replace(/\s+/g," ").trim(); }
+  function up(s){ return norm(s).toUpperCase(); }
+  function fmtInt(n){ return (n||0).toLocaleString("pt-BR"); }
+  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  function setStatus(id,msg,err){ var el=$(id); if(!el) return; if(!msg){el.style.display="none";return;} el.style.display="block"; el.className="insight"+(err?" warn":""); el.textContent=msg; }
+
+  function fetchNC(){
+    return fetch(NC_URL,{cache:"no-store"}).then(function(r){
+      if(!r.ok) throw new Error("HTTP "+r.status); return r.text();
+    });
+  }
+
+  // Faz parse do HTML: cada ocorrência é <tr class="row"> (resumo) + <tr class="det"> (detalhe).
+  function parseNC(htmlText){
+    var doc=new DOMParser().parseFromString(htmlText,"text/html");
+    var trs=Array.prototype.slice.call(doc.querySelectorAll("tr"));
+    var regs=[], atual=null;
+    trs.forEach(function(tr){
+      if(tr.classList.contains("row")){
+        var td=tr.querySelectorAll("td");
+        if(td.length<6){ return; }
+        var statusTxt=up(norm((td[5]||{}).textContent));
+        atual={
+          numero: norm((td[0]||{}).textContent).replace(/^▶?\s*/,""),
+          unidade: norm((td[1]||{}).textContent),
+          data: norm((td[2]||{}).textContent),
+          cliente: norm((td[3]||{}).textContent),
+          tipoErro: norm((td[4]||{}).textContent) || "SEM CATEGORIA",
+          status: statusTxt.indexOf("FINAL")>=0 ? "FINALIZADA" : (statusTxt.indexOf("ABERT")>=0?"ABERTO":statusTxt||"—"),
+          setor:"", responsavel:"", solicitante:"", resumo:""
+        };
+        regs.push(atual);
+      }else if(tr.classList.contains("det") && atual){
+        // Extrai campos "<b>Rótulo:</b> valor" do detalhe
+        var divs=tr.querySelectorAll(".detg > div, div");
+        Array.prototype.forEach.call(divs,function(d){
+          var b=d.querySelector("b"); if(!b) return;
+          var rot=up(norm(b.textContent)).replace(/:$/,"");
+          var val=norm(d.textContent.replace(b.textContent,""));
+          if(rot.indexOf("TIPO ORIGINAL")>=0) atual.setor=up(val);
+          else if(rot.indexOf("RESPONS")>=0)  atual.responsavel=val||"—";
+          else if(rot.indexOf("SOLICITANTE")>=0) atual.solicitante=val||"—";
+          else if(rot==="RESUMO") atual.resumo=val;
+        });
+        if(!atual.setor) atual.setor="—";
+        if(!atual.responsavel) atual.responsavel="—";
+      }
+    });
+    return regs;
+  }
+
+  function contar(arr, campo){
+    var m={}; arr.forEach(function(x){ var k=x[campo]||"—"; m[k]=(m[k]||0)+1; });
+    return Object.keys(m).map(function(k){return {k:k,v:m[k]};}).sort(function(a,b){return b.v-a.v;});
+  }
+
+  function kpi(label,value,sub){
+    return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
+  }
+
+  var PALETA=["#4f6ef7","#f0a500","#22c55e","#e67e22","#8e44ad","#0c7c8c","#e74c3c","#16a085","#c0392b","#2980b9","#7f8c9a"];
+
+  function mkChart(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+  function dlBar(ink,horizontal){
+    return { display:function(c){return (c.dataset.data[c.dataIndex]||0)>0;}, anchor:"end", align:"end", color:ink, font:{size:10,weight:"600"}, formatter:function(v){return v||"";} };
+  }
+
+  // Render genérico de um conjunto (usado por 18 e 19), com sufixo de ids.
+  function renderConjunto(regs, cfg){
+    var ink=css("--ink-dim")||"#a4adc4", gridC=css("--grid")||"rgba(255,255,255,.06)";
+    var abertas=regs.filter(function(x){return x.status==="ABERTO";}).length;
+    var final=regs.filter(function(x){return x.status==="FINALIZADA";}).length;
+
+    // KPIs
+    var k=$(cfg.kpi);
+    if(k){
+      var html = kpi("Total", fmtInt(regs.length), "no período") +
+                 kpi("Abertas", '<span style="color:#e59866">'+fmtInt(abertas)+'</span>', "em aberto") +
+                 kpi("Finalizadas", '<span style="color:#3ddc97">'+fmtInt(final)+'</span>', "concluídas");
+      if(cfg.comSetor){
+        var nSet=contar(regs,"setor").length;
+        html += kpi("Setores", fmtInt(nSet), "com ocorrência");
+      }
+      html += kpi("Tipos de erro", fmtInt(contar(regs,"tipoErro").length), "distintos") +
+              kpi("Responsáveis", fmtInt(contar(regs,"responsavel").length), "envolvidos");
+      k.innerHTML=html;
+    }
+
+    if(typeof Chart==="undefined") return;
+
+    // Status (doughnut)
+    if(cfg.chartStatus){
+      mkChart(cfg.chartStatus,{ type:"doughnut",
+        data:{ labels:["Abertas","Finalizadas"], datasets:[{ data:[abertas,final], backgroundColor:["#e67e22","#22c55e"], borderWidth:0 }] },
+        options:{ responsive:true, maintainAspectRatio:false, cutout:"60%",
+          plugins:{legend:{position:"bottom",labels:{color:ink,generateLabels:function(ch){var d=ch.data,ds=d.datasets[0];return d.labels.map(function(l,i){return {text:l+": "+(ds.data[i]||0),fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,fontColor:"#ffffff",index:i};});}}},datalabels:{display:false}} } });
+    }
+
+    // Setor (barras) — só na aba geral
+    if(cfg.chartSetor){
+      var setores=contar(regs,"setor");
+      mkChart(cfg.chartSetor,{ type:"bar",
+        data:{ labels:setores.map(function(x){return x.k;}),
+          datasets:[{ label:"Ocorrências", data:setores.map(function(x){return x.v;}), backgroundColor:setores.map(function(_,i){return PALETA[i%PALETA.length];}), borderRadius:5 }] },
+        options:{ responsive:true, maintainAspectRatio:false, indexAxis:"y",
+          plugins:{legend:{display:false},datalabels:dlBar(ink,true)},
+          scales:{x:{beginAtZero:true,ticks:{color:ink,precision:0},grid:{color:gridC}},y:{ticks:{color:ink},grid:{color:gridC}}} } });
+    }
+
+    // Tipo de erro (barras horizontais)
+    if(cfg.chartTipo){
+      var tipos=contar(regs,"tipoErro").slice(0,10);
+      mkChart(cfg.chartTipo,{ type:"bar",
+        data:{ labels:tipos.map(function(x){return x.k;}),
+          datasets:[{ label:"Ocorrências", data:tipos.map(function(x){return x.v;}), backgroundColor:"#4f6ef7", borderRadius:5 }] },
+        options:{ responsive:true, maintainAspectRatio:false, indexAxis:"y",
+          plugins:{legend:{display:false},datalabels:dlBar(ink,true)},
+          scales:{x:{beginAtZero:true,ticks:{color:ink,precision:0},grid:{color:gridC}},y:{ticks:{color:ink},grid:{color:gridC}}} } });
+    }
+
+    // Responsável (barras horizontais)
+    if(cfg.chartResp){
+      var resps=contar(regs,"responsavel").slice(0,10);
+      mkChart(cfg.chartResp,{ type:"bar",
+        data:{ labels:resps.map(function(x){return x.k;}),
+          datasets:[{ label:"Ocorrências", data:resps.map(function(x){return x.v;}), backgroundColor:"#8e44ad", borderRadius:5 }] },
+        options:{ responsive:true, maintainAspectRatio:false, indexAxis:"y",
+          plugins:{legend:{display:false},datalabels:dlBar(ink,true)},
+          scales:{x:{beginAtZero:true,ticks:{color:ink,precision:0},grid:{color:gridC}},y:{ticks:{color:ink},grid:{color:gridC}}} } });
+    }
+
+    // Tabela detalhada
+    var tb=$(cfg.tabela);
+    if(tb){
+      var ordenadas=regs.slice().sort(function(a,b){ return (b.numero||"").localeCompare(a.numero||"",undefined,{numeric:true}); });
+      var cols = cfg.comSetor
+        ? '<th>Nº</th><th style="text-align:left">Data</th><th style="text-align:left">Cliente</th><th style="text-align:left">Setor</th><th style="text-align:left">Tipo de erro</th><th style="text-align:left">Responsável</th><th>Status</th>'
+        : '<th>Nº</th><th style="text-align:left">Data</th><th style="text-align:left">Cliente</th><th style="text-align:left">Tipo de erro</th><th style="text-align:left">Responsável</th><th>Status</th>';
+      var body=ordenadas.map(function(x){
+        var pill = x.status==="FINALIZADA"?'<span style="color:#3ddc97">✔ Finalizada</span>':(x.status==="ABERTO"?'<span style="color:#e59866">● Aberto</span>':x.status);
+        var base='<td>'+x.numero+'</td><td style="text-align:left">'+x.data+'</td><td style="text-align:left">'+x.cliente+'</td>';
+        if(cfg.comSetor) base+='<td style="text-align:left">'+x.setor+'</td>';
+        base+='<td style="text-align:left">'+x.tipoErro+'</td><td style="text-align:left">'+x.responsavel+'</td><td>'+pill+'</td>';
+        return '<tr>'+base+'</tr>';
+      }).join("");
+      if(!body) body='<tr><td colspan="7" style="text-align:left;color:var(--ink-muted)">Nenhuma ocorrência</td></tr>';
+      tb.innerHTML='<thead><tr>'+cols+'</tr></thead><tbody>'+body+'</tbody>';
+    }
+
+    // Insight
+    if(cfg.insight){
+      var ins=$(cfg.insight);
+      if(ins){
+        var pctAb = regs.length? Math.round(abertas/regs.length*100):0;
+        ins.className="insight"+(pctAb>50?" warn":" good");
+        var topTipo=contar(regs,"tipoErro")[0];
+        ins.innerHTML="<b>"+fmtInt(regs.length)+" não conformidades</b> no período — "+fmtInt(abertas)+" abertas ("+pctAb+"%) e "+fmtInt(final)+" finalizadas."+
+          (topTipo?" Tipo mais recorrente: <b>"+topTipo.k+"</b> ("+topTipo.v+").":"");
+      }
+    }
+  }
+
+  var _regs=null;
+  function renderTudo(){
+    if(!_regs) return;
+    renderConjunto(_regs, { comSetor:true,
+      kpi:"#kpi-ocorrencias", chartSetor:"chartOcgSetor", chartStatus:"chartOcgStatus",
+      chartTipo:"chartOcgTipo", chartResp:"chartOcgResp", tabela:"#tableOcg", insight:"#insight-ocorrencias" });
+    var exp=_regs.filter(function(x){ return x.setor===SETOR_EXP; });
+    renderConjunto(exp, { comSetor:false,
+      kpi:"#kpi-ocorr_exp", chartStatus:"chartOceStatus",
+      chartTipo:"chartOceTipo", chartResp:"chartOceResp", tabela:"#tableOce", insight:"#insight-ocorr_exp" });
+  }
+
+  function loadAll(){
+    setStatus("#ocg-status","Carregando não conformidades…",false);
+    setStatus("#oce-status","Carregando não conformidades…",false);
+    fetchNC().then(function(txt){
+      _regs=parseNC(txt);
+      renderTudo();
+      loaded=true;
+      if(!_regs.length){ setStatus("#ocg-status","Nenhuma ocorrência reconhecida no sistema.",true); }
+      else setStatus("#ocg-status","",false);
+      var nExp=_regs.filter(function(x){return x.setor===SETOR_EXP;}).length;
+      if(!nExp){ setStatus("#oce-status","Nenhuma ocorrência de Expedição (LOGISTICA INTERNA) no período.",true); }
+      else setStatus("#oce-status","",false);
+      console.log("[NaoConformidades] total:",_regs.length,"| expedição:",nExp);
+    }).catch(function(e){
+      console.error("[NaoConformidades]",e);
+      setStatus("#ocg-status","Falha ao carregar não conformidades: "+(e.message||e),true);
+      setStatus("#oce-status","Falha ao carregar não conformidades: "+(e.message||e),true);
+    });
+  }
+
+  function maybeLoad(){
+    var s18=document.querySelector('.page[data-page="ocorrencias"]');
+    var s19=document.querySelector('.page[data-page="ocorr_exp"]');
+    if(((s18&&s18.classList.contains("active"))||(s19&&s19.classList.contains("active"))) && !loaded) loadAll();
+  }
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
+  document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
+  setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
+  setTimeout(maybeLoad, 400);
 })();
 </script>
 
