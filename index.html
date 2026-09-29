@@ -798,6 +798,20 @@ body.locked > *:not(#loginScreen){display:none !important}
         <div class="chart-wrap tall"><canvas id="chartBraftVol"></canvas></div>
       </div>
     </div>
+    <div class="row cols-2">
+      <div class="card">
+        <div class="card-head"><div><h3>Quantidade por dia e operação</h3><div class="sub">Paletes por dia, empilhados por destino (Guarulhos / SP / Sul)</div></div><span class="card-tag" style="border-color:#8e44ad;color:#a569bd">DIÁRIO</span></div>
+        <div class="chart-wrap tall"><canvas id="chartBraftDia"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Paletes por conferente</h3><div class="sub">Volume movimentado por cada conferente</div></div><span class="card-tag">CONFERENTE</span></div>
+        <div class="chart-wrap tall"><canvas id="chartBraftConf"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Estatística por conferente</h3><div class="sub">Registros, paletes, NFs, volumes e peso por conferente</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="tableBraftConf"></table></div>
+    </div>
     <div class="card" style="margin-top:14px">
       <div class="card-head"><div><h3>Últimos registros</h3><div class="sub">Movimentações mais recentes da BRAFT</div></div><span class="card-tag">DADOS BRUTOS</span></div>
       <div class="table-wrap"><table class="data" id="tableBraft"></table></div>
@@ -3644,6 +3658,8 @@ body.locked > *:not(#loginScreen){display:none !important}
   function analyze(rows){
     var mesEnv={}, mesFicou={}, mesStretch={}, mesVol={}, mesNF={}, mesPeso={};
     var destino={gua:0,sp:0,sul:0};
+    var porDia={};          // dia -> {gua,sp,sul}
+    var porConf={};         // conferente -> {reg,paletes,ficou,nf,vol,peso}
     var totEnv=0, totFicou=0, totStretchEnv=0, totStretchFicou=0, totNF=0, totVol=0, totPeso=0, nReg=0;
     var lista=[];
 
@@ -3670,6 +3686,16 @@ body.locked > *:not(#loginScreen){display:none !important}
       mesPeso[pd.mesKey]=(mesPeso[pd.mesKey]||0)+peso;
 
       lista.push({ data:pd.data, ord:pd.ano*10000+pd.mesNum*100+ +pd.dia, palEnv:palEnv, veic:veic, ficou:ficP, conf:conf, nf:nf, vol:vol, peso:peso });
+
+      // por dia × destino (para o gráfico diário empilhado)
+      var dk=pd.ano+"-"+String(pd.mesNum).padStart(2,"0")+"-"+pd.dia;
+      if(!porDia[dk]) porDia[dk]={gua:0,sp:0,sul:0,ord:pd.ano*10000+pd.mesNum*100+ +pd.dia,lab:pd.dia+"/"+String(pd.mesNum).padStart(2,"0")};
+      porDia[dk].gua+=gua; porDia[dk].sp+=sp; porDia[dk].sul+=sul;
+
+      // por conferente (linhas sem conferente entram como "Sem conferente")
+      var cf=conf||"Sem conferente";
+      if(!porConf[cf]) porConf[cf]={reg:0,paletes:0,ficou:0,nf:0,vol:0,peso:0};
+      var pc=porConf[cf]; pc.reg++; pc.paletes+=palEnv; pc.ficou+=ficP; pc.nf+=nf; pc.vol+=vol; pc.peso+=peso;
     }
 
     function serie(obj){ return Object.keys(obj).sort().map(function(k){ return {mes:MES_LBL[+k.split("-")[1]-1]||k, key:k, v:obj[k]}; }); }
@@ -3677,9 +3703,16 @@ body.locked > *:not(#loginScreen){display:none !important}
     var fluxo=meses.map(function(k){ return {mes:MES_LBL[+k.split("-")[1]-1]||k, env:mesEnv[k]||0, ficou:mesFicou[k]||0}; });
     var volNF=meses.map(function(k){ return {mes:MES_LBL[+k.split("-")[1]-1]||k, vol:mesVol[k]||0, nf:mesNF[k]||0}; });
 
+    // dias em ordem cronológica (todos os dias com envio)
+    var dias=Object.keys(porDia).map(function(k){return porDia[k];}).sort(function(a,b){return a.ord-b.ord;});
+    // conferentes ordenados por total de paletes (só os que têm nome; "Sem conferente" fica por último)
+    var confs=Object.keys(porConf).map(function(k){ var c=porConf[k]; return {nome:k,reg:c.reg,paletes:c.paletes,ficou:c.ficou,nf:c.nf,vol:c.vol,peso:c.peso}; })
+      .sort(function(a,b){ if(a.nome==="Sem conferente")return 1; if(b.nome==="Sem conferente")return -1; return b.paletes-a.paletes; });
+
     lista.sort(function(a,b){return b.ord-a.ord;});
 
     return { envMes:serie(mesEnv), fluxo:fluxo, volNF:volNF, destino:destino, lista:lista,
+             dias:dias, confs:confs,
              totEnv:totEnv, totFicou:totFicou, totStretchEnv:totStretchEnv, totStretchFicou:totStretchFicou,
              totNF:totNF, totVol:totVol, totPeso:totPeso, nReg:nReg };
   }
@@ -3738,6 +3771,36 @@ body.locked > *:not(#loginScreen){display:none !important}
         scales:{x:{ticks:{color:ink},grid:{color:gridC}},
           y:{position:"left",beginAtZero:true,ticks:{color:ink},grid:{color:gridC},title:{display:true,text:"Volumes",color:ink}},
           y1:{position:"right",beginAtZero:true,ticks:{color:C_NF},grid:{drawOnChartArea:false},title:{display:true,text:"NFs",color:C_NF}}} } });
+
+    // Quantidade por dia × operação (barras empilhadas Guarulhos/SP/Sul)
+    mk("chartBraftDia",{ type:"bar",
+      data:{ labels:a.dias.map(function(x){return x.lab;}),
+        datasets:[
+          { label:"Guarulhos", data:a.dias.map(function(x){return x.gua;}), backgroundColor:"#8e44ad", borderRadius:{topLeft:0,topRight:0}, stack:"d" },
+          { label:"SP Filial", data:a.dias.map(function(x){return x.sp;}), backgroundColor:"#2980b9", stack:"d" },
+          { label:"Sul", data:a.dias.map(function(x){return x.sul;}), backgroundColor:"#16a085", stack:"d" }
+        ] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
+        scales:{x:{stacked:true,ticks:{color:ink,maxRotation:90,minRotation:45},grid:{color:gridC}},y:{stacked:true,beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} } });
+
+    // Paletes por conferente (barras horizontais)
+    mk("chartBraftConf",{ type:"bar",
+      data:{ labels:a.confs.map(function(x){return x.nome;}),
+        datasets:[{ label:"Paletes", data:a.confs.map(function(x){return x.paletes;}),
+          backgroundColor:a.confs.map(function(x){return x.nome==="Sem conferente"?"#7f8c9a":"#8e44ad";}), borderRadius:5 }] },
+      options:{ responsive:true, maintainAspectRatio:false, indexAxis:"y",
+        plugins:{legend:{display:false},datalabels:{display:true,anchor:"end",align:"end",color:ink,font:{size:10,weight:"600"},formatter:function(v){return v?v.toLocaleString("pt-BR"):"";}}},
+        scales:{x:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}},y:{ticks:{color:ink},grid:{color:gridC}}} } });
+
+    // Tabela por conferente
+    var tc=$("#tableBraftConf");
+    if(tc){
+      var lc=a.confs.map(function(c){
+        return "<tr><td style=\"text-align:left\">"+c.nome+"</td><td>"+fmtInt(c.reg)+"</td><td>"+fmtInt(c.paletes)+"</td><td>"+(c.ficou?fmtInt(c.ficou):"—")+"</td><td>"+(c.nf?fmtInt(c.nf):"—")+"</td><td>"+(c.vol?fmtInt(c.vol):"—")+"</td><td>"+(c.peso?fmtInt(c.peso)+" kg":"—")+"</td></tr>";
+      }).join("");
+      if(!lc) lc='<tr><td colspan="7" style="text-align:left;color:var(--ink-muted)">Nenhum conferente registrado</td></tr>';
+      tc.innerHTML='<thead><tr><th style="text-align:left">Conferente</th><th>Registros</th><th>Paletes</th><th>Ficou lá</th><th>NFs</th><th>Volumes</th><th>Peso</th></tr></thead><tbody>'+lc+'</tbody>';
+    }
 
     // Tabela últimos registros
     var tb=$("#tableBraft");
