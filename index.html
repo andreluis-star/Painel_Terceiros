@@ -3736,6 +3736,18 @@ body.locked > *:not(#loginScreen){display:none !important}
     var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
     function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
     var dlTop={ display:function(c){ return (c.dataset.data[c.dataIndex]||0)>0; }, anchor:"end", align:"end", color:ink, font:{size:10,weight:"600"}, formatter:function(v){ return v? v.toLocaleString("pt-BR"):""; } };
+    // rótulo no TOPO da barra, dentro (para barras verticais simples e agrupadas)
+    var dlIn={ display:function(c){ return (c.dataset.data[c.dataIndex]||0)>0; }, anchor:"end", align:"start", offset:2, color:"#fff", font:{size:9,weight:"700"}, formatter:function(v){ return v? v.toLocaleString("pt-BR"):""; } };
+    // rótulo no CENTRO de cada segmento (para barras empilhadas)
+    var dlStack={ display:function(c){ return (c.dataset.data[c.dataIndex]||0)>0; }, anchor:"center", align:"center", color:"#fff", font:{size:8.5,weight:"700"}, formatter:function(v){ return v? v.toLocaleString("pt-BR"):""; } };
+    // legenda da rosca com valor ao lado do rótulo
+    function legendaComValor(chart){
+      var d=chart.data, ds=d.datasets[0];
+      return d.labels.map(function(lab,i){
+        var val=ds.data[i]||0;
+        return { text:lab+": "+val.toLocaleString("pt-BR"), fillStyle:ds.backgroundColor[i], strokeStyle:ds.backgroundColor[i], lineWidth:0, index:i };
+      });
+    }
     var base={ responsive:true, maintainAspectRatio:false, layout:{padding:{top:16}}, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
       scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
 
@@ -3744,7 +3756,7 @@ body.locked > *:not(#loginScreen){display:none !important}
       data:{ labels:a.envMes.map(function(x){return x.mes;}),
         datasets:[{ label:"Paletes enviados", data:a.envMes.map(function(x){return x.v;}),
           backgroundColor:function(){var c=$("#chartBraftMes");if(!c)return C_ENV;var g=c.getContext("2d").createLinearGradient(0,0,0,320);g.addColorStop(0,C_ENV);g.addColorStop(1,"#5b2c6f");return g;}(), borderRadius:5 }] },
-      options:Object.assign({},base,{plugins:{legend:{display:false},datalabels:dlTop}}) });
+      options:Object.assign({},base,{plugins:{legend:{display:false},datalabels:dlIn}}) });
 
     // Enviado x Ficou lá por mês
     mk("chartBraftFluxo",{ type:"bar",
@@ -3753,12 +3765,12 @@ body.locked > *:not(#loginScreen){display:none !important}
           { label:"Enviados", data:a.fluxo.map(function(x){return x.env;}), backgroundColor:C_ENV, borderRadius:4 },
           { label:"Ficou lá", data:a.fluxo.map(function(x){return x.ficou;}), backgroundColor:C_FICOU, borderRadius:4 }
         ] },
-      options:base });
+      options:Object.assign({},base,{plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlIn}}) });
 
     // Envios por destino (doughnut)
     mk("chartBraftDestino",{ type:"doughnut",
       data:{ labels:["Guarulhos","SP Filial","Sul"], datasets:[{ data:[a.destino.gua,a.destino.sp,a.destino.sul], backgroundColor:["#8e44ad","#2980b9","#16a085"], borderWidth:0 }] },
-      options:{ responsive:true, maintainAspectRatio:false, cutout:"60%", plugins:{legend:{position:"right",labels:{color:ink}},datalabels:{display:false}} } });
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"60%", plugins:{legend:{position:"right",labels:{color:ink,generateLabels:legendaComValor}},datalabels:{display:false}} } });
 
     // Volumes e NFs por mês (barras volume + linha NFs)
     mk("chartBraftVol",{ type:"bar",
@@ -3767,7 +3779,7 @@ body.locked > *:not(#loginScreen){display:none !important}
           { type:"bar", label:"Volumes", yAxisID:"y", data:a.volNF.map(function(x){return x.vol;}), backgroundColor:C_VOL, borderRadius:4, order:2 },
           { type:"line", label:"NFs", yAxisID:"y1", data:a.volNF.map(function(x){return x.nf;}), borderColor:C_NF, backgroundColor:C_NF, borderWidth:2, tension:.3, pointRadius:3, order:1 }
         ] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:16}}, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlIn},
         scales:{x:{ticks:{color:ink},grid:{color:gridC}},
           y:{position:"left",beginAtZero:true,ticks:{color:ink},grid:{color:gridC},title:{display:true,text:"Volumes",color:ink}},
           y1:{position:"right",beginAtZero:true,ticks:{color:C_NF},grid:{drawOnChartArea:false},title:{display:true,text:"NFs",color:C_NF}}} } });
@@ -3780,7 +3792,7 @@ body.locked > *:not(#loginScreen){display:none !important}
           { label:"SP Filial", data:a.dias.map(function(x){return x.sp;}), backgroundColor:"#2980b9", stack:"d" },
           { label:"Sul", data:a.dias.map(function(x){return x.sul;}), backgroundColor:"#16a085", stack:"d" }
         ] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlStack},
         scales:{x:{stacked:true,ticks:{color:ink,maxRotation:90,minRotation:45},grid:{color:gridC}},y:{stacked:true,beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} } });
 
     // Paletes por conferente (barras horizontais)
