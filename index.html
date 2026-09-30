@@ -765,6 +765,9 @@ body.locked > *:not(#loginScreen){display:none !important}
         padding:9px 16px; border-radius:8px; box-shadow:0 4px 14px -6px rgba(142,68,173,.8); transition:filter .15s, transform .1s; }
       .page[data-page="braft"] .braft-btn-base:hover{ filter:brightness(1.12); }
       .page[data-page="braft"] .braft-btn-base:active{ transform:translateY(1px); }
+      .page[data-page="braft"] .braft-filter{ margin:2px 0 10px; }
+      .page[data-page="braft"] .braft-filter label{ font-size:.78rem; color:var(--ink-dim); font-weight:600; display:inline-flex; align-items:center; gap:7px; }
+      .page[data-page="braft"] .braft-filter select{ background:var(--card,#12233a); color:var(--ink,#e8eef6); border:1px solid var(--line,#24354a); border-radius:8px; padding:6px 10px; font-size:.82rem; font-weight:600; cursor:pointer; outline:none; }
     </style>
     <div id="braft-status" class="insight" style="display:none"></div>
     <div class="kpi-grid" id="kpi-braft"></div>
@@ -781,6 +784,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="row cols-2">
       <div class="card">
         <div class="card-head"><div><h3>Envios por destino</h3><div class="sub">Guarulhos · SP Filial · Sul</div></div><span class="card-tag">DESTINO</span></div>
+        <div class="braft-filter"><label>Mês de corte <select id="braftDestinoMes"></select></label></div>
         <div class="chart-wrap"><canvas id="chartBraftDestino"></canvas></div>
       </div>
       <div class="card">
@@ -791,6 +795,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="row cols-2">
       <div class="card">
         <div class="card-head"><div><h3>Quantidade por dia e operação</h3><div class="sub">Paletes por dia, empilhados por destino (Guarulhos / SP / Sul)</div></div><span class="card-tag" style="border-color:#8e44ad;color:#a569bd">DIÁRIO</span></div>
+        <div class="braft-filter"><label>Mês de corte <select id="braftDiaMes"></select></label></div>
         <div class="chart-wrap tall"><canvas id="chartBraftDia"></canvas></div>
       </div>
       <div class="card">
@@ -3639,6 +3644,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   function analyze(rows){
     var mesEnv={}, mesFicou={}, mesStretch={}, mesVol={}, mesNF={}, mesPeso={};
     var destino={gua:0,sp:0,sul:0};
+    var destinoMes={};      // mesKey -> {gua,sp,sul}
     var porDia={};          // dia -> {gua,sp,sul}
     var porConf={};         // conferente -> {reg,paletes,ficou,nf,vol,peso}
     var totEnv=0, totFicou=0, totStretchEnv=0, totStretchFicou=0, totNF=0, totVol=0, totPeso=0, nReg=0;
@@ -3670,8 +3676,12 @@ body.locked > *:not(#loginScreen){display:none !important}
 
       // por dia × destino (para o gráfico diário empilhado)
       var dk=pd.ano+"-"+String(pd.mesNum).padStart(2,"0")+"-"+pd.dia;
-      if(!porDia[dk]) porDia[dk]={gua:0,sp:0,sul:0,ord:pd.ano*10000+pd.mesNum*100+ +pd.dia,lab:pd.dia+"/"+String(pd.mesNum).padStart(2,"0")};
+      if(!porDia[dk]) porDia[dk]={gua:0,sp:0,sul:0,ord:pd.ano*10000+pd.mesNum*100+ +pd.dia,lab:pd.dia+"/"+String(pd.mesNum).padStart(2,"0"),mesKey:pd.mesKey};
       porDia[dk].gua+=gua; porDia[dk].sp+=sp; porDia[dk].sul+=sul;
+
+      // destino por mês (para o filtro de mês do gráfico de destino)
+      if(!destinoMes[pd.mesKey]) destinoMes[pd.mesKey]={gua:0,sp:0,sul:0};
+      destinoMes[pd.mesKey].gua+=gua; destinoMes[pd.mesKey].sp+=sp; destinoMes[pd.mesKey].sul+=sul;
 
       // por conferente (linhas sem conferente entram como "Sem conferente")
       var cf=conf||"Sem conferente";
@@ -3692,7 +3702,7 @@ body.locked > *:not(#loginScreen){display:none !important}
 
     lista.sort(function(a,b){return b.ord-a.ord;});
 
-    return { envMes:serie(mesEnv), fluxo:fluxo, volNF:volNF, destino:destino, lista:lista,
+    return { envMes:serie(mesEnv), fluxo:fluxo, volNF:volNF, destino:destino, destinoMes:destinoMes, mesesKeys:meses, lista:lista,
              dias:dias, confs:confs,
              totEnv:totEnv, totFicou:totFicou, totStretchEnv:totStretchEnv, totStretchFicou:totStretchFicou,
              totNF:totNF, totVol:totVol, totPeso:totPeso, nReg:nReg };
@@ -3702,6 +3712,49 @@ body.locked > *:not(#loginScreen){display:none !important}
     return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
   }
   var C_ENV="#8e44ad", C_FICOU="#e67e22", C_VOL="#2980b9", C_NF="#16a085";
+
+  // ---- Estado e funções dos gráficos com filtro de mês de corte ----
+  var _braftA=null, _braftInk="#a4adc4", _braftGrid="rgba(255,255,255,.06)", _braftDlStack=null, _braftFiltrosOk=false;
+  function nomeMes(k){ return (MES_LBL[+k.split("-")[1]-1]||k)+"/"+k.slice(2,4); }
+  function popularFiltrosMes(a){
+    if(_braftFiltrosOk) return;         // popula uma vez só
+    var meses=(a.mesesKeys||[]).slice();
+    ["braftDiaMes","braftDestinoMes"].forEach(function(id){
+      var sel=document.getElementById(id); if(!sel) return;
+      var opts='<option value="">Todos os meses</option>'+meses.map(function(k){return '<option value="'+k+'">'+nomeMes(k)+'</option>';}).join("");
+      sel.innerHTML=opts;
+      sel.value="";  // padrão: todos
+    });
+    var s1=document.getElementById("braftDiaMes");
+    var s2=document.getElementById("braftDestinoMes");
+    if(s1 && !s1._wired){ s1._wired=1; s1.addEventListener("change",renderBraftDia); }
+    if(s2 && !s2._wired){ s2._wired=1; s2.addEventListener("change",renderBraftDestino); }
+    _braftFiltrosOk=true;
+  }
+  function renderBraftDia(){
+    var a=_braftA; if(!a||typeof Chart==="undefined") return;
+    var sel=document.getElementById("braftDiaMes"); var mk_=sel?sel.value:"";
+    var dias = mk_ ? a.dias.filter(function(d){return d.mesKey===mk_;}) : a.dias;
+    var c=$("#chartBraftDia"); if(!c) return; if(charts["chartBraftDia"]) charts["chartBraftDia"].destroy();
+    charts["chartBraftDia"]=new Chart(c.getContext("2d"),{ type:"bar",
+      data:{ labels:dias.map(function(x){return x.lab;}),
+        datasets:[
+          { label:"Guarulhos", data:dias.map(function(x){return x.gua;}), backgroundColor:"#8e44ad", stack:"d" },
+          { label:"SP Filial", data:dias.map(function(x){return x.sp;}), backgroundColor:"#2980b9", stack:"d" },
+          { label:"Sul", data:dias.map(function(x){return x.sul;}), backgroundColor:"#16a085", stack:"d" }
+        ] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:_braftInk}},datalabels:_braftDlStack},
+        scales:{x:{stacked:true,ticks:{color:_braftInk,maxRotation:90,minRotation:45},grid:{color:_braftGrid}},y:{stacked:true,beginAtZero:true,ticks:{color:_braftInk},grid:{color:_braftGrid}}} } });
+  }
+  function renderBraftDestino(){
+    var a=_braftA; if(!a||typeof Chart==="undefined") return;
+    var sel=document.getElementById("braftDestinoMes"); var mk_=sel?sel.value:"";
+    var d = mk_ ? (a.destinoMes[mk_]||{gua:0,sp:0,sul:0}) : a.destino;
+    var c=$("#chartBraftDestino"); if(!c) return; if(charts["chartBraftDestino"]) charts["chartBraftDestino"].destroy();
+    charts["chartBraftDestino"]=new Chart(c.getContext("2d"),{ type:"doughnut",
+      data:{ labels:["Guarulhos","SP Filial","Sul"], datasets:[{ data:[d.gua,d.sp,d.sul], backgroundColor:["#8e44ad","#2980b9","#16a085"], borderWidth:0 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:"60%", plugins:{legend:{position:"right",labels:{color:"#ffffff",generateLabels:legendaComValor}},datalabels:{display:false}} } });
+  }
 
   function render(a){
     var k=$("#kpi-braft");
@@ -3748,10 +3801,9 @@ body.locked > *:not(#loginScreen){display:none !important}
         ] },
       options:Object.assign({},base,{plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlIn}}) });
 
-    // Envios por destino (doughnut)
-    mk("chartBraftDestino",{ type:"doughnut",
-      data:{ labels:["Guarulhos","SP Filial","Sul"], datasets:[{ data:[a.destino.gua,a.destino.sp,a.destino.sul], backgroundColor:["#8e44ad","#2980b9","#16a085"], borderWidth:0 }] },
-      options:{ responsive:true, maintainAspectRatio:false, cutout:"60%", plugins:{legend:{position:"right",labels:{color:"#ffffff",generateLabels:legendaComValor}},datalabels:{display:false}} } });
+    // Envios por destino (doughnut) — respeita o mês de corte selecionado
+    _braftA=a; _braftInk=ink;
+    renderBraftDestino();
 
     // Volumes e NFs por mês (barras volume + linha NFs)
     mk("chartBraftVol",{ type:"bar",
@@ -3765,16 +3817,10 @@ body.locked > *:not(#loginScreen){display:none !important}
           y:{position:"left",beginAtZero:true,ticks:{color:ink},grid:{color:gridC},title:{display:true,text:"Volumes",color:ink}},
           y1:{position:"right",beginAtZero:true,ticks:{color:C_NF},grid:{drawOnChartArea:false},title:{display:true,text:"NFs",color:C_NF}}} } });
 
-    // Quantidade por dia × operação (barras empilhadas Guarulhos/SP/Sul)
-    mk("chartBraftDia",{ type:"bar",
-      data:{ labels:a.dias.map(function(x){return x.lab;}),
-        datasets:[
-          { label:"Guarulhos", data:a.dias.map(function(x){return x.gua;}), backgroundColor:"#8e44ad", borderRadius:{topLeft:0,topRight:0}, stack:"d" },
-          { label:"SP Filial", data:a.dias.map(function(x){return x.sp;}), backgroundColor:"#2980b9", stack:"d" },
-          { label:"Sul", data:a.dias.map(function(x){return x.sul;}), backgroundColor:"#16a085", stack:"d" }
-        ] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:dlStack},
-        scales:{x:{stacked:true,ticks:{color:ink,maxRotation:90,minRotation:45},grid:{color:gridC}},y:{stacked:true,beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} } });
+    // Quantidade por dia × operação — respeita o mês de corte selecionado
+    _braftGrid=gridC; _braftDlStack=dlStack;
+    popularFiltrosMes(a);
+    renderBraftDia();
 
     // Paletes por conferente (barras horizontais)
     mk("chartBraftConf",{ type:"bar",
