@@ -3746,6 +3746,13 @@ body.locked > *:not(#loginScreen){display:none !important}
       options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:"bottom",labels:{color:_braftInk}},datalabels:_braftDlStack},
         scales:{x:{stacked:true,ticks:{color:_braftInk,maxRotation:90,minRotation:45},grid:{color:_braftGrid}},y:{stacked:true,beginAtZero:true,ticks:{color:_braftInk},grid:{color:_braftGrid}}} } });
   }
+  function legendaComValor(chart){
+    var d=chart.data, ds=d.datasets[0];
+    return d.labels.map(function(lab,i){
+      var val=ds.data[i]||0;
+      return { text:lab+": "+val.toLocaleString("pt-BR"), fillStyle:ds.backgroundColor[i], strokeStyle:ds.backgroundColor[i], lineWidth:0, fontColor:"#ffffff", index:i };
+    });
+  }
   function renderBraftDestino(){
     var a=_braftA; if(!a||typeof Chart==="undefined") return;
     var sel=document.getElementById("braftDestinoMes"); var mk_=sel?sel.value:"";
@@ -3775,13 +3782,6 @@ body.locked > *:not(#loginScreen){display:none !important}
     // rótulo no CENTRO de cada segmento (para barras empilhadas)
     var dlStack={ display:function(c){ return (c.dataset.data[c.dataIndex]||0)>0; }, anchor:"center", align:"center", color:"#fff", font:{size:8.5,weight:"700"}, formatter:function(v){ return v? v.toLocaleString("pt-BR"):""; } };
     // legenda da rosca com valor ao lado do rótulo
-    function legendaComValor(chart){
-      var d=chart.data, ds=d.datasets[0];
-      return d.labels.map(function(lab,i){
-        var val=ds.data[i]||0;
-        return { text:lab+": "+val.toLocaleString("pt-BR"), fillStyle:ds.backgroundColor[i], strokeStyle:ds.backgroundColor[i], lineWidth:0, fontColor:"#ffffff", index:i };
-      });
-    }
     var base={ responsive:true, maintainAspectRatio:false, layout:{padding:{top:16}}, plugins:{legend:{position:"bottom",labels:{color:ink}},datalabels:{display:false}},
       scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
 
