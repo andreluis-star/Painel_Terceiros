@@ -99,6 +99,28 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
 #status.show{display:block;}
 #status.error{background:#3a1f24;color:#ff9b9b;border-color:#5a2a2f;}
 .footer{max-width:1500px;margin:32px auto 0;padding:20px 32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--ink-muted);font-family:'JetBrains Mono',monospace;letter-spacing:.05em;flex-wrap:wrap;gap:8px;}
+/* ===== 18 · Dash Expedição (NAO-CONFORMIDADES) ===== */
+.dex-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
+.dex-seg{display:flex;flex-wrap:wrap;gap:6px}
+.dex-mes{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-dim)}
+.dex-mes select,.dex-search{background:var(--surface);color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-family:inherit;font-size:12.5px;outline:none}
+.dex-search{width:260px;max-width:100%}
+#kpi-ocorr_exp .kpi-value{font-size:28px}
+.dex-table th,.dex-table td{text-align:left!important;vertical-align:top}
+.dex-table td{font-family:inherit;font-size:12.5px}
+.dex-sub{font-size:11px;color:var(--ink-muted);margin-top:2px}
+.dex-st{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.dex-st.ok{background:rgba(61,220,151,.14);color:var(--green)}
+.dex-st.tr{background:rgba(255,210,63,.14);color:var(--yellow)}
+.dex-st.pe{background:rgba(255,77,109,.14);color:var(--red)}
+.dex-st.dv{background:rgba(127,140,154,.18);color:var(--ink-dim)}
+.dex-quem{display:inline-block;background:rgba(255,165,82,.12);color:var(--accent-2);border:1px solid rgba(255,165,82,.35);border-radius:20px;padding:2px 9px;font-size:11.5px;font-weight:700;margin:1px 3px 1px 0;white-space:nowrap}
+.dex-none{color:var(--ink-muted);font-size:11.5px;font-style:italic}
+.dex-hot{color:var(--red)!important;font-weight:800}
+.dex-bar{height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;min-width:70px}
+.dex-bar i{display:block;height:100%;background:var(--green)}
+.dex-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-muted);font-size:13px}
+.dex-note{background:rgba(77,159,255,.08);border:1px solid rgba(77,159,255,.2);color:var(--ink-dim);border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:14px}
 @media (max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.row.cols-2,.row.cols-3,.row.uneven{grid-template-columns:1fr}}
 @media (max-width:640px){.header-inner,.nav,main,.footer{padding-left:16px;padding-right:16px}.kpi-grid{grid-template-columns:1fr}.page-head h2{font-size:24px}}
 /* ---- Mão de Obra: grade "por operação/mês" ---- */
@@ -130,7 +152,7 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
 #colabResultTable th:first-child,#colabResultTable td:first-child{left:0;min-width:110px}
 #colabResultTable th:nth-child(2),#colabResultTable td:nth-child(2){left:110px;min-width:180px;box-shadow:2px 0 0 var(--border)}
 #colabResultTable td{text-align:center}
-/* Colaboradores disponíveis por mês (aba 15): um "chip" por nome, colorido por função */
+/* Colaboradores disponíveis por mês (aba 14): um "chip" por nome, colorido por função */
 .colab-name-list{display:flex;flex-direction:column;gap:6px}
 .colab-name-chip{font-size:11.5px;font-weight:700;color:#0b0f1a;padding:6px 10px;border-radius:7px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;letter-spacing:.01em}
@@ -308,22 +330,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-jem"></div>
   </section>
 
-  <!-- 02 · BIPADOS X ERROS -->
-  <section class="page" data-page="bipados">
-    <div class="page-head">
-      <div class="eyebrow">02 · Conferência</div>
-      <h2>Veículos bipados × Erros de embarque</h2>
-      <p>Indicadores de conferência de carga na expedição.</p>
-    </div>
-    <div class="kpi-grid" id="kpi-bipados"></div>
-    <div class="card"><div class="card-head"><div><h3>Veículos bipados × Erros</h3><div class="sub">Operação de conferência por mês</div></div><span class="card-tag">EMBARQUE</span></div><div class="chart-wrap tall"><canvas id="chartBipados"></canvas></div></div>
-    <div class="insight" id="insight-bipados"></div>
-  </section>
-
-  <!-- 15 · AJUDANTES -->
+  <!-- 14 · AJUDANTES -->
   <section class="page" data-page="ajudantes">
     <div class="page-head">
-      <div class="eyebrow">15 · Equipe</div>
+      <div class="eyebrow">14 · Equipe</div>
       <h2>Ajudantes & eventos</h2>
       <p>Quantidade de ajudantes alocados versus eventos de ajudantes registrados no mês.</p>
     </div>
@@ -332,10 +342,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-ajudantes"></div>
   </section>
 
-  <!-- 16 · CONFERENTES -->
+  <!-- 15 · CONFERENTES -->
   <section class="page" data-page="conferentes">
     <div class="page-head">
-      <div class="eyebrow">16 · Equipe</div>
+      <div class="eyebrow">15 · Equipe</div>
       <h2>Conferentes & eventos</h2>
       <p>Carga operacional dos conferentes ao longo do período.</p>
     </div>
@@ -344,10 +354,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-conferentes"></div>
   </section>
 
-  <!-- 04 · ATRASO EXPRESSO -->
+  <!-- 03 · ATRASO EXPRESSO -->
   <section class="page" data-page="atraso_expresso">
     <div class="page-head">
-      <div class="eyebrow">04 · Tempos críticos</div>
+      <div class="eyebrow">03 · Tempos críticos</div>
       <h2>Atraso expresso</h2>
       <p>Tempo total de atraso e dias excedidos para saída de cargas expressas. Quanto menor, melhor.</p>
     </div>
@@ -356,10 +366,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-atraso_expresso"></div>
   </section>
 
-  <!-- 05 · SAÍDA A+ -->
+  <!-- 04 · SAÍDA A+ -->
   <section class="page" data-page="saida_a">
     <div class="page-head">
-      <div class="eyebrow">05 · Tempos críticos</div>
+      <div class="eyebrow">04 · Tempos críticos</div>
       <h2>Saída A+</h2>
       <p>Tempo total de atraso e dias excedidos para saída de cargas regulares. Quanto menor, melhor.</p>
     </div>
@@ -368,10 +378,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-saida_a"></div>
   </section>
 
-  <!-- 06 · MANIFESTOS -->
+  <!-- 05 · MANIFESTOS -->
   <section class="page" data-page="manifestos">
     <div class="page-head">
-      <div class="eyebrow">06 · Operação fim</div>
+      <div class="eyebrow">05 · Operação fim</div>
       <h2>Manifestos & operação</h2>
       <p>Documentos manifestados versus o volume operacional total (entregas + coletas).</p>
     </div>
@@ -380,10 +390,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-manifestos"></div>
   </section>
 
-  <!-- 07 · PERSONALIZADOS -->
+  <!-- 06 · PERSONALIZADOS -->
   <section class="page" data-page="personalizados">
     <div class="page-head">
-      <div class="eyebrow">07 · Operação fim</div>
+      <div class="eyebrow">06 · Operação fim</div>
       <h2>Personalizados</h2>
       <p>Volumes personalizados frente ao total entregue/coletado no mês.</p>
     </div>
@@ -392,10 +402,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-personalizados"></div>
   </section>
 
-  <!-- 08 · CUBAGEM -->
+  <!-- 07 · CUBAGEM -->
   <section class="page" data-page="cubagem">
     <div class="page-head">
-      <div class="eyebrow">08 · Cubagem</div>
+      <div class="eyebrow">07 · Cubagem</div>
       <h2>Volumes cubados & NFs</h2>
       <p>Quantidade de notas fiscais cubadas e volume total medido. Indicador relevante para faturamento e ocupação do galpão.</p>
     </div>
@@ -416,10 +426,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-cubagem"></div>
   </section>
 
-  <!-- 09 · MÃO DE OBRA · VISÃO GERAL -->
+  <!-- 08 · MÃO DE OBRA · VISÃO GERAL -->
   <section class="page" data-page="mo_overview">
     <div class="page-head">
-      <div class="eyebrow">09 · Mão de Obra</div>
+      <div class="eyebrow">08 · Mão de Obra</div>
       <h2>Ajudantes terceiros · Visão geral</h2>
       <p>Quantidade de ajudantes terceiros alocados por mês, segmentados entre Rota e Expedição.</p>
     </div>
@@ -435,10 +445,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mo_overview"></div>
   </section>
 
-  <!-- 10 · ROTA X EXPEDIÇÃO -->
+  <!-- 09 · ROTA X EXPEDIÇÃO -->
   <section class="page" data-page="mo_rota_exp">
     <div class="page-head">
-      <div class="eyebrow">10 · Mão de Obra</div>
+      <div class="eyebrow">09 · Mão de Obra</div>
       <h2>Rota × Expedição</h2>
       <p>Comparativo mensal entre ajudantes alocados em Rota e em Expedição.</p>
     </div>
@@ -450,30 +460,30 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mo_rota_exp"></div>
   </section>
 
-  <!-- 11 · POR OPERAÇÃO -->
+  <!-- 10 · POR OPERAÇÃO -->
   <section class="page" data-page="mo_operacao">
     <div class="page-head">
-      <div class="eyebrow">11 · Mão de Obra</div>
+      <div class="eyebrow">10 · Mão de Obra</div>
       <h2>Ajudantes por operação</h2>
       <p>Todas as operações e meses com dados em uma única visão.</p>
     </div>
     <div class="op-months-grid" id="mo-op-grid"></div>
   </section>
 
-  <!-- 12 · POR FORNECEDOR -->
+  <!-- 11 · POR FORNECEDOR -->
   <section class="page" data-page="mo_fornecedor">
     <div class="page-head">
-      <div class="eyebrow">12 · Mão de Obra</div>
+      <div class="eyebrow">11 · Mão de Obra</div>
       <h2>Pessoas por fornecedor</h2>
       <p>Volume de ajudantes alocados por fornecedor, mês a mês.</p>
     </div>
     <div class="row cols-2" id="mo-forn-grid"></div>
   </section>
 
-  <!-- 13 · RESUMO ANUAL -->
+  <!-- 12 · RESUMO ANUAL -->
   <section class="page" data-page="mo_resumo">
     <div class="page-head">
-      <div class="eyebrow">13 · Mão de Obra</div>
+      <div class="eyebrow">12 · Mão de Obra</div>
       <h2>Resumo anual</h2>
       <p>Totais acumulados por operação e por tipo no período com dados.</p>
     </div>
@@ -484,10 +494,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
   </section>
 
-  <!-- 14 · COLABORADORES · VISÃO GERAL -->
+  <!-- 13 · COLABORADORES · VISÃO GERAL -->
   <section class="page" data-page="colab_overview">
     <div class="page-head">
-      <div class="eyebrow">14 · Colaboradores</div>
+      <div class="eyebrow">13 · Colaboradores</div>
       <h2>Expedição · Visão geral</h2>
       <p>Dias trabalhados e colaboradores disponíveis por mês. Ativo = FO, FE, FA, P, AT ou LT no dia; trabalhado = P.</p>
     </div>
@@ -507,10 +517,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-colab_overview"></div>
   </section>
 
-  <!-- 03 · COLABORADORES · ESTATÍSTICAS MENSAIS -->
+  <!-- 02 · COLABORADORES · ESTATÍSTICAS MENSAIS -->
   <section class="page" data-page="colab_mensal">
     <div class="page-head">
-      <div class="eyebrow">03 · Colaboradores</div>
+      <div class="eyebrow">02 · Colaboradores</div>
       <h2>Estatísticas mensais</h2>
       <p>Contagem de dias por sigla, mês a mês, para os colaboradores ativos e para as demais situações (home office, afastamento, não contratado, desligamento).</p>
     </div>
@@ -524,10 +534,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
   </section>
 
-  <!-- 17 · COLABORADORES · EQUIPE INTERNA -->
+  <!-- 16 · COLABORADORES · EQUIPE INTERNA -->
   <section class="page" data-page="colab_verificacao">
     <div class="page-head">
-      <div class="eyebrow">17 · Colaboradores</div>
+      <div class="eyebrow">16 · Colaboradores</div>
       <h2>Equipe Interna</h2>
       <p>Tamanho de equipe por função (Líder, Conferente, Ajudante): presença real ("P") comparada à estimativa de dias úteis do mês. Segue o mesmo período selecionado nas demais abas, sempre de 1º ao último dia de cada mês.</p>
     </div>
@@ -552,11 +562,11 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-colab_equipe"></div>
   </section>
 
-  <!-- 18 · OCORRÊNCIAS -->
-  <!-- 18 · OCORRÊNCIAS (Não Conformidades — todos os setores) -->
+  <!-- 17 · OCORRÊNCIAS -->
+  <!-- 17 · OCORRÊNCIAS (Não Conformidades — todos os setores) -->
   <section class="page" data-page="ocorrencias">
     <div class="page-head">
-      <div class="eyebrow">18 · Ocorrências</div>
+      <div class="eyebrow">17 · Ocorrências</div>
       <h2>Não conformidades — geral</h2>
       <p>Todas as não conformidades registradas no período, de todos os setores. Fonte: sistema Não Conformidades (Portoex).</p>
     </div>
@@ -577,33 +587,53 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-ocorrencias"></div>
   </section>
 
-  <!-- 19 · EXPEDIÇÃO (Não Conformidades — só LOGISTICA INTERNA) -->
+  <!-- 18 · DASH EXPEDIÇÃO (sistema NAO-CONFORMIDADES — tratativas da Expedição / Log. Interna) -->
   <section class="page" data-page="ocorr_exp">
     <div class="page-head">
-      <div class="eyebrow">19 · Expedição</div>
-      <h2>Não conformidades — Expedição</h2>
-      <p>Não conformidades da Logística Interna (Expedição). Mesma fonte da aba 18, filtrada por setor. Fonte: sistema Não Conformidades (Portoex).</p>
+      <div class="eyebrow">18 · Dash Expedição</div>
+      <h2>Dash geral de tratamentos — Expedição</h2>
+      <p>Tudo o que caiu para a <strong>Expedição / Log. Interna</strong> tratar: erros, quem errou, prazos de aceite e de finalização, custos e pendências. Fonte: sistema <strong>Não Conformidades</strong> (andreluis-star.github.io/NAO-CONFORMIDADES), ao vivo. Somente leitura — para informar quem errou ou tratar, use o próprio sistema.</p>
+    </div>
+    <div class="dex-toolbar">
+      <div class="dex-seg" id="dexVertSeg">
+        <button class="toggle-btn active" data-v="ambas">NC + Erros</button>
+        <button class="toggle-btn" data-v="NC">Não Conformidades</button>
+        <button class="toggle-btn" data-v="ERRO">Erros Operacionais</button>
+      </div>
+      <label class="dex-mes">Mês
+        <select id="dexMes"><option value="">Todos os meses</option></select>
+      </label>
+      <div style="flex:1"></div>
+      <button class="toggle-btn" id="dexCsv">Exportar CSV</button>
     </div>
     <div id="oce-status" class="insight" style="display:none"></div>
+    <div id="dexNote"></div>
     <div class="kpi-grid" id="kpi-ocorr_exp"></div>
     <div class="row cols-2">
-      <div class="card"><div class="card-head"><div><h3>Abertas × Finalizadas</h3><div class="sub">Situação das ocorrências da Expedição</div></div><span class="card-tag">STATUS</span></div><div class="chart-wrap tall"><canvas id="chartOceStatus"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Por tipo de erro</h3><div class="sub">Motivos mais recorrentes na Expedição</div></div></div><div class="chart-wrap tall"><canvas id="chartOceTipo"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Erros por tipo</h3><div class="sub">O que mais acontece na Expedição</div></div><span class="card-tag">TIPO</span></div><div class="chart-wrap tall"><canvas id="chDexTipo"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Quem errou</h3><div class="sub">Colaboradores identificados nas ocorrências</div></div><span class="card-tag">COLABORADOR</span></div><div class="chart-wrap tall"><canvas id="chDexQuem"></canvas><div id="chDexQuemEmpty" class="dex-empty" style="display:none">Nenhum nome informado ainda.</div></div></div>
+    </div>
+    <div class="row cols-3" style="margin-top:14px">
+      <div class="card"><div class="card-head"><div><h3>Situação das tratativas</h3><div class="sub">Onde cada ocorrência está agora</div></div></div><div class="chart-wrap"><canvas id="chDexStatus"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Tempo até finalizar</h3><div class="sub">Dias entre a abertura e o OK</div></div></div><div class="chart-wrap"><canvas id="chDexLead"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Idade das pendências</h3><div class="sub">Há quantos dias estão em aberto</div></div></div><div class="chart-wrap"><canvas id="chDexAge"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div class="card-head"><div><h3>Evolução mensal</h3><div class="sub">Ocorrências recebidas por mês e situação atual</div></div><span class="card-tag">MÊS</span></div><div class="chart-wrap"><canvas id="chDexMes"></canvas></div></div>
+    <div class="row cols-2" style="margin-top:14px">
+      <div class="card"><div class="card-head"><div><h3>Ranking de colaboradores</h3><div class="sub">Erros por pessoa, finalização e custo</div></div></div><div class="table-wrap"><table class="data dex-table" id="dexRank"></table></div></div>
+      <div class="card"><div class="card-head"><div><h3>Pendências mais antigas</h3><div class="sub">Ainda sem OK, da mais antiga para a mais nova</div></div></div><div class="table-wrap"><table class="data dex-table" id="dexOld"></table></div></div>
     </div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Por responsável</h3><div class="sub">Responsáveis pelas ocorrências da Expedição</div></div></div><div class="chart-wrap tall"><canvas id="chartOceResp"></canvas></div></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Ocorrências detalhadas</h3><div class="sub">Cada não conformidade da Expedição no período</div></div><span class="card-tag">DADOS BRUTOS</span></div>
-      <div class="table-wrap"><table class="data" id="tableOce"></table></div>
+      <div class="card-head"><div><h3>Detalhamento das tratativas</h3><div class="sub">Cada ocorrência da Expedição no filtro</div></div><input id="dexSearch" class="dex-search" placeholder="Buscar ocorrência, ref., pessoa…"></div>
+      <div class="table-wrap"><table class="data dex-table" id="tableOce"></table></div>
     </div>
     <div class="insight" id="insight-ocorr_exp"></div>
   </section>
 
-  <!-- 20 · MATTEL (planilha NOTAS MATTEL 2026 × sistema ETIQUETAS-MATTEL) -->
+  <!-- 19 · MATTEL (planilha NOTAS MATTEL 2026 × sistema ETIQUETAS-MATTEL) -->
   <section class="page" data-page="mattel">
     <div class="page-head">
-      <div class="eyebrow">20 · Mattel</div>
+      <div class="eyebrow">19 · Mattel</div>
       <h2>Expedição &amp; coleta Mattel</h2>
       <p>Cruzamento entre a planilha <strong>NOTAS MATTEL 2026</strong> e o sistema <strong>ETIQUETAS-MATTEL</strong> (coleta/expedição e minutas), conectados pelo número da Nota Fiscal. Dados carregados ao vivo das duas fontes.</p>
     </div>
@@ -669,10 +699,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mattel"></div>
 
   </section>
-  <!-- 21 · PALETES (sistema Conferência Geral — Firestore conferenciaptx) -->
+  <!-- 20 · PALETES (sistema Conferência Geral — Firestore conferenciaptx) -->
   <section class="page" data-page="paletes">
     <div class="page-head">
-      <div class="eyebrow">21 · Paletes</div>
+      <div class="eyebrow">20 · Paletes</div>
       <h2>Controle de paletes</h2>
       <p>Movimentação de paletes (enviados e recebidos) do sistema <strong>Conferência Geral</strong>, por dia e por mês, com transferências SC&times;SP, modelos e controle por cliente. Dados ao vivo do Firestore.</p>
     </div>
@@ -704,10 +734,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-paletes"></div>
   </section>
-  <!-- 22 · PALETES SP (planilha CONTROLE PBR1 · ITJ → SP) -->
+  <!-- 21 · PALETES SP (planilha CONTROLE PBR1 · ITJ → SP) -->
   <section class="page" data-page="paletes_sp">
     <div class="page-head">
-      <div class="eyebrow">22 · Paletes SP</div>
+      <div class="eyebrow">21 · Paletes SP</div>
       <h2>Paletes PBR1 · Itajaí &rarr; São Paulo</h2>
       <p>Controle de envios de paletes PBR1 de Itajaí para São Paulo, com destaque para os <strong>envios à BRAFT</strong> por dia e por mês. O retorno de paletes vem consolidado (sem separação por destino), então é exibido como total geral.</p>
       <a class="psp-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=1100141065#gid=1100141065" target="_blank" rel="noopener">
@@ -749,10 +779,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-psp"></div>
   </section>
-  <!-- 23 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
+  <!-- 22 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
   <section class="page" data-page="braft">
     <div class="page-head">
-      <div class="eyebrow">23 · BRAFT</div>
+      <div class="eyebrow">22 · BRAFT</div>
       <h2>Fluxo de paletes BRAFT</h2>
       <p>Checklist completo da BRAFT: paletes enviados (por destino), o que <strong>ficou lá</strong>, stretch, e o resumo de NFs, volumes e peso atualizados pelo grupo. Dados ao vivo da aba BRAFT da planilha.</p>
       <a class="braft-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=574891819#gid=574891819" target="_blank" rel="noopener">
@@ -826,7 +856,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   const SHEET_NAME = 'MONTAGENS GRAF';
   const SHEET_NAME_MO = 'ACOMP M.O.3º';
   const SHEET_NAME_COLAB = 'ABS VERTICAL';
-  // Fonte externa (planilha separada) usada pela aba 18 · Ocorrências.
+  // Fonte externa (planilha separada) usada pela aba 17 · Ocorrências.
   const SHEET_ID_OCORRENCIAS = '1D7C9_0iKZypa8F7nh_iOtxaTZArMchdj';
   const SHEET_NAME_OCORRENCIAS = 'Ocorrências';
   // A busca sem "range" explícito às vezes traz um intervalo usado menor do
@@ -1038,8 +1068,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     }
     if(total===0) throw new Error('Não encontrei nenhuma linha com data válida na aba "'+SHEET_NAME_OCORRENCIAS+'".');
 
-    // Recorte de EXPEDIÇÃO: usado pelo painel 02 (contagem de erros de
-    // embarque = ocorrências de responsável "Expedição") e pela aba 19.
+    // Recorte de EXPEDIÇÃO (ocorrências de responsável "Expedição").
     const expedRecords = records.filter(r => r.resp === 'Expedição')
       .sort((a,b) => (a.y-b.y) || (a.mo-b.mo) || (a.d-b.d));
     const expedByMonth = {};
@@ -1323,7 +1352,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     }
     return count;
   }
-  // Tamanho de equipe por mês/função (aba 17 · Equipe Interna): dias úteis do
+  // Tamanho de equipe por mês/função (aba 16 · Equipe Interna): dias úteis do
   // mês, "P" real (somado dos blocos agregados por equipe), colaboradores
   // disponíveis (quem teve ao menos 1 "P" no mês — só isso indica que estava
   // contratado e vindo na operação) e a quantidade estimada (dias úteis ×
@@ -1414,28 +1443,27 @@ body.locked > *:not(#loginScreen){display:none !important}
   const pages = [
     {id:'overview', label:'Visão Geral', num:'00'},
     {id:'jem', label:'JEM', num:'01'},
-    {id:'bipados', label:'Bipados x Erros', num:'02'},
-    {id:'colab_mensal', label:'Estatísticas Mensais', num:'03'},
-    {id:'atraso_expresso', label:'Atraso Expresso', num:'04'},
-    {id:'saida_a', label:'Saída A+', num:'05'},
-    {id:'manifestos', label:'Manifestos', num:'06'},
-    {id:'personalizados', label:'Personalizados', num:'07'},
-    {id:'cubagem', label:'Cubagem', num:'08'},
-    {id:'mo_overview', label:'Mão de Obra', num:'09'},
-    {id:'mo_rota_exp', label:'Rota x Expedição', num:'10'},
-    {id:'mo_operacao', label:'Por Operação', num:'11'},
-    {id:'mo_fornecedor', label:'Por Fornecedor', num:'12'},
-    {id:'mo_resumo', label:'Resumo Anual MO', num:'13'},
-    {id:'colab_overview', label:'Colaboradores', num:'14'},
-    {id:'ajudantes', label:'Ajudantes', num:'15'},
-    {id:'conferentes', label:'Conferentes', num:'16'},
-    {id:'colab_verificacao', label:'Equipe Interna', num:'17'},
-    {id:'ocorrencias', label:'Ocorrências', num:'18'},
-    {id:'ocorr_exp', label:'Ocorrências Expedição', num:'19'},
-    {id:'mattel', label:'Mattel', num:'20'},
-    {id:'paletes', label:'Paletes', num:'21'},
-    {id:'paletes_sp', label:'Paletes SP', num:'22'},
-    {id:'braft', label:'BRAFT', num:'23'},
+    {id:'colab_mensal', label:'Estatísticas Mensais', num:'02'},
+    {id:'atraso_expresso', label:'Atraso Expresso', num:'03'},
+    {id:'saida_a', label:'Saída A+', num:'04'},
+    {id:'manifestos', label:'Manifestos', num:'05'},
+    {id:'personalizados', label:'Personalizados', num:'06'},
+    {id:'cubagem', label:'Cubagem', num:'07'},
+    {id:'mo_overview', label:'Mão de Obra', num:'08'},
+    {id:'mo_rota_exp', label:'Rota x Expedição', num:'09'},
+    {id:'mo_operacao', label:'Por Operação', num:'10'},
+    {id:'mo_fornecedor', label:'Por Fornecedor', num:'11'},
+    {id:'mo_resumo', label:'Resumo Anual MO', num:'12'},
+    {id:'colab_overview', label:'Colaboradores', num:'13'},
+    {id:'ajudantes', label:'Ajudantes', num:'14'},
+    {id:'conferentes', label:'Conferentes', num:'15'},
+    {id:'colab_verificacao', label:'Equipe Interna', num:'16'},
+    {id:'ocorrencias', label:'Ocorrências', num:'17'},
+    {id:'ocorr_exp', label:'Dash Expedição', num:'18'},
+    {id:'mattel', label:'Mattel', num:'19'},
+    {id:'paletes', label:'Paletes', num:'20'},
+    {id:'paletes_sp', label:'Paletes SP', num:'21'},
+    {id:'braft', label:'BRAFT', num:'22'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -1541,7 +1569,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,right:8}},scales:baseScales,plugins:{legend:{display:false}}}
   });
   // Dual-axis "combined" chart: bars on the left axis, a line on the right
-  // axis — used by the Separado/Combinado toggle on pages 05, 06 and 09.
+  // axis — used by the Separado/Combinado toggle on several pages.
   function comboChart(id, meses, barData, barLabel, barColor, lineData, lineLabel, lineColor, barFmt, lineFmt){
     const bf = barFmt || (v => (v===0||v==null) ? '' : fmt(v));
     const lf = lineFmt || (v => (v===0||v==null) ? '' : fmt(v));
@@ -1624,7 +1652,6 @@ body.locked > *:not(#loginScreen){display:none !important}
 
     renderOverview(D, meses);
     renderJEM(D, meses, mAtual, mAnterior);
-    renderBipados(D, meses, mAtual, mAnterior);
     renderAjudantes(D, meses, mAtual, mAnterior);
     renderConferentes(D, meses, mAtual, mAnterior);
     renderAtrasoExpresso(D, meses, mAtual, mAnterior);
@@ -1716,33 +1743,6 @@ body.locked > *:not(#loginScreen){display:none !important}
     document.getElementById('jemMonthsTag').textContent = `JEM · ${meses.length} MESES`;
     const d = delta(vol.curr, vol.prev, true);
     setInsight('jem', `<strong>Leitura do mês:</strong> o volume JEM em <strong>${mAtual}</strong> foi de ${fmt(vol.curr)}, uma variação de ${d.arrow} ${d.text} frente a ${mAnterior}. Despachos: ${fmt(desp.curr)} (${delta(desp.curr,desp.prev,true).arrow} ${delta(desp.curr,desp.prev,true).text}).`);
-  }
-
-  function renderBipados(D, meses, mAtual, mAnterior){
-    const grid = document.getElementById('kpi-bipados'); grid.innerHTML='';
-    // Erros de embarque = ocorrências de responsável "Expedição" (aba 18),
-    // alinhadas aos meses exibidos. Cai no valor antigo da MONTAGENS GRAF só
-    // se a base de Ocorrências não tiver carregado.
-    const errosExp = OCORR ? meses.map(m => OCORR.expedByMonth[m] || 0) : D.erros_embarques;
-    const bip=last2(D.veiculos_bipados), err=last2(errosExp);
-    const taxaCurr = (bip.curr!=null&&bip.curr)?(err.curr/bip.curr)*100:null;
-    const taxaPrev = (bip.prev!=null&&bip.prev)?(err.prev/bip.prev)*100:null;
-    grid.appendChild(kpiCard(`Veículos bipados ${mAtual}`, fmt(bip.curr), `vs. ${mAnterior}: ${fmt(bip.prev)}`, delta(bip.curr,bip.prev,true), 'green'));
-    grid.appendChild(kpiCard('Erros de embarque (Expedição)', fmt(err.curr), `vs. ${mAnterior}: ${fmt(err.prev)}`, delta(err.curr,err.prev,false), 'red'));
-    grid.appendChild(kpiCard('Taxa de erro', taxaCurr!=null?taxaCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—', 'erros / bipados', delta(taxaCurr,taxaPrev,false), 'purple'));
-    const peak = peakInfo(errosExp, meses);
-    grid.appendChild(kpiCard('Pico de erros', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'atenção'}, 'yellow'));
-
-    mkChart('chartBipados', {
-      type:'bar', data:{labels:meses,datasets:[
-        {label:'Veículos bipados',data:D.veiculos_bipados,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')},
-        {label:'Erros de embarque (Expedição)',data:errosExp,backgroundColor:'#ff4d6d',borderRadius:6,datalabels:dl('#ff4d6d','end','end')}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
-    });
-    const d = delta(err.curr, err.prev, false);
-    const cls = d.cls==='up' ? 'good' : (d.cls==='down' ? 'warn' : '');
-    setInsight('bipados', `<strong>${d.cls==='up'?'Destaque positivo':'Atenção'}:</strong> os erros de embarque foram de ${fmt(err.prev)} (${mAnterior}) para ${fmt(err.curr)} (${mAtual}) — variação de ${d.arrow} ${d.text}, com ${fmt(bip.curr)} veículos bipados no mês.`, cls);
   }
 
   function renderAjudantes(D, meses, mAtual, mAnterior){
@@ -1986,152 +1986,258 @@ body.locked > *:not(#loginScreen){display:none !important}
     setInsight('ocorrencias', `<strong>Leitura do período:</strong> ${fmt(data.total)} ocorrências registradas. "${topResp[0]}" responde por ${fmt(topResp[1])} casos (${pct(topResp[1])}%), o tipo mais recorrente foi "${topTipo[0]}" (${fmt(topTipo[1])} casos) e o mês de maior volume foi ${peakMonth} (${fmt(peakVal)}).`);
   }
 
-  // ============ NÃO CONFORMIDADES · EXPEDIÇÃO (aba 19) ============
-  // Fonte: painel "Não Conformidades" (franciscosilva-sys/portoex-painel),
-  // gerado a partir da tela 295 do Brudam. A página traz os dados embutidos
-  // num objeto `const DATA = {...}` com chaves "AAAAMM_setor" (ex.:
-  // "202610_logisticainterna"). Buscamos a página publicada, extraímos esse
-  // objeto e usamos só o setor LOGÍSTICA INTERNA (= Expedição). Se a página
-  // do GitHub Pages falhar, tentamos a cópia crua do repositório.
-  const NC_SOURCES = [
-    'https://franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html',
-    'https://raw.githubusercontent.com/franciscosilva-sys/portoex-painel/main/NaoConformidades.html'
-  ];
-  const NC_SETOR_EXP = 'logisticainterna';
-  let NC_EXP = null; // { records, geradoEm }
+  // ============ 18 · DASH EXPEDIÇÃO (sistema NAO-CONFORMIDADES) ============
+  // Réplica, somente leitura, da aba "Dash Expedição" do sistema
+  // andreluis-star.github.io/NAO-CONFORMIDADES. Aquele sistema guarda todo o
+  // seu estado no Firestore (projeto portoex-nc, documento portoex/nc, campo
+  // "state" com o JSON). Lemos esse documento pela API REST — o painel NUNCA
+  // grava nada lá; ajustes (quem errou, tratativas) são feitos no próprio sistema.
+  const DEX_DOC_URL = 'https://firestore.googleapis.com/v1/projects/portoex-nc/databases/(default)/documents/portoex/nc?key=AIzaSyDZjORlQnMWCJ7cZUGi5fz3emG7jNtOg8Q';
+  const DEX_DAY = 86400000;
+  const DEX_BUCKETS = ['até 1 dia','2–3 dias','4–7 dias','8–15 dias','mais de 15'];
+  const DEX_C = {green:'#3ddc97',yellow:'#ffd23f',red:'#ff4d6d',orange:'#ffa552',blue:'#4d9fff',gray:'#7f8c9a'};
+  let DEX = null;            // { regs:[...], ts }
+  let dexVert = 'ambas', dexMes = '';
 
-  async function fetchNCPage(){
-    let lastErr = null;
-    for(const base of NC_SOURCES){
-      try{
-        const res = await fetch(base + '?_=' + Date.now(), { cache:'no-store' });
-        if(!res.ok) throw new Error('HTTP ' + res.status);
-        return await res.text();
-      }catch(err){ lastErr = err; }
-    }
-    throw new Error('não foi possível acessar a página de Não Conformidades (' + (lastErr ? lastErr.message : 'erro desconhecido') + ')');
-  }
-  function parseNCPage(html){
-    const marker = 'const DATA = ';
-    const i = html.indexOf(marker);
-    if(i === -1) throw new Error('objeto DATA não encontrado na página de Não Conformidades');
-    const j = html.indexOf('\n', i);
-    let txt = html.slice(i + marker.length, j === -1 ? undefined : j).trim();
-    if(txt.endsWith(';')) txt = txt.slice(0, -1);
-    const DATA = JSON.parse(txt);
-    const m = html.match(/gerado em\s+(\d{2}\/\d{2}\/\d{4}(?:\s+\d{2}:\d{2})?)/i);
-    return { DATA, geradoEm: m ? m[1] : null };
-  }
-  function buildNCExp(DATA){
-    const seen = new Set(), records = [];
-    Object.keys(DATA).forEach(key => {
-      const km = key.match(/^(\d{4})(\d{2})_(.+)$/);
-      if(!km || km[3] !== NC_SETOR_EXP) return;
-      const y = parseInt(km[1],10), mo = parseInt(km[2],10);
-      (DATA[key]||[]).forEach(r => {
-        const id = (r.empresa||'') + '|' + (r.codigo||'');
-        if(seen.has(id)) return; seen.add(id);
-        const dm = String(r.data||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        const sortKey = dm ? (+dm[3])*10000 + (+dm[2])*100 + (+dm[1]) : y*10000 + mo*100;
-        records.push({
-          ...r,
-          status: String(r.status||'').trim().toUpperCase() || 'SEM STATUS',
-          categoria: String(r.categoria||'').trim() || 'SEM CATEGORIA',
-          responsavel: String(r.responsavel||'').trim() || 'Não atribuído',
-          mes: MES_ABBR[mo-1] + '/' + String(y).slice(2), mk: y*100 + mo,
-          sortKey: sortKey * 1e6 + parseInt(String(r.hora||'0').replace(/\D/g,'')||'0', 10)
-        });
-      });
-    });
-    records.sort((a,b) => b.sortKey - a.sortKey); // mais recentes primeiro
-    return records;
-  }
-  function countBy(list, fn){
-    const m = new Map();
-    list.forEach(r => { const k = fn(r); m.set(k, (m.get(k)||0) + 1); });
-    return [...m.entries()].sort((a,b) => b[1]-a[1]);
-  }
   const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const dexNorm = s => (s==null?'':String(s)).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  const dexIsExp = n => dexNorm(n).startsWith('expedicao');
+  function dexMonthKey(d){
+    if(!d) return null; d=String(d).trim();
+    let m=d.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return m[1]+'-'+m[2];
+    m=d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); if(m){ let y=+m[3]; if(m[3].length===2) y+=2000; return y+'-'+String(+m[2]).padStart(2,'0'); }
+    return null;
+  }
+  const dexMesLabel = k => { if(!/^\d{4}-\d{2}$/.test(k)) return k; const [y,m]=k.split('-'); return MES_ABBR[+m-1]+'/'+y.slice(2); };
+  const dexData = d => { if(!d) return '—'; const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m?`${m[3]}/${m[2]}/${m[1]}`:d; };
+  const dexMoney = n => (n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  function dexParseMoney(v){ v=String(v==null?'':v).trim(); if(!v) return 0; const n=parseFloat(v.replace(/\./g,'').replace(',','.')); return isNaN(n)?0:n; }
+  const dexTs = iso => { const t=Date.parse(iso); return isNaN(t)?null:t; };
+  const dexDias = d => d==null ? '—' : (d<1 ? Math.round(d*24)+' h' : (Math.round(d*10)/10).toLocaleString('pt-BR')+' d');
+  const dexAvg = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
+  function dexMedian(a){ if(!a.length) return null; const s=a.slice().sort((x,y)=>x-y), m=Math.floor(s.length/2); return s.length%2?s[m]:(s[m-1]+s[m])/2; }
+  const dexBucket = d => d<=1?DEX_BUCKETS[0]:d<=3?DEX_BUCKETS[1]:d<=7?DEX_BUCKETS[2]:d<=15?DEX_BUCKETS[3]:DEX_BUCKETS[4];
+  const dexPct = (a,b) => b ? Math.round(a*100/b)+'%' : '—';
+  const dexQuem = r => String(r.quemErrou||'').split(/[,;\/]+/).map(x=>x.trim()).filter(Boolean);
+  const dexSituacao = r => r.status==='ok'?'Finalizada':r.status==='aceito'?'Em tratamento':r.status==='pendente_criador'?'Devolvida ao criador':'Aguardando aceite';
+  const dexStCls = r => r.status==='ok'?'ok':r.status==='aceito'?'tr':r.status==='pendente_criador'?'dv':'pe';
 
+  // Mesma migração de status que o sistema faz ao abrir (sem gravar nada).
+  function dexNormalize(state){
+    const regs = Array.isArray(state && state.registros) ? state.registros : [];
+    return regs.filter(r => r && !r.excluido).map(r0 => {
+      const r = Object.assign({}, r0);
+      if(!Array.isArray(r.hist)) r.hist = [];
+      if(r.status==='aberto') r.status='pendente_resp';
+      else if(r.status==='tratamento') r.status='aceito';
+      else if(!['pendente_resp','pendente_criador','aceito','ok'].includes(r.status)) r.status='pendente_resp';
+      if(r.pendCom===undefined) r.pendCom = r.status==='ok' ? '' : (r.status==='pendente_criador' ? r.criadoPor : r.resp);
+      return r;
+    });
+  }
+  function dexInfo(r){
+    const h = r.hist;
+    const ab = dexTs(r.dataCad) || (h[0] && dexTs(h[0].quando)) || null;
+    const aceiteH = h.find(x => x.aceite==='S');
+    let okH = null;
+    if(r.status==='ok'){ for(let i=h.length-1;i>=0;i--){ if(/^Concluído|^Encerr/.test(h[i].acao||'')){ okH=h[i]; break; } } }
+    return {
+      tAce: aceiteH&&ab ? Math.max(0,(dexTs(aceiteH.quando)-ab)/DEX_DAY) : null,
+      tOk: okH&&ab ? Math.max(0,(dexTs(okH.quando)-ab)/DEX_DAY) : null,
+      idade: (r.status!=='ok'&&ab) ? Math.max(0,(Date.now()-ab)/DEX_DAY) : null,
+      recusas: h.filter(x=>x.aceite==='N').length,
+      devol: h.filter(x=>/^Devolveu/.test(x.acao||'')).length,
+      reab: h.filter(x=>/^Reabriu/.test(x.acao||'')).length,
+      custo: dexParseMoney(r.custo)
+    };
+  }
+  const dexPass = r => (dexVert==='ambas'||r.vert===dexVert) && (!dexMes || dexMonthKey(r.data)===dexMes);
+  const dexRegs = () => DEX ? DEX.regs.filter(r => dexIsExp(r.resp) && dexPass(r)) : [];
+
+  function dexKpi(label, value, sub, cls){
+    const d=document.createElement('div'); d.className='kpi '+(cls||'');
+    d.innerHTML=`<div class="kpi-label">${label}</div><div class="kpi-value">${value}</div><div class="kpi-foot"><span>${sub}</span></div>`;
+    return d;
+  }
+  function dexFillMeses(){
+    const sel=document.getElementById('dexMes'); if(!sel||!DEX) return;
+    const set=new Set();
+    DEX.regs.filter(r=>dexIsExp(r.resp)).forEach(r=>{ const k=dexMonthKey(r.data); if(k) set.add(k); });
+    const keys=[...set].sort();
+    sel.innerHTML='<option value="">Todos os meses</option>'+keys.map(k=>`<option value="${k}">${dexMesLabel(k)}</option>`).join('');
+    if(!keys.includes(dexMes)) dexMes='';
+    sel.value=dexMes;
+  }
   function setOceStatus(html, warn){
-    const el = document.getElementById('oce-status'); if(!el) return;
-    el.className = 'insight' + (warn ? ' warn' : '');
-    el.style.display = html ? '' : 'none';
-    el.innerHTML = html || '';
+    const el=document.getElementById('oce-status'); if(!el) return;
+    el.className='insight'+(warn?' warn':''); el.style.display=html?'':'none'; el.innerHTML=html||'';
   }
 
-  function renderOcorrExp(nc){
-    const grid = document.getElementById('kpi-ocorr_exp'); if(!grid) return;
-    grid.innerHTML = '';
-    const recs = (nc && nc.records) || [];
-    const total = recs.length;
-    const abertas = recs.filter(r => r.status === 'ABERTO').length;
-    const finalizadas = recs.filter(r => r.status === 'FINALIZADA').length;
-    const outras = total - abertas - finalizadas;
-    const semCausa = recs.filter(r => !String(r.causa_raiz||'').trim()).length;
-    const pct = n => total ? Math.round(n/total*100) : 0;
-    const meses = [...new Set(recs.map(r => r.mk))].sort().map(k => MES_ABBR[(k%100)-1] + '/' + String(Math.floor(k/100)).slice(2));
-    const periodo = meses.length ? (meses.length > 1 ? meses[0] + ' a ' + meses[meses.length-1] : meses[0]) : '—';
-    const porMes = countBy(recs, r => r.mes);
-    const ultMes = meses[meses.length-1];
-    const qtdUlt = ultMes ? (porMes.find(e => e[0]===ultMes)||[0,0])[1] : 0;
+  function renderDex(){
+    const grid=document.getElementById('kpi-ocorr_exp'); if(!grid) return;
+    const regs=dexRegs();
+    const info=new Map(regs.map(r=>[r,dexInfo(r)]));
+    const I=r=>info.get(r);
+    const tot=regs.length;
+    const ok=regs.filter(r=>r.status==='ok').length;
+    const trat=regs.filter(r=>r.status==='aceito').length;
+    const pend=regs.filter(r=>r.status==='pendente_resp').length;
+    const dev=regs.filter(r=>r.status==='pendente_criador').length;
+    const ident=regs.filter(r=>dexQuem(r).length).length;
+    const comPlano=regs.filter(r=>(r.plano||'').trim()).length;
+    const tAce=regs.map(r=>I(r).tAce).filter(x=>x!=null);
+    const tOk=regs.map(r=>I(r).tOk).filter(x=>x!=null);
+    const custo=regs.reduce((a,r)=>a+I(r).custo,0);
+    const comCusto=regs.filter(r=>I(r).custo>0).length;
+    const reab=regs.reduce((a,r)=>a+I(r).reab,0);
+    const recEvents=regs.reduce((a,r)=>a+I(r).recusas,0);
+    const aceitas=regs.filter(r=>r.hist.some(h=>h.aceite==='S')).length;
+    const atrasadas=regs.filter(r=>{ const d=I(r).idade; return d!=null&&d>7; }).length;
+    const redirec=DEX ? DEX.regs.filter(r=>!dexIsExp(r.resp)&&dexPass(r)&&r.hist.some(h=>h.aceite==='N'&&dexIsExp(h.quem))).length : 0;
 
-    grid.appendChild(kpiCard('Total Expedição', fmt(total), 'não conformidades · ' + periodo, {cls:'flat',arrow:'—',text:'acumulado'}, 'red'));
-    grid.appendChild(kpiCard('Em aberto', fmt(abertas), `${pct(abertas)}% do total`, {cls: abertas ? 'down' : 'flat', arrow: abertas ? '!' : '—', text: abertas ? 'pendentes' : 'nenhuma'}, 'yellow'));
-    grid.appendChild(kpiCard('Finalizadas', fmt(finalizadas), `${pct(finalizadas)}% do total`, {cls:'flat',arrow:'',text:'resolvidas'}, 'green'));
-    grid.appendChild(kpiCard(`Último mês (${ultMes||'—'})`, fmt(qtdUlt), 'não conformidades no mês', {cls:'flat',arrow:'—',text:'mês atual'}, 'accent'));
+    document.getElementById('dexNote').innerHTML = (tot && ident<tot)
+      ? `<div class="dex-note">ℹ️ ${fmt(tot-ident)} de ${fmt(tot)} ocorrência(s) ainda sem o nome de quem errou — informe no sistema Não Conformidades (aba Dash Expedição ou Trâmite).</div>` : '';
 
-    const stLabels = ['Abertas','Finalizadas'], stVals = [abertas, finalizadas], stColors = ['#ff4d6d','#3ddc97'];
-    if(outras > 0){ stLabels.push('Outros'); stVals.push(outras); stColors.push('#4d9fff'); }
-    mkChart('chartOceStatus', {
-      type:'doughnut', data:{labels:stLabels,datasets:[{data:stVals,backgroundColor:stColors,borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'55%',
-        plugins:{legend:{position:'bottom'},datalabels:{color:'#e8ecf5',font:{size:12,weight:'700'},textAlign:'center',
-          formatter:(v,ctx)=>{ if(!v) return ''; const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return fmt(v)+'\n'+Math.round(v/t*100)+'%'; }}}}
-    });
-    const hBar = (id, entries, color) => mkChart(id, {
-      type:'bar', data:{labels:entries.map(e=>e[0]),datasets:[{label:'Ocorrências',data:entries.map(e=>e[1]),backgroundColor:color,borderRadius:6,datalabels:dl(color,'end','end')}]},
-      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}
-    });
-    const tipoEntries = countBy(recs, r => r.categoria);
-    const respEntries = countBy(recs, r => r.responsavel);
-    hBar('chartOceTipo', tipoEntries, '#a78bfa');
-    hBar('chartOceResp', respEntries, '#ff5b3a');
+    grid.innerHTML='';
+    grid.appendChild(dexKpi('Recebidas para tratar',fmt(tot),'responsável: Expedição / Log. Interna','accent'));
+    grid.appendChild(dexKpi('Finalizadas (OK)',fmt(ok),dexPct(ok,tot)+' do total','green'));
+    grid.appendChild(dexKpi('Em tratamento',fmt(trat),'aceitas, aguardando OK','yellow'));
+    grid.appendChild(dexKpi('Aguardando aceite',fmt(pend),dev?(fmt(dev)+' devolvida(s) ao criador'):'nenhuma devolvida','red'));
+    grid.appendChild(dexKpi('Em aberto há +7 dias',fmt(atrasadas),'sem OK há mais de uma semana','red'));
+    grid.appendChild(dexKpi('Tempo médio p/ aceitar',dexDias(dexAvg(tAce)),'mediana '+dexDias(dexMedian(tAce)),''));
+    grid.appendChild(dexKpi('Tempo médio p/ finalizar',dexDias(dexAvg(tOk)),'mediana '+dexDias(dexMedian(tOk)),''));
+    grid.appendChild(dexKpi('Taxa de aceite',dexPct(aceitas,aceitas+recEvents),fmt(recEvents)+' recusa(s) · '+fmt(redirec)+' redirecionada(s)','purple'));
+    grid.appendChild(dexKpi('Com plano de ação',dexPct(comPlano,tot),fmt(comPlano)+' de '+fmt(tot),'green'));
+    grid.appendChild(dexKpi('Quem errou identificado',dexPct(ident,tot),fmt(ident)+' de '+fmt(tot)+' ocorrências','yellow'));
+    grid.appendChild(dexKpi('Custo total','R$ '+dexMoney(custo),fmt(comCusto)+' ocorrência(s) com custo','red'));
+    grid.appendChild(dexKpi('Reaberturas',fmt(reab),'ocorrências que voltaram após OK',''));
 
-    const td = (v, extra) => `<td style="text-align:left;${extra||''}">${v}</td>`;
-    let html = '<thead><tr>' + ['Código','Data','Cliente','Categoria','Responsável','Status','Causa raiz','Minuta']
-      .map(h => `<th style="text-align:left">${h}</th>`).join('') + '</tr></thead><tbody>';
-    if(!recs.length){
-      html += '<tr><td colspan="8">Nenhuma não conformidade da Expedição na fonte.</td></tr>';
-    }else{
-      recs.forEach(r => {
-        const stColor = r.status==='ABERTO' ? 'var(--red)' : (r.status==='FINALIZADA' ? 'var(--green)' : 'var(--ink-dim)');
-        html += `<tr title="${escHtml(r.resumo||'')}">` +
-          td('<b>'+escHtml(r.codigo)+'</b>') + td(escHtml(r.data)) + td(escHtml(r.cliente||'—')) +
-          td(escHtml(r.categoria)) + td(escHtml(r.responsavel)) +
-          td(escHtml(r.status), `color:${stColor};font-weight:700`) +
-          td(escHtml(r.causa_raiz||'Não definida'), r.causa_raiz ? '' : 'color:var(--ink-muted);font-style:italic') +
-          td(escHtml(r.minuta||'—')) + '</tr>';
-      });
-    }
-    html += '</tbody>';
-    document.getElementById('tableOce').innerHTML = html;
+    const hBar=(id,entries,color)=>mkChart(id,{type:'bar',
+      data:{labels:entries.map(e=>e[0]),datasets:[{label:'Ocorrências',data:entries.map(e=>e[1]),backgroundColor:color,borderRadius:6,datalabels:dl(color,'end','end')}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}});
+    const vBar=(id,labels,data,colors)=>mkChart(id,{type:'bar',
+      data:{labels,datasets:[{label:'Ocorrências',data,backgroundColor:colors,borderRadius:6,datalabels:dl('#e8ecf5','end','end')}]},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},scales:baseScales,plugins:{legend:{display:false}}}});
 
-    const topTipo = tipoEntries[0] || ['—',0], topResp = respEntries[0] || ['—',0];
-    setInsight('ocorr_exp', total
-      ? `<strong>Expedição (${periodo}):</strong> ${fmt(total)} não conformidades — ${fmt(abertas)} em aberto (${pct(abertas)}%) e ${fmt(finalizadas)} finalizadas. Categoria mais recorrente: "${escHtml(topTipo[0])}" (${fmt(topTipo[1])}). Responsável com mais casos: ${escHtml(topResp[0])} (${fmt(topResp[1])}). ${semCausa ? `<strong>${fmt(semCausa)}</strong> ainda sem causa raiz definida.` : 'Todas com causa raiz definida.'}`
-      : 'Nenhuma não conformidade da Expedição encontrada na fonte.', semCausa ? 'warn' : '');
+    const byT=new Map(); regs.forEach(r=>{ const t=r.tipo||'Não especificado'; byT.set(t,(byT.get(t)||0)+1); });
+    hBar('chDexTipo',[...byT].sort((a,b)=>b[1]-a[1]).slice(0,12),DEX_C.blue);
+
+    const byQ=new Map(); regs.forEach(r=>dexQuem(r).forEach(n=>byQ.set(n,(byQ.get(n)||0)+1)));
+    const qEnt=[...byQ].sort((a,b)=>b[1]-a[1]).slice(0,12);
+    document.getElementById('chDexQuemEmpty').style.display = qEnt.length?'none':'flex';
+    document.getElementById('chDexQuem').style.display = qEnt.length?'':'none';
+    hBar('chDexQuem',qEnt,DEX_C.orange);
+
+    mkChart('chDexStatus',{type:'doughnut',
+      data:{labels:['Finalizada','Em tratamento','Aguardando aceite','Devolvida ao criador'],datasets:[{data:[ok,trat,pend,dev],backgroundColor:[DEX_C.green,DEX_C.yellow,DEX_C.red,DEX_C.gray],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}},
+        datalabels:{color:'#0b0f1a',font:{size:11,weight:'700'},formatter:v=>v?fmt(v):''}}}});
+    vBar('chDexLead',DEX_BUCKETS,DEX_BUCKETS.map(b=>tOk.filter(d=>dexBucket(d)===b).length),DEX_C.green);
+    const ages=regs.map(r=>I(r).idade).filter(x=>x!=null);
+    vBar('chDexAge',DEX_BUCKETS,DEX_BUCKETS.map(b=>ages.filter(d=>dexBucket(d)===b).length),DEX_BUCKETS.map((b,i)=>i<2?DEX_C.yellow:DEX_C.red));
+
+    const months=new Map();
+    regs.forEach(r=>{ const k=dexMonthKey(r.data)||dexMonthKey(r.dataCad)||'s/ data'; if(!months.has(k)) months.set(k,{ok:0,tr:0,pe:0}); const m=months.get(k); if(r.status==='ok')m.ok++; else if(r.status==='aceito')m.tr++; else m.pe++; });
+    const mk=[...months.keys()].sort();
+    const stackDl=c=>({color:'#0b0f1a',font:{size:10,weight:'700'},formatter:v=>v?fmt(v):''});
+    mkChart('chDexMes',{type:'bar',data:{labels:mk.map(dexMesLabel),datasets:[
+        {label:'Finalizadas',data:mk.map(k=>months.get(k).ok),backgroundColor:DEX_C.green,borderRadius:4,datalabels:stackDl()},
+        {label:'Em tratamento',data:mk.map(k=>months.get(k).tr),backgroundColor:DEX_C.yellow,borderRadius:4,datalabels:stackDl()},
+        {label:'Pendentes',data:mk.map(k=>months.get(k).pe),backgroundColor:DEX_C.red,borderRadius:4,datalabels:stackDl()}]},
+      options:{responsive:true,maintainAspectRatio:false,scales:{x:{...baseScales.x,stacked:true},y:{...baseScales.y,stacked:true}},plugins:{legend:{position:'top',align:'end'}}}});
+
+    // Ranking de colaboradores
+    const rk=new Map();
+    regs.forEach(r=>{ const i=I(r); dexQuem(r).forEach(n=>{
+      if(!rk.has(n)) rk.set(n,{n,q:0,ok:0,custo:0,tipos:new Map(),ult:''});
+      const o=rk.get(n); o.q++; if(r.status==='ok') o.ok++; o.custo+=i.custo; o.tipos.set(r.tipo,(o.tipos.get(r.tipo)||0)+1);
+      const d=r.data||''; const iso=/^\d{4}-/.test(d)?d:(dexMonthKey(d)?d.split('/').reverse().join('-'):''); if(iso>o.ult) o.ult=iso;
+    }); });
+    const rkL=[...rk.values()].sort((a,b)=>b.q-a.q||b.custo-a.custo);
+    document.getElementById('dexRank').innerHTML = !rkL.length
+      ? '<tbody><tr><td class="dex-none">Sem nomes informados neste filtro.</td></tr></tbody>'
+      : '<thead><tr><th>#</th><th>Colaborador</th><th>Erros</th><th>Finalização</th><th>Tipo mais comum</th><th>Custo</th><th>Último</th></tr></thead><tbody>'+rkL.map((o,i)=>{
+          const top=[...o.tipos].sort((a,b)=>b[1]-a[1])[0];
+          return `<tr><td>${i+1}</td><td><span class="dex-quem">${escHtml(o.n)}</span></td><td><b>${o.q}</b></td>
+            <td><div style="display:flex;align-items:center;gap:7px"><div class="dex-bar"><i style="width:${Math.round(o.ok*100/o.q)}%"></i></div><span style="font-size:11px">${o.ok}/${o.q}</span></div></td>
+            <td>${escHtml(top?top[0]:'—')}${top&&top[1]>1?` <span class="dex-sub" style="display:inline">(${top[1]}×)</span>`:''}</td><td>${o.custo?'R$ '+dexMoney(o.custo):'—'}</td><td>${dexData(o.ult)}</td></tr>`;
+        }).join('')+'</tbody>';
+
+    // Pendências mais antigas
+    const old=regs.filter(r=>r.status!=='ok').sort((a,b)=>(I(b).idade||0)-(I(a).idade||0)).slice(0,10);
+    document.getElementById('dexOld').innerHTML = !old.length
+      ? '<tbody><tr><td class="dex-none">Nenhuma pendência em aberto. 👏</td></tr></tbody>'
+      : '<thead><tr><th>Em aberto</th><th>Ocorrência</th><th>Situação</th><th>Com quem</th></tr></thead><tbody>'+old.map(r=>{ const d=I(r).idade;
+          return `<tr><td class="${d>7?'dex-hot':''}">${dexDias(d)}</td><td style="max-width:260px"><b>${escHtml(r.ocorr||'—')}</b><div class="dex-sub">${dexData(r.data)} · ${escHtml(r.tipo)}</div></td><td><span class="dex-st ${dexStCls(r)}">${escHtml(dexSituacao(r))}</span></td><td>${escHtml(r.pendCom||r.resp)}</td></tr>`;
+        }).join('')+'</tbody>';
+
+    renderDexTable();
+
+    const topT=[...byT].sort((a,b)=>b[1]-a[1])[0];
+    setInsight('ocorr_exp', tot
+      ? `<strong>Expedição${dexMes?' · '+dexMesLabel(dexMes):''}:</strong> ${fmt(tot)} ocorrência(s) para tratar — ${fmt(ok)} finalizadas (${dexPct(ok,tot)}), ${fmt(trat)} em tratamento e ${fmt(pend+dev)} aguardando. ${atrasadas?`<strong>${fmt(atrasadas)}</strong> em aberto há mais de 7 dias. `:''}Tipo mais recorrente: "${escHtml(topT?topT[0]:'—')}"${topT?` (${fmt(topT[1])})`:''}.`
+      : 'Nenhuma tratativa da Expedição neste filtro.', atrasadas ? 'warn' : '');
   }
+
+  function renderDexTable(){
+    const tb=document.getElementById('tableOce'); if(!tb) return;
+    const q=(document.getElementById('dexSearch').value||'').toLowerCase();
+    let regs=dexRegs();
+    if(q) regs=regs.filter(r=>[r.ocorr,r.ref,r.placa,r.tipo,r.quemErrou,r.obs,r.plano,r.criadoPor].join(' ').toLowerCase().includes(q));
+    regs.sort((a,b)=>(b.id||0)-(a.id||0));
+    if(!regs.length){ tb.innerHTML='<tbody><tr><td class="dex-none">Nenhuma tratativa da Expedição neste filtro.</td></tr></tbody>'; return; }
+    tb.innerHTML='<thead><tr><th>Data</th><th>Ocorrência</th><th>Tipo</th><th>Quem errou</th><th>Situação</th><th>Plano de ação</th><th>Aceite em</th><th>OK em</th><th>Recusas / devol.</th><th>Custo</th><th>Aberta por</th></tr></thead><tbody>'+regs.map(r=>{
+      const i=dexInfo(r), qs=dexQuem(r);
+      return `<tr>
+        <td>${dexData(r.data)}</td>
+        <td style="max-width:260px"><b>${escHtml(r.ocorr||'—')}</b>${r.ref?`<div class="dex-sub">Ref: ${escHtml(r.ref)}</div>`:''}<div class="dex-sub">${r.vert==='ERRO'?'Erro operacional':'Não conformidade'}${r.origem==='painel'?' · nova base':r.origem==='planilha'?' · planilha':''}</div></td>
+        <td>${escHtml(r.tipo)}</td>
+        <td>${qs.length?qs.map(n=>`<span class="dex-quem">${escHtml(n)}</span>`).join(''):'<span class="dex-none">não informado</span>'}</td>
+        <td><span class="dex-st ${dexStCls(r)}">${escHtml(dexSituacao(r))}</span></td>
+        <td style="max-width:240px;font-size:11.5px">${r.plano?escHtml(r.plano):'<span class="dex-none">sem plano</span>'}</td>
+        <td>${dexDias(i.tAce)}</td><td>${dexDias(i.tOk)}</td>
+        <td>${i.recusas||i.devol?(i.recusas+' / '+i.devol):'—'}</td>
+        <td>${i.custo?'R$ '+dexMoney(i.custo):'—'}</td>
+        <td>${escHtml(r.criadoPor||'—')}</td></tr>`;
+    }).join('')+'</tbody>';
+  }
+
+  function exportDexCSV(){
+    const regs=dexRegs().sort((a,b)=>(b.id||0)-(a.id||0));
+    const head=['Data','Vertente','Ocorrência','Tipo','Referência','Placa','Quem errou','Situação','Plano de ação','Dias até aceite','Dias até OK','Dias em aberto','Recusas','Devoluções','Reaberturas','Custo (R$)','Aberta por','Origem'];
+    const cell=v=>{ v=v==null?'':String(v); return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+    const n=d=>d==null?'':(Math.round(d*10)/10).toString().replace('.',',');
+    const rows=regs.map(r=>{ const i=dexInfo(r); return [dexData(r.data),r.vert==='ERRO'?'Erro operacional':'Não conformidade',r.ocorr,r.tipo,r.ref,r.placa,r.quemErrou||'',dexSituacao(r),r.plano||'',n(i.tAce),n(i.tOk),n(i.idade),i.recusas,i.devol,i.reab,i.custo?dexMoney(i.custo):'',r.criadoPor,r.origem||'cadastro'].map(cell).join(';'); });
+    const blob=new Blob(['﻿'+[head.join(';'),...rows].join('\n')],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tratativas_expedicao_'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+  }
+
+  document.querySelectorAll('#dexVertSeg .toggle-btn').forEach(b=>b.addEventListener('click',()=>{
+    dexVert=b.dataset.v;
+    document.querySelectorAll('#dexVertSeg .toggle-btn').forEach(x=>x.classList.toggle('active',x===b));
+    renderDex();
+  }));
+  document.getElementById('dexMes').addEventListener('change',e=>{ dexMes=e.target.value; renderDex(); });
+  document.getElementById('dexSearch').addEventListener('input',renderDexTable);
+  document.getElementById('dexCsv').addEventListener('click',exportDexCSV);
 
   async function loadOcorrExp(){
     try{
-      const { DATA, geradoEm } = parseNCPage(await fetchNCPage());
-      NC_EXP = { records: buildNCExp(DATA), geradoEm };
-      renderOcorrExp(NC_EXP);
-      setOceStatus(geradoEm ? `Fonte <strong>Não Conformidades</strong> (Brudam) · gerada em ${escHtml(geradoEm)}.` : '', false);
+      const res=await fetch(DEX_DOC_URL,{cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status+' ao ler o Firestore do sistema Não Conformidades');
+      const doc=await res.json();
+      const raw=doc && doc.fields && doc.fields.state && doc.fields.state.stringValue;
+      if(!raw) throw new Error('documento portoex/nc sem o campo "state"');
+      const tsF=doc.fields.ts||{};
+      const ts=parseInt(tsF.integerValue||tsF.doubleValue||'0',10)||Date.parse(doc.updateTime)||null;
+      DEX={ regs: dexNormalize(JSON.parse(raw)), ts };
+      dexFillMeses();
+      renderDex();
+      setOceStatus(ts?`Fonte <strong>Não Conformidades</strong> · última alteração no sistema em ${new Date(ts).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}.`:'', false);
     }catch(err){
-      console.error(err);
-      setOceStatus('<strong>Não foi possível atualizar a aba 19:</strong> ' + escHtml(err.message) + (NC_EXP ? ' — exibindo a última leitura.' : ''), true);
+      console.error('[Dash Expedição]',err);
+      setOceStatus('<strong>Não foi possível atualizar o Dash Expedição:</strong> '+escHtml(err.message)+(DEX?' — exibindo a última leitura.':''), true);
     }
   }
 
@@ -2291,7 +2397,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     });
   }
 
-  // ============ COLABORADORES · RENDER (abas 15-17) ============
+  // ============ COLABORADORES · RENDER (abas 14-16) ============
   const ATIVO_CODES_ORDER = ['P','FO','FE','FA','AT','LT'];
   const OUTRAS_CODES_ORDER = ['H','AF','NC','DV','D'];
 
@@ -2391,7 +2497,7 @@ body.locked > *:not(#loginScreen){display:none !important}
 
   let colabFullData = null;   // { employees, days, teamCols, teamDaily } sem filtro
 
-  // ---- Equipe Interna (aba 17): tamanho de equipe por função, mensal ----
+  // ---- Equipe Interna (aba 16): tamanho de equipe por função, mensal ----
   // Segue o mesmo período global das demais abas — sem filtros próprios.
   const TEAM_COLORS = { 'LÍDER':'#a78bfa', 'CONFERENTE':'#4d9fff', 'AJUDANTE':'#3ddc97' };
   function renderEquipeInterna(agg){
@@ -2479,7 +2585,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   // ============ PERÍODO CONFIGURÁVEL (compartilhado por todas as abas) ============
   let fullData = null;   // { D, meses } · dados JEM sem filtro de período
   let moFullData = null; // { mo, forn } · dados de Mão de Obra sem filtro de período
-  let OCORR = null;      // dados de Ocorrências (inclui recorte de Expedição p/ painel 02 e aba 19)
+  let OCORR = null;      // dados de Ocorrências (recorte de Expedição; não é mais usado pela aba 18)
   const MES_ABBR = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
   function monthKey(label){
     if(!label) return null;
@@ -2505,7 +2611,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     endSel.value = meses.length - 1;
   }
   // Intervalo [chave-mês inicial, chave-mês final] do período selecionado nas abas
-  // JEM (00-09) — usado para filtrar também as abas de Mão de Obra (10-14).
+  // JEM — usado para filtrar também as abas de Mão de Obra e Colaboradores.
   function getSelectedPeriodRange(){
     if(!fullData) return null;
     let s = parseInt(document.getElementById('periodStart').value, 10);
@@ -2567,7 +2673,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   // mesmo intervalo.
   async function init(){
     setStatus('Carregando dados da planilha…', false);
-    loadOcorrExp(); // aba 19 · fonte independente (página Não Conformidades)
+    loadOcorrExp(); // aba 18 · Dash Expedição (Firestore do sistema NAO-CONFORMIDADES)
     const [jemResult, moResult, colabResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
       loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
@@ -3996,13 +4102,13 @@ body.locked > *:not(#loginScreen){display:none !important}
 </script>
 
 
-<!-- ============ ABAS 18/19 · NÃO CONFORMIDADES (independente) ============ -->
+<!-- ============ ABA 17 · NÃO CONFORMIDADES GERAL (independente) ============ -->
+<!-- A aba 18 (Dash Expedição) tem loader próprio no script principal (loadOcorrExp). -->
 <script>
 (function(){
   "use strict";
   // Lê o sistema Não Conformidades e faz parse da tabela HTML embutida.
   var NC_URL="https://franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html";
-  var SETOR_EXP="LOGISTICA INTERNA";     // filtro da aba 19 (Expedição)
   var REFRESH_MS=10*60*1000;
   var loaded=false, charts={};
 
@@ -4019,8 +4125,33 @@ body.locked > *:not(#loginScreen){display:none !important}
     });
   }
 
-  // Faz parse do HTML: cada ocorrência é <tr class="row"> (resumo) + <tr class="det"> (detalhe).
+  // Formato atual da página: dados embutidos em `const DATA = {...}` com
+  // chaves "AAAAMM_setor". Lemos cada setor (ignorando o agregado "todos")
+  // para saber o setor de cada ocorrência.
+  var SETOR_LABEL={logisticainterna:"LOGISTICA INTERNA",logisticaexterna:"LOGISTICA EXTERNA",grfrota:"GR/FROTA"};
+  function parseNCData(htmlText){
+    var mk="const DATA = ", i=htmlText.indexOf(mk); if(i<0) return null;
+    var j=htmlText.indexOf("\n",i), txt=htmlText.slice(i+mk.length, j<0?undefined:j).trim().replace(/;$/,"");
+    var DATA; try{ DATA=JSON.parse(txt); }catch(e){ return null; }
+    var regs=[], seen={};
+    Object.keys(DATA).forEach(function(key){
+      var m=key.match(/^(\d{6})_(.+)$/); if(!m || m[2]==="todos") return;
+      var setor=SETOR_LABEL[m[2]]||m[2].toUpperCase();
+      (DATA[key]||[]).forEach(function(r){
+        var id=(r.empresa||"")+"|"+(r.codigo||""); if(seen[id]) return; seen[id]=1;
+        var st=up(r.status);
+        regs.push({ numero:norm(r.codigo), unidade:norm(r.empresa), data:norm(r.data), cliente:norm(r.cliente),
+          tipoErro:norm(r.categoria)||"SEM CATEGORIA",
+          status: st.indexOf("FINAL")>=0?"FINALIZADA":(st.indexOf("ABERT")>=0?"ABERTO":st||"—"),
+          setor:setor, responsavel:norm(r.responsavel)||"—", solicitante:norm(r.solicitante)||"—", resumo:norm(r.resumo) });
+      });
+    });
+    return regs;
+  }
+
+  // Formato antigo: cada ocorrência é <tr class="row"> (resumo) + <tr class="det"> (detalhe).
   function parseNC(htmlText){
+    var viaData=parseNCData(htmlText); if(viaData) return viaData;
     var doc=new DOMParser().parseFromString(htmlText,"text/html");
     var trs=Array.prototype.slice.call(doc.querySelectorAll("tr"));
     var regs=[], atual=null;
@@ -4175,36 +4306,26 @@ body.locked > *:not(#loginScreen){display:none !important}
     renderConjunto(_regs, { comSetor:true,
       kpi:"#kpi-ocorrencias", chartSetor:"chartOcgSetor", chartStatus:"chartOcgStatus",
       chartTipo:"chartOcgTipo", chartResp:"chartOcgResp", tabela:"#tableOcg", insight:"#insight-ocorrencias" });
-    var exp=_regs.filter(function(x){ return x.setor===SETOR_EXP; });
-    renderConjunto(exp, { comSetor:false,
-      kpi:"#kpi-ocorr_exp", chartStatus:"chartOceStatus",
-      chartTipo:"chartOceTipo", chartResp:"chartOceResp", tabela:"#tableOce", insight:"#insight-ocorr_exp" });
   }
 
   function loadAll(){
     setStatus("#ocg-status","Carregando não conformidades…",false);
-    setStatus("#oce-status","Carregando não conformidades…",false);
     fetchNC().then(function(txt){
       _regs=parseNC(txt);
       renderTudo();
       loaded=true;
       if(!_regs.length){ setStatus("#ocg-status","Nenhuma ocorrência reconhecida no sistema.",true); }
       else setStatus("#ocg-status","",false);
-      var nExp=_regs.filter(function(x){return x.setor===SETOR_EXP;}).length;
-      if(!nExp){ setStatus("#oce-status","Nenhuma ocorrência de Expedição (LOGISTICA INTERNA) no período.",true); }
-      else setStatus("#oce-status","",false);
-      console.log("[NaoConformidades] total:",_regs.length,"| expedição:",nExp);
+      console.log("[NaoConformidades] total:",_regs.length);
     }).catch(function(e){
       console.error("[NaoConformidades]",e);
       setStatus("#ocg-status","Falha ao carregar não conformidades: "+(e.message||e),true);
-      setStatus("#oce-status","Falha ao carregar não conformidades: "+(e.message||e),true);
     });
   }
 
   function maybeLoad(){
     var s18=document.querySelector('.page[data-page="ocorrencias"]');
-    var s19=document.querySelector('.page[data-page="ocorr_exp"]');
-    if(((s18&&s18.classList.contains("active"))||(s19&&s19.classList.contains("active"))) && !loaded) loadAll();
+    if(s18&&s18.classList.contains("active") && !loaded) loadAll();
   }
   document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
   document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
