@@ -1986,43 +1986,153 @@ body.locked > *:not(#loginScreen){display:none !important}
     setInsight('ocorrencias', `<strong>Leitura do período:</strong> ${fmt(data.total)} ocorrências registradas. "${topResp[0]}" responde por ${fmt(topResp[1])} casos (${pct(topResp[1])}%), o tipo mais recorrente foi "${topTipo[0]}" (${fmt(topTipo[1])} casos) e o mês de maior volume foi ${peakMonth} (${fmt(peakVal)}).`);
   }
 
-  // ============ OCORRÊNCIAS EXPEDIÇÃO (aba 19) · RENDER ============
-  function renderOcorrExp(o){
+  // ============ NÃO CONFORMIDADES · EXPEDIÇÃO (aba 19) ============
+  // Fonte: painel "Não Conformidades" (franciscosilva-sys/portoex-painel),
+  // gerado a partir da tela 295 do Brudam. A página traz os dados embutidos
+  // num objeto `const DATA = {...}` com chaves "AAAAMM_setor" (ex.:
+  // "202610_logisticainterna"). Buscamos a página publicada, extraímos esse
+  // objeto e usamos só o setor LOGÍSTICA INTERNA (= Expedição). Se a página
+  // do GitHub Pages falhar, tentamos a cópia crua do repositório.
+  const NC_SOURCES = [
+    'https://franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html',
+    'https://raw.githubusercontent.com/franciscosilva-sys/portoex-painel/main/NaoConformidades.html'
+  ];
+  const NC_SETOR_EXP = 'logisticainterna';
+  let NC_EXP = null; // { records, geradoEm }
+
+  async function fetchNCPage(){
+    let lastErr = null;
+    for(const base of NC_SOURCES){
+      try{
+        const res = await fetch(base + '?_=' + Date.now(), { cache:'no-store' });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.text();
+      }catch(err){ lastErr = err; }
+    }
+    throw new Error('não foi possível acessar a página de Não Conformidades (' + (lastErr ? lastErr.message : 'erro desconhecido') + ')');
+  }
+  function parseNCPage(html){
+    const marker = 'const DATA = ';
+    const i = html.indexOf(marker);
+    if(i === -1) throw new Error('objeto DATA não encontrado na página de Não Conformidades');
+    const j = html.indexOf('\n', i);
+    let txt = html.slice(i + marker.length, j === -1 ? undefined : j).trim();
+    if(txt.endsWith(';')) txt = txt.slice(0, -1);
+    const DATA = JSON.parse(txt);
+    const m = html.match(/gerado em\s+(\d{2}\/\d{2}\/\d{4}(?:\s+\d{2}:\d{2})?)/i);
+    return { DATA, geradoEm: m ? m[1] : null };
+  }
+  function buildNCExp(DATA){
+    const seen = new Set(), records = [];
+    Object.keys(DATA).forEach(key => {
+      const km = key.match(/^(\d{4})(\d{2})_(.+)$/);
+      if(!km || km[3] !== NC_SETOR_EXP) return;
+      const y = parseInt(km[1],10), mo = parseInt(km[2],10);
+      (DATA[key]||[]).forEach(r => {
+        const id = (r.empresa||'') + '|' + (r.codigo||'');
+        if(seen.has(id)) return; seen.add(id);
+        const dm = String(r.data||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        const sortKey = dm ? (+dm[3])*10000 + (+dm[2])*100 + (+dm[1]) : y*10000 + mo*100;
+        records.push({
+          ...r,
+          status: String(r.status||'').trim().toUpperCase() || 'SEM STATUS',
+          categoria: String(r.categoria||'').trim() || 'SEM CATEGORIA',
+          responsavel: String(r.responsavel||'').trim() || 'Não atribuído',
+          mes: MES_ABBR[mo-1] + '/' + String(y).slice(2), mk: y*100 + mo,
+          sortKey: sortKey * 1e6 + parseInt(String(r.hora||'0').replace(/\D/g,'')||'0', 10)
+        });
+      });
+    });
+    records.sort((a,b) => b.sortKey - a.sortKey); // mais recentes primeiro
+    return records;
+  }
+  function countBy(list, fn){
+    const m = new Map();
+    list.forEach(r => { const k = fn(r); m.set(k, (m.get(k)||0) + 1); });
+    return [...m.entries()].sort((a,b) => b[1]-a[1]);
+  }
+  const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  function setOceStatus(html, warn){
+    const el = document.getElementById('oce-status'); if(!el) return;
+    el.className = 'insight' + (warn ? ' warn' : '');
+    el.style.display = html ? '' : 'none';
+    el.innerHTML = html || '';
+  }
+
+  function renderOcorrExp(nc){
     const grid = document.getElementById('kpi-ocorr_exp'); if(!grid) return;
-    grid.innerHTML='';
-    if(!o || !o.expedRecords) return;
-    const meses = o.meses;
-    const vals = meses.map(m => o.expedByMonth[m] || 0);
-    let peakVal=-1, peakMes='—';
-    meses.forEach((m,i)=>{ if(vals[i]>peakVal){ peakVal=vals[i]; peakMes=m; } });
-    if(peakVal<0) peakVal=0;
-    const topTipo = o.expedTipoEntries[0] || ['—',0];
-    const ult = vals.length ? vals[vals.length-1] : 0;
-    grid.appendChild(kpiCard('Total Expedição', fmt(o.expedTotal), 'ocorrências no período', {cls:'flat',arrow:'—',text:'acumulado'}, 'red'));
-    grid.appendChild(kpiCard('Mês de pico', fmt(peakVal), peakMes, {cls:'flat',arrow:'',text:'atenção'}, 'yellow'));
-    grid.appendChild(kpiCard('Tipo mais recorrente', topTipo[0], `${fmt(topTipo[1])} ocorrências`, {cls:'flat',arrow:'',text:'—'}, 'purple'));
-    grid.appendChild(kpiCard(`Último mês (${meses[meses.length-1]||'—'})`, fmt(ult), 'ocorrências Expedição', {cls:'flat',arrow:'—',text:'mês atual'}, 'accent'));
+    grid.innerHTML = '';
+    const recs = (nc && nc.records) || [];
+    const total = recs.length;
+    const abertas = recs.filter(r => r.status === 'ABERTO').length;
+    const finalizadas = recs.filter(r => r.status === 'FINALIZADA').length;
+    const outras = total - abertas - finalizadas;
+    const semCausa = recs.filter(r => !String(r.causa_raiz||'').trim()).length;
+    const pct = n => total ? Math.round(n/total*100) : 0;
+    const meses = [...new Set(recs.map(r => r.mk))].sort().map(k => MES_ABBR[(k%100)-1] + '/' + String(Math.floor(k/100)).slice(2));
+    const periodo = meses.length ? (meses.length > 1 ? meses[0] + ' a ' + meses[meses.length-1] : meses[0]) : '—';
+    const porMes = countBy(recs, r => r.mes);
+    const ultMes = meses[meses.length-1];
+    const qtdUlt = ultMes ? (porMes.find(e => e[0]===ultMes)||[0,0])[1] : 0;
 
-    mkChart('chartOcorrExpMes', {
-      type:'bar', data:{labels:meses,datasets:[{label:'Ocorrências Expedição',data:vals,backgroundColor:'#ff4d6d',borderRadius:6,datalabels:dl('#ff4d6d','end','end')}]},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
-    });
-    mkChart('chartOcorrExpTipo', {
-      type:'bar', data:{labels:o.expedTipoEntries.map(e=>e[0]),datasets:[{label:'Ocorrências',data:o.expedTipoEntries.map(e=>e[1]),backgroundColor:'#a78bfa',borderRadius:6,datalabels:dl('#a78bfa','end','end')}]},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
-    });
+    grid.appendChild(kpiCard('Total Expedição', fmt(total), 'não conformidades · ' + periodo, {cls:'flat',arrow:'—',text:'acumulado'}, 'red'));
+    grid.appendChild(kpiCard('Em aberto', fmt(abertas), `${pct(abertas)}% do total`, {cls: abertas ? 'down' : 'flat', arrow: abertas ? '!' : '—', text: abertas ? 'pendentes' : 'nenhuma'}, 'yellow'));
+    grid.appendChild(kpiCard('Finalizadas', fmt(finalizadas), `${pct(finalizadas)}% do total`, {cls:'flat',arrow:'',text:'resolvidas'}, 'green'));
+    grid.appendChild(kpiCard(`Último mês (${ultMes||'—'})`, fmt(qtdUlt), 'não conformidades no mês', {cls:'flat',arrow:'—',text:'mês atual'}, 'accent'));
 
-    let html = '<thead><tr><th>Data</th><th>Placa</th><th>Tipo de ocorrência</th><th>Referência</th><th>Mês</th></tr></thead><tbody>';
-    const rowsDesc = o.expedRecords.slice().reverse();
-    if(!rowsDesc.length){
-      html += '<tr><td colspan="5">Nenhuma ocorrência de Expedição no período.</td></tr>';
+    const stLabels = ['Abertas','Finalizadas'], stVals = [abertas, finalizadas], stColors = ['#ff4d6d','#3ddc97'];
+    if(outras > 0){ stLabels.push('Outros'); stVals.push(outras); stColors.push('#4d9fff'); }
+    mkChart('chartOceStatus', {
+      type:'doughnut', data:{labels:stLabels,datasets:[{data:stVals,backgroundColor:stColors,borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'55%',
+        plugins:{legend:{position:'bottom'},datalabels:{color:'#e8ecf5',font:{size:12,weight:'700'},textAlign:'center',
+          formatter:(v,ctx)=>{ if(!v) return ''; const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return fmt(v)+'\n'+Math.round(v/t*100)+'%'; }}}}
+    });
+    const hBar = (id, entries, color) => mkChart(id, {
+      type:'bar', data:{labels:entries.map(e=>e[0]),datasets:[{label:'Ocorrências',data:entries.map(e=>e[1]),backgroundColor:color,borderRadius:6,datalabels:dl(color,'end','end')}]},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}
+    });
+    const tipoEntries = countBy(recs, r => r.categoria);
+    const respEntries = countBy(recs, r => r.responsavel);
+    hBar('chartOceTipo', tipoEntries, '#a78bfa');
+    hBar('chartOceResp', respEntries, '#ff5b3a');
+
+    const td = (v, extra) => `<td style="text-align:left;${extra||''}">${v}</td>`;
+    let html = '<thead><tr>' + ['Código','Data','Cliente','Categoria','Responsável','Status','Causa raiz','Minuta']
+      .map(h => `<th style="text-align:left">${h}</th>`).join('') + '</tr></thead><tbody>';
+    if(!recs.length){
+      html += '<tr><td colspan="8">Nenhuma não conformidade da Expedição na fonte.</td></tr>';
     }else{
-      rowsDesc.forEach(r=>{ html += `<tr><td>${r.data||'—'}</td><td>${r.placa||'—'}</td><td>${r.tipo||'—'}</td><td>${r.ref||'—'}</td><td>${r.mes}</td></tr>`; });
+      recs.forEach(r => {
+        const stColor = r.status==='ABERTO' ? 'var(--red)' : (r.status==='FINALIZADA' ? 'var(--green)' : 'var(--ink-dim)');
+        html += `<tr title="${escHtml(r.resumo||'')}">` +
+          td('<b>'+escHtml(r.codigo)+'</b>') + td(escHtml(r.data)) + td(escHtml(r.cliente||'—')) +
+          td(escHtml(r.categoria)) + td(escHtml(r.responsavel)) +
+          td(escHtml(r.status), `color:${stColor};font-weight:700`) +
+          td(escHtml(r.causa_raiz||'Não definida'), r.causa_raiz ? '' : 'color:var(--ink-muted);font-style:italic') +
+          td(escHtml(r.minuta||'—')) + '</tr>';
+      });
     }
     html += '</tbody>';
-    document.getElementById('tableOcorrExp').innerHTML = html;
+    document.getElementById('tableOce').innerHTML = html;
 
-    setInsight('ocorr_exp', `<strong>Expedição:</strong> ${fmt(o.expedTotal)} ocorrências no período. Mês de maior volume: ${peakMes} (${fmt(peakVal)}). Tipo mais recorrente: "${topTipo[0]}" (${fmt(topTipo[1])}).`);
+    const topTipo = tipoEntries[0] || ['—',0], topResp = respEntries[0] || ['—',0];
+    setInsight('ocorr_exp', total
+      ? `<strong>Expedição (${periodo}):</strong> ${fmt(total)} não conformidades — ${fmt(abertas)} em aberto (${pct(abertas)}%) e ${fmt(finalizadas)} finalizadas. Categoria mais recorrente: "${escHtml(topTipo[0])}" (${fmt(topTipo[1])}). Responsável com mais casos: ${escHtml(topResp[0])} (${fmt(topResp[1])}). ${semCausa ? `<strong>${fmt(semCausa)}</strong> ainda sem causa raiz definida.` : 'Todas com causa raiz definida.'}`
+      : 'Nenhuma não conformidade da Expedição encontrada na fonte.', semCausa ? 'warn' : '');
+  }
+
+  async function loadOcorrExp(){
+    try{
+      const { DATA, geradoEm } = parseNCPage(await fetchNCPage());
+      NC_EXP = { records: buildNCExp(DATA), geradoEm };
+      renderOcorrExp(NC_EXP);
+      setOceStatus(geradoEm ? `Fonte <strong>Não Conformidades</strong> (Brudam) · gerada em ${escHtml(geradoEm)}.` : '', false);
+    }catch(err){
+      console.error(err);
+      setOceStatus('<strong>Não foi possível atualizar a aba 19:</strong> ' + escHtml(err.message) + (NC_EXP ? ' — exibindo a última leitura.' : ''), true);
+    }
   }
 
   // ============ MÃO DE OBRA · RENDER ============
@@ -2457,6 +2567,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   // mesmo intervalo.
   async function init(){
     setStatus('Carregando dados da planilha…', false);
+    loadOcorrExp(); // aba 19 · fonte independente (página Não Conformidades)
     const [jemResult, moResult, colabResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
       loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
