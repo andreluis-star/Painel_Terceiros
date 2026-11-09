@@ -863,6 +863,91 @@ body.locked > *:not(#loginScreen){display:none !important}
 </footer>
 
 <script>
+/* ============ COMPARATIVO ANO × ANO ANTERIOR (todas as abas) ============
+   Quando um gráfico mensal tem o MESMO mês em anos diferentes (ex.: OUT/25 e
+   OUT/26), o eixo passa a ser o mês e cada ano vira uma série própria, lado a
+   lado. O ano mais recente mantém a cor original; anos anteriores ficam numa
+   versão acinzentada da mesma cor, com contorno/linha tracejada. Gráficos em
+   que nenhum mês se repete ficam exatamente como antes. */
+(function(){
+  "use strict";
+  var MESES=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  var RE=/^\s*(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)[\/\.\- ]?(\d{2}|\d{4})\s*$/i;
+  function hexToRgb(c){
+    if(typeof c!=='string') return null; c=c.trim();
+    var m=c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if(m){ var h=m[1]; if(h.length===3) h=h.split('').map(function(x){return x+x;}).join('');
+      return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16),1]; }
+    m=c.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\s*\)$/i);
+    if(m) return [+m[1],+m[2],+m[3],m[4]==null?1:+m[4]];
+    return null;
+  }
+  // Cor do ano anterior: mistura com cinza-azulado (quanto mais antigo, mais apagado).
+  function mute(c, age){
+    if(Array.isArray(c)) return c.map(function(x){ return mute(x,age); });
+    var rgb=hexToRgb(c); if(!rgb) return c;
+    var k=Math.min(0.85, 0.6+0.15*(age-1)), g=[92,101,122];
+    var r=rgb.map(function(v,i){ return i<3 ? Math.round(v*(1-k)+g[i]*k) : v; });
+    return 'rgba('+r[0]+','+r[1]+','+r[2]+','+(rgb[3]*0.95).toFixed(2)+')';
+  }
+  function yoy(cfg){
+    try{
+      if(!cfg || !cfg.data || !Array.isArray(cfg.data.labels) || !Array.isArray(cfg.data.datasets)) return cfg;
+      if(cfg.type!=='bar' && cfg.type!=='line') return cfg;
+      var opt=cfg.options||{};
+      if(opt.indexAxis==='y' || cfg.yoy===false) return cfg;
+      var labels=cfg.data.labels; if(labels.length<2) return cfg;
+      var parsed=labels.map(function(l){ var m=String(l).match(RE); if(!m) return null; var yy=m[2].length===4?m[2].slice(2):m[2]; return {mes:m[1].toUpperCase(), yy:yy}; });
+      if(parsed.some(function(p){return !p;})) return cfg;
+      var porMes={}, repete=false;
+      parsed.forEach(function(p){ porMes[p.mes]=porMes[p.mes]||{}; porMes[p.mes][p.yy]=1; if(Object.keys(porMes[p.mes]).length>1) repete=true; });
+      if(!repete) return cfg;
+      var anos=[]; parsed.forEach(function(p){ if(anos.indexOf(p.yy)<0) anos.push(p.yy); }); anos.sort();
+      var ordem=MESES.filter(function(m){ return porMes[m]; }); // ordem do calendário: JAN → DEZ
+      var stacked=!!(opt.scales && ((opt.scales.x&&opt.scales.x.stacked)||(opt.scales.y&&opt.scales.y.stacked)));
+      var novos=[];
+      cfg.data.datasets.forEach(function(ds){
+        var tipo=ds.type||cfg.type;
+        anos.forEach(function(yy, yi){
+          var age=anos.length-1-yi;
+          var data=ordem.map(function(mes){ for(var i=0;i<parsed.length;i++){ if(parsed[i].mes===mes && parsed[i].yy===yy) return ds.data[i]; } return null; });
+          if(data.every(function(v){ return v==null; })) return;
+          var nd=Object.assign({}, ds, { data:data, label:(ds.label?ds.label+' · ':'')+'20'+yy, skipNull:true });
+          if(stacked) nd.stack=(ds.stack?ds.stack+'_':'')+'20'+yy;
+          if(age>0){
+            var base=ds.backgroundColor!=null?ds.backgroundColor:ds.borderColor;
+            nd.backgroundColor=mute(ds.backgroundColor!=null?ds.backgroundColor:base, age);
+            if(tipo==='line'){
+              nd.borderColor=mute(ds.borderColor!=null?ds.borderColor:base, age);
+              nd.pointBackgroundColor=mute(ds.pointBackgroundColor!=null?ds.pointBackgroundColor:base, age);
+              nd.borderDash=[7,5]; nd.borderWidth=ds.borderWidth||2.5;
+            }else{
+              nd.borderColor=Array.isArray(base)?base:base; nd.borderWidth=1.5; nd.borderDash=[4,3];
+            }
+            if(ds.datalabels && ds.datalabels.color) nd.datalabels=Object.assign({}, ds.datalabels, { color:mute(ds.datalabels.color, age) });
+          }
+          novos.push(nd);
+        });
+      });
+      // rótulo do eixo: mês + anos presentes naquele mês (ex.: "OUT" / "25 · 26")
+      var novosLabels=ordem.map(function(mes){ return [mes, anos.filter(function(y){ return porMes[mes][y]; }).join(' · ')]; });
+      var plugins=Object.assign({}, opt.plugins||{});
+      var leg=Object.assign({position:'top',align:'end'}, plugins.legend||{}); leg.display=true;
+      leg.labels=Object.assign({boxWidth:12,boxHeight:10}, leg.labels||{});
+      plugins.legend=leg;
+      var tt=Object.assign({}, plugins.tooltip||{}); tt.callbacks=Object.assign({}, tt.callbacks||{}, {
+        title:function(items){ if(!items.length) return ''; var it=items[0]; var lbl=it.dataset.label||''; var ano=(lbl.match(/(20\d{2})$/)||[])[1]; return ordem[it.dataIndex]+(ano?'/'+ano:''); }
+      });
+      plugins.tooltip=tt;
+      var out=Object.assign({}, cfg, { data:Object.assign({}, cfg.data, { labels:novosLabels, datasets:novos }), options:Object.assign({}, opt, { plugins:plugins }) });
+      out.__yoy=true;
+      return out;
+    }catch(e){ console.warn('[comparativo ano a ano]', e); return cfg; }
+  }
+  window.portoexYoY=yoy;
+})();
+</script>
+<script>
 (function(){
   const SHEET_ID = '1VZKDyY8oAtRHcT0TDvyv5zI1rJeEZe_KAvbbyRbE9qs';
   const SHEET_NAME = 'MONTAGENS GRAF';
@@ -1577,7 +1662,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     formatter: v => (v===0||v==null) ? '' : fmt(v), padding:{top:2,bottom:2,left:4,right:4}
   });
   const charts = {}; // id -> Chart instance, so we can destroy on reload
-  function mkChart(id, config){ if(charts[id]) charts[id].destroy(); charts[id] = new Chart(document.getElementById(id), config); }
+  function mkChart(id, config){ if(charts[id]) charts[id].destroy(); charts[id] = new Chart(document.getElementById(id), window.portoexYoY ? window.portoexYoY(config) : config); }
   const miniBar = (id, meses, data, color) => mkChart(id, {
     type:'bar', data:{labels:meses,datasets:[{label:'',data,backgroundColor:color,borderRadius:5,datalabels:dl(color,'end','end')}]},
     options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,right:8}},scales:baseScales,plugins:{legend:{display:false}}}
@@ -3189,7 +3274,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     // ---- Charts ----
     if(typeof Chart==="undefined") return;
     var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
-    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),window.portoexYoY?window.portoexYoY(cfg):cfg); }
     var baseOpts={ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:ink}},datalabels:{display:false}}, scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{ticks:{color:ink},grid:{color:gridC}}} };
 
     // expedição (doughnut)
@@ -3333,7 +3418,7 @@ body.locked > *:not(#loginScreen){display:none !important}
 
     if(typeof Chart==="undefined") return;
     var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
-    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),window.portoexYoY?window.portoexYoY(cfg):cfg); }
 
     // Status (doughnut)
     mk("chartDashStatus",{ type:"doughnut",
@@ -3607,7 +3692,7 @@ body.locked > *:not(#loginScreen){display:none !important}
 
     if(typeof Chart==="undefined") return;
     var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
-    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),window.portoexYoY?window.portoexYoY(cfg):cfg); }
     var base={ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:ink}},datalabels:{display:false}},
       scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
 
@@ -3818,7 +3903,7 @@ body.locked > *:not(#loginScreen){display:none !important}
 
     if(typeof Chart==="undefined") return;
     var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
-    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),window.portoexYoY?window.portoexYoY(cfg):cfg); }
     var base={ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:ink}},datalabels:{display:false}},
       scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
 
@@ -4091,7 +4176,7 @@ body.locked > *:not(#loginScreen){display:none !important}
 
     if(typeof Chart==="undefined") return;
     var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
-    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),window.portoexYoY?window.portoexYoY(cfg):cfg); }
     var dlTop={ display:function(c){ return (c.dataset.data[c.dataIndex]||0)>0; }, anchor:"end", align:"end", color:ink, font:{size:10,weight:"600"}, formatter:function(v){ return v? v.toLocaleString("pt-BR"):""; } };
     // rótulo no TOPO da barra, dentro (para barras verticais simples e agrupadas)
     var dlIn={ display:function(c){ return (c.dataset.data[c.dataIndex]||0)>0; }, anchor:"end", align:"start", offset:2, color:"#fff", font:{size:9,weight:"700"}, formatter:function(v){ return v? v.toLocaleString("pt-BR"):""; } };
@@ -4299,7 +4384,7 @@ body.locked > *:not(#loginScreen){display:none !important}
 
   var PALETA=["#4f6ef7","#f0a500","#22c55e","#e67e22","#8e44ad","#0c7c8c","#e74c3c","#16a085","#c0392b","#2980b9","#7f8c9a"];
 
-  function mkChart(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),cfg); }
+  function mkChart(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),window.portoexYoY?window.portoexYoY(cfg):cfg); }
   function dlBar(ink,horizontal){
     return { display:function(c){return (c.dataset.data[c.dataIndex]||0)>0;}, anchor:"end", align:"end", color:ink, font:{size:10,weight:"600"}, formatter:function(v){return v||"";} };
   }
