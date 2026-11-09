@@ -330,27 +330,41 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-jem"></div>
   </section>
 
-  <!-- 14 · AJUDANTES -->
+  <!-- 14 · AJUDANTES (base ABSENTEÍSMO) -->
   <section class="page" data-page="ajudantes">
     <div class="page-head">
       <div class="eyebrow">14 · Equipe</div>
-      <h2>Ajudantes & eventos</h2>
-      <p>Quantidade de ajudantes alocados versus eventos de ajudantes registrados no mês.</p>
+      <h2>Ajudantes · quadro e absenteísmo</h2>
+      <p>Quadro de ajudantes por mês, presença e ausências lançadas no sistema <strong>Frequência da equipe</strong> (andreluis-star.github.io/ABSENTEISMO). Segue o período selecionado no topo; quem foi promovido conta na função antiga até a data da promoção.</p>
     </div>
     <div class="kpi-grid" id="kpi-ajudantes"></div>
-    <div class="card"><div class="card-head"><div><h3>Ajudantes × Eventos por mês</h3><div class="sub">Comparativo de alocação e demanda</div></div><span class="card-tag">EQUIPE DE APOIO</span></div><div class="chart-wrap tall"><canvas id="chartAjudantes"></canvas></div></div>
+    <div class="row cols-2">
+      <div class="card"><div class="card-head"><div><h3>Quadro × Absenteísmo</h3><div class="sub">Pessoas na função no mês (barras) e % de ausência (linha)</div></div><span class="card-tag">AJUDANTE</span></div><div class="chart-wrap tall"><canvas id="chartAjudantes"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Lançamentos por sigla</h3><div class="sub">Dias lançados por mês, por situação</div></div><span class="card-tag">SIGLAS</span></div><div class="chart-wrap tall"><canvas id="chartAjudantesSiglas"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Por colaborador</h3><div class="sub" id="sub-ajudantes">Último mês do período</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="table-ajudantes"></table></div>
+    </div>
     <div class="insight" id="insight-ajudantes"></div>
   </section>
 
-  <!-- 15 · CONFERENTES -->
+  <!-- 15 · CONFERENTES (base ABSENTEÍSMO) -->
   <section class="page" data-page="conferentes">
     <div class="page-head">
       <div class="eyebrow">15 · Equipe</div>
-      <h2>Conferentes & eventos</h2>
-      <p>Carga operacional dos conferentes ao longo do período.</p>
+      <h2>Conferentes · quadro e absenteísmo</h2>
+      <p>Quadro de conferentes por mês, presença e ausências lançadas no sistema <strong>Frequência da equipe</strong> (andreluis-star.github.io/ABSENTEISMO). Segue o período selecionado no topo; quem foi promovido conta na função antiga até a data da promoção.</p>
     </div>
     <div class="kpi-grid" id="kpi-conferentes"></div>
-    <div class="card"><div class="card-head"><div><h3>Conferentes (6) × Eventos</h3><div class="sub">Carga operacional dos conferentes</div></div><span class="card-tag">CONFERÊNCIA</span></div><div class="chart-wrap tall"><canvas id="chartConferentes"></canvas></div></div>
+    <div class="row cols-2">
+      <div class="card"><div class="card-head"><div><h3>Quadro × Absenteísmo</h3><div class="sub">Pessoas na função no mês (barras) e % de ausência (linha)</div></div><span class="card-tag">CONFERENTE</span></div><div class="chart-wrap tall"><canvas id="chartConferentes"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Lançamentos por sigla</h3><div class="sub">Dias lançados por mês, por situação</div></div><span class="card-tag">SIGLAS</span></div><div class="chart-wrap tall"><canvas id="chartConferentesSiglas"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Por colaborador</h3><div class="sub" id="sub-conferentes">Último mês do período</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data" id="table-conferentes"></table></div>
+    </div>
     <div class="insight" id="insight-conferentes"></div>
   </section>
 
@@ -499,7 +513,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="page-head">
       <div class="eyebrow">13 · Colaboradores</div>
       <h2>Expedição · Visão geral</h2>
-      <p>Dias trabalhados e colaboradores disponíveis por mês. Ativo = FO, FE, FA, P, AT ou LT no dia; trabalhado = P.</p>
+      <p>Dias trabalhados e colaboradores disponíveis por mês. Ativo = FO, FE, FA, P, AT ou LT no dia; trabalhado = P. Fonte: sistema <strong>Frequência da equipe</strong> (ABSENTEISMO), ao vivo.</p>
     </div>
     <div class="kpi-grid" id="kpi-colab_overview"></div>
     <div class="card">
@@ -539,16 +553,16 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="page-head">
       <div class="eyebrow">16 · Colaboradores</div>
       <h2>Equipe Interna</h2>
-      <p>Tamanho de equipe por função (Líder, Conferente, Ajudante): presença real ("P") comparada à estimativa de dias úteis do mês. Segue o mesmo período selecionado nas demais abas, sempre de 1º ao último dia de cada mês.</p>
+      <p>Tamanho de equipe por função (Líder, Conferente, Ajudante): presença real ("P") comparada à estimativa de dias úteis do mês. Segue o mesmo período selecionado nas demais abas, sempre de 1º ao último dia de cada mês; dias úteis já descontam os feriados lançados. Fonte: sistema <strong>Frequência da equipe</strong> (ABSENTEISMO).</p>
     </div>
     <div class="kpi-grid" id="kpi-colab_equipe"></div>
     <div class="card">
       <div class="card-head"><div><h3>Colaboradores disponíveis por função</h3><div class="sub">Quem teve ao menos um "P" no mês — contratado e vindo na operação</div></div><span class="card-tag">EQUIPE</span></div>
       <div class="chart-wrap tall"><canvas id="chartEquipeHeadcount"></canvas></div>
     </div>
-    <div class="row cols-3" id="equipe-p-grid" style="margin-top:14px"></div>
+    <div class="row cols-2" id="equipe-p-grid" style="margin-top:14px"></div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Resumo de eventos — situações ativas</h3><div class="sub">Folga, Férias, Falta, Presente, Atestado, Luto — soma das três equipes</div></div><span class="card-tag">ATIVOS</span></div>
+      <div class="card-head"><div><h3>Resumo de eventos — situações ativas</h3><div class="sub">Folga, Férias, Falta, Presente, Atestado, Luto — soma das equipes</div></div><span class="card-tag">ATIVOS</span></div>
       <div class="chart-wrap tall"><canvas id="chartEquipeEventosAtivos"></canvas></div>
     </div>
     <div class="card" style="margin-top:14px">
@@ -587,21 +601,19 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-ocorrencias"></div>
   </section>
 
-  <!-- 18 · DASH EXPEDIÇÃO (sistema NAO-CONFORMIDADES — tratativas da Expedição / Log. Interna) -->
+  <!-- 18 · DASH EXPEDIÇÃO (base NaoConformidades.html — setor LOGÍSTICA INTERNA) -->
   <section class="page" data-page="ocorr_exp">
     <div class="page-head">
       <div class="eyebrow">18 · Dash Expedição</div>
-      <h2>Dash geral de tratamentos — Expedição</h2>
-      <p>Tudo o que caiu para a <strong>Expedição / Log. Interna</strong> tratar: erros, quem errou, prazos de aceite e de finalização, custos e pendências. Fonte: sistema <strong>Não Conformidades</strong> (andreluis-star.github.io/NAO-CONFORMIDADES), ao vivo. Somente leitura — para informar quem errou ou tratar, use o próprio sistema.</p>
+      <h2>Dash de não conformidades — Expedição</h2>
+      <p>Não conformidades do setor <strong>Logística Interna (Expedição)</strong>: situação, categorias, responsáveis, causa raiz, plano de ação e pendências. Fonte: painel <strong>Não Conformidades</strong> (franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html), gerado a partir do Brudam — mesma base da aba 17.</p>
     </div>
     <div class="dex-toolbar">
-      <div class="dex-seg" id="dexVertSeg">
-        <button class="toggle-btn active" data-v="ambas">NC + Erros</button>
-        <button class="toggle-btn" data-v="NC">Não Conformidades</button>
-        <button class="toggle-btn" data-v="ERRO">Erros Operacionais</button>
-      </div>
       <label class="dex-mes">Mês
         <select id="dexMes"><option value="">Todos os meses</option></select>
+      </label>
+      <label class="dex-mes">Empresa
+        <select id="dexEmp"><option value="">Todas</option></select>
       </label>
       <div style="flex:1"></div>
       <button class="toggle-btn" id="dexCsv">Exportar CSV</button>
@@ -610,21 +622,21 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div id="dexNote"></div>
     <div class="kpi-grid" id="kpi-ocorr_exp"></div>
     <div class="row cols-2">
-      <div class="card"><div class="card-head"><div><h3>Erros por tipo</h3><div class="sub">O que mais acontece na Expedição</div></div><span class="card-tag">TIPO</span></div><div class="chart-wrap tall"><canvas id="chDexTipo"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Quem errou</h3><div class="sub">Colaboradores identificados nas ocorrências</div></div><span class="card-tag">COLABORADOR</span></div><div class="chart-wrap tall"><canvas id="chDexQuem"></canvas><div id="chDexQuemEmpty" class="dex-empty" style="display:none">Nenhum nome informado ainda.</div></div></div>
+      <div class="card"><div class="card-head"><div><h3>Por categoria</h3><div class="sub">O que mais acontece na Expedição</div></div><span class="card-tag">CATEGORIA</span></div><div class="chart-wrap tall"><canvas id="chDexTipo"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Por responsável</h3><div class="sub">Responsável pelo plano de ação</div></div><span class="card-tag">RESPONSÁVEL</span></div><div class="chart-wrap tall"><canvas id="chDexResp"></canvas></div></div>
     </div>
     <div class="row cols-3" style="margin-top:14px">
-      <div class="card"><div class="card-head"><div><h3>Situação das tratativas</h3><div class="sub">Onde cada ocorrência está agora</div></div></div><div class="chart-wrap"><canvas id="chDexStatus"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Tempo até finalizar</h3><div class="sub">Dias entre a abertura e o OK</div></div></div><div class="chart-wrap"><canvas id="chDexLead"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Idade das pendências</h3><div class="sub">Há quantos dias estão em aberto</div></div></div><div class="chart-wrap"><canvas id="chDexAge"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Situação</h3><div class="sub">Abertas × finalizadas</div></div></div><div class="chart-wrap"><canvas id="chDexStatus"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Causa raiz</h3><div class="sub">Motivo apontado na análise</div></div></div><div class="chart-wrap"><canvas id="chDexCausa"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Idade das abertas</h3><div class="sub">Há quantos dias estão em aberto</div></div></div><div class="chart-wrap"><canvas id="chDexAge"></canvas></div></div>
     </div>
-    <div class="card" style="margin-top:14px"><div class="card-head"><div><h3>Evolução mensal</h3><div class="sub">Ocorrências recebidas por mês e situação atual</div></div><span class="card-tag">MÊS</span></div><div class="chart-wrap"><canvas id="chDexMes"></canvas></div></div>
+    <div class="card" style="margin-top:14px"><div class="card-head"><div><h3>Evolução mensal</h3><div class="sub">Ocorrências por mês e situação atual</div></div><span class="card-tag">MÊS</span></div><div class="chart-wrap"><canvas id="chDexMes"></canvas></div></div>
     <div class="row cols-2" style="margin-top:14px">
-      <div class="card"><div class="card-head"><div><h3>Ranking de colaboradores</h3><div class="sub">Erros por pessoa, finalização e custo</div></div></div><div class="table-wrap"><table class="data dex-table" id="dexRank"></table></div></div>
-      <div class="card"><div class="card-head"><div><h3>Pendências mais antigas</h3><div class="sub">Ainda sem OK, da mais antiga para a mais nova</div></div></div><div class="table-wrap"><table class="data dex-table" id="dexOld"></table></div></div>
+      <div class="card"><div class="card-head"><div><h3>Ranking de clientes</h3><div class="sub">Clientes com mais ocorrências na Expedição</div></div></div><div class="table-wrap"><table class="data dex-table" id="dexRank"></table></div></div>
+      <div class="card"><div class="card-head"><div><h3>Pendências mais antigas</h3><div class="sub">Ainda em aberto, da mais antiga para a mais nova</div></div></div><div class="table-wrap"><table class="data dex-table" id="dexOld"></table></div></div>
     </div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Detalhamento das tratativas</h3><div class="sub">Cada ocorrência da Expedição no filtro</div></div><input id="dexSearch" class="dex-search" placeholder="Buscar ocorrência, ref., pessoa…"></div>
+      <div class="card-head"><div><h3>Detalhamento</h3><div class="sub">Passe o mouse na linha para ver o resumo</div></div><input id="dexSearch" class="dex-search" placeholder="Buscar código, cliente, minuta…"></div>
       <div class="table-wrap"><table class="data dex-table" id="tableOce"></table></div>
     </div>
     <div class="insight" id="insight-ocorr_exp"></div>
@@ -1262,7 +1274,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   // sigla) com o total do dia. Localizamos cada bloco pelo texto do rótulo em
   // vez de confiar nas letras de coluna fixas, para resistir a edições na
   // planilha.
-  const TEAM_LABELS = ['LÍDER', 'CONFERENTE', 'AJUDANTE'];
+  const TEAM_LABELS = ['LÍDER', 'ANALISTA', 'CONFERENTE', 'AJUDANTE'];
   function findTeamBlock(rows, dataStart, teamLabel){
     for(let r=0; r<dataStart; r++){
       const headerRow = rows[r] || [];
@@ -1348,7 +1360,9 @@ body.locked > *:not(#loginScreen){display:none !important}
     const totalDays = new Date(year, month, 0).getDate();
     for(let d=1; d<=totalDays; d++){
       const wd = new Date(year, month-1, d).getDay();
-      if(wd>=1 && wd<=5) count++;
+      const iso = year+'-'+String(month).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      // mês corrente: conta só os dias úteis até hoje (o resto ainda não foi lançado)
+      if(wd>=1 && wd<=5 && !(ABSD && ABSD.feriados[iso]) && iso <= absToday()) count++;
     }
     return count;
   }
@@ -1652,8 +1666,6 @@ body.locked > *:not(#loginScreen){display:none !important}
 
     renderOverview(D, meses);
     renderJEM(D, meses, mAtual, mAnterior);
-    renderAjudantes(D, meses, mAtual, mAnterior);
-    renderConferentes(D, meses, mAtual, mAnterior);
     renderAtrasoExpresso(D, meses, mAtual, mAnterior);
     renderSaidaA(D, meses, mAtual, mAnterior);
     renderManifestos(D, meses, mAtual, mAnterior);
@@ -1743,46 +1755,6 @@ body.locked > *:not(#loginScreen){display:none !important}
     document.getElementById('jemMonthsTag').textContent = `JEM · ${meses.length} MESES`;
     const d = delta(vol.curr, vol.prev, true);
     setInsight('jem', `<strong>Leitura do mês:</strong> o volume JEM em <strong>${mAtual}</strong> foi de ${fmt(vol.curr)}, uma variação de ${d.arrow} ${d.text} frente a ${mAnterior}. Despachos: ${fmt(desp.curr)} (${delta(desp.curr,desp.prev,true).arrow} ${delta(desp.curr,desp.prev,true).text}).`);
-  }
-
-  function renderAjudantes(D, meses, mAtual, mAnterior){
-    const grid = document.getElementById('kpi-ajudantes'); grid.innerHTML='';
-    const aj=last2(D.ajudantes), ev=last2(D.qtd_eventos_ajud);
-    const ratioCurr=(aj.curr!=null&&aj.curr)?ev.curr/aj.curr:null, ratioPrev=(aj.prev!=null&&aj.prev)?ev.prev/aj.prev:null;
-    const peak = peakInfo(D.ajudantes, meses);
-    grid.appendChild(kpiCard(`Ajudantes ${mAtual}`, fmt(aj.curr), `vs. ${mAnterior}: ${fmt(aj.prev)}`, delta(aj.curr,aj.prev,true)));
-    grid.appendChild(kpiCard('Eventos ajudantes', fmt(ev.curr), 'QTD eventos AJUD', delta(ev.curr,ev.prev,true), 'accent'));
-    grid.appendChild(kpiCard('Eventos por ajudante', ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:2}):'—', `razão ${mAtual}`, delta(ratioCurr,ratioPrev,true), 'purple'));
-    grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
-
-    mkChart('chartAjudantes', {
-      type:'bar', data:{labels:meses,datasets:[
-        {label:'Ajudantes',data:D.ajudantes,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
-        {label:'QTD Eventos AJUD',data:D.qtd_eventos_ajud,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
-    });
-    setInsight('ajudantes', `<strong>Análise:</strong> em ${mAtual}, ${fmt(aj.curr)} ajudantes registraram ${fmt(ev.curr)} eventos (razão de ${ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:2}):'—'} evento/ajudante).`);
-  }
-
-  function renderConferentes(D, meses, mAtual, mAnterior){
-    const grid = document.getElementById('kpi-conferentes'); grid.innerHTML='';
-    const cf=last2(D.conferentes_6), ev=last2(D.qtd_eventos_conf);
-    const ratioCurr=(cf.curr!=null&&cf.curr)?ev.curr/cf.curr:null, ratioPrev=(cf.prev!=null&&cf.prev)?ev.prev/cf.prev:null;
-    const peak = peakInfo(D.conferentes_6, meses);
-    grid.appendChild(kpiCard(`Conferentes ${mAtual}`, fmt(cf.curr), `vs. ${mAnterior}: ${fmt(cf.prev)}`, delta(cf.curr,cf.prev,true)));
-    grid.appendChild(kpiCard('Eventos conferentes', fmt(ev.curr), 'QTD eventos CONF', delta(ev.curr,ev.prev,true), 'accent'));
-    grid.appendChild(kpiCard('Eventos por conferente', ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:2}):'—', `razão ${mAtual}`, delta(ratioCurr,ratioPrev,true), 'purple'));
-    grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
-
-    mkChart('chartConferentes', {
-      type:'bar', data:{labels:meses,datasets:[
-        {label:'Conferentes (6)',data:D.conferentes_6,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
-        {label:'QTD Eventos CONF',data:D.qtd_eventos_conf,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
-    });
-    setInsight('conferentes', `<strong>Análise:</strong> em ${mAtual}, ${fmt(cf.curr)} conferentes registraram ${fmt(ev.curr)} eventos (razão de ${ratioCurr!=null?ratioCurr.toLocaleString('pt-BR',{maximumFractionDigits:2}):'—'} evento/conferente).`);
   }
 
   function renderAtrasoExpresso(D, meses, mAtual, mAnterior){
@@ -1986,255 +1958,215 @@ body.locked > *:not(#loginScreen){display:none !important}
     setInsight('ocorrencias', `<strong>Leitura do período:</strong> ${fmt(data.total)} ocorrências registradas. "${topResp[0]}" responde por ${fmt(topResp[1])} casos (${pct(topResp[1])}%), o tipo mais recorrente foi "${topTipo[0]}" (${fmt(topTipo[1])} casos) e o mês de maior volume foi ${peakMonth} (${fmt(peakVal)}).`);
   }
 
-  // ============ 18 · DASH EXPEDIÇÃO (sistema NAO-CONFORMIDADES) ============
-  // Réplica, somente leitura, da aba "Dash Expedição" do sistema
-  // andreluis-star.github.io/NAO-CONFORMIDADES. Aquele sistema guarda todo o
-  // seu estado no Firestore (projeto portoex-nc, documento portoex/nc, campo
-  // "state" com o JSON). Lemos esse documento pela API REST — o painel NUNCA
-  // grava nada lá; ajustes (quem errou, tratativas) são feitos no próprio sistema.
-  const DEX_DOC_URL = 'https://firestore.googleapis.com/v1/projects/portoex-nc/databases/(default)/documents/portoex/nc?key=AIzaSyDZjORlQnMWCJ7cZUGi5fz3emG7jNtOg8Q';
+  // ============ 18 · DASH EXPEDIÇÃO (base NaoConformidades.html) ============
+  // A página do painel de Não Conformidades (gerada do Brudam) traz os dados
+  // embutidos em `const DATA = {...}`, com chaves "AAAAMM_setor". Usamos só o
+  // setor "logisticainterna" (Expedição). A aba 17 lê a mesma página.
+  const NC_SOURCES = [
+    'https://franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html',
+    'https://raw.githubusercontent.com/franciscosilva-sys/portoex-painel/main/NaoConformidades.html'
+  ];
+  const NC_SETOR_EXP = 'logisticainterna';
   const DEX_DAY = 86400000;
-  const DEX_BUCKETS = ['até 1 dia','2–3 dias','4–7 dias','8–15 dias','mais de 15'];
-  const DEX_C = {green:'#3ddc97',yellow:'#ffd23f',red:'#ff4d6d',orange:'#ffa552',blue:'#4d9fff',gray:'#7f8c9a'};
-  let DEX = null;            // { regs:[...], ts }
-  let dexVert = 'ambas', dexMes = '';
+  const DEX_BUCKETS = ['até 3 dias','4–7 dias','8–15 dias','16–30 dias','mais de 30'];
+  const DEX_C = {green:'#3ddc97',yellow:'#ffd23f',red:'#ff4d6d',orange:'#ffa552',blue:'#4d9fff',purple:'#a78bfa',gray:'#7f8c9a'};
+  let DEX = null;              // { regs:[...], geradoEm }
+  let dexMes = '', dexEmp = '';
 
   const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  const dexNorm = s => (s==null?'':String(s)).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
-  const dexIsExp = n => dexNorm(n).startsWith('expedicao');
-  function dexMonthKey(d){
-    if(!d) return null; d=String(d).trim();
-    let m=d.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m) return m[1]+'-'+m[2];
-    m=d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/); if(m){ let y=+m[3]; if(m[3].length===2) y+=2000; return y+'-'+String(+m[2]).padStart(2,'0'); }
-    return null;
-  }
-  const dexMesLabel = k => { if(!/^\d{4}-\d{2}$/.test(k)) return k; const [y,m]=k.split('-'); return MES_ABBR[+m-1]+'/'+y.slice(2); };
-  const dexData = d => { if(!d) return '—'; const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m?`${m[3]}/${m[2]}/${m[1]}`:d; };
-  const dexMoney = n => (n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  function dexParseMoney(v){ v=String(v==null?'':v).trim(); if(!v) return 0; const n=parseFloat(v.replace(/\./g,'').replace(',','.')); return isNaN(n)?0:n; }
-  const dexTs = iso => { const t=Date.parse(iso); return isNaN(t)?null:t; };
-  const dexDias = d => d==null ? '—' : (d<1 ? Math.round(d*24)+' h' : (Math.round(d*10)/10).toLocaleString('pt-BR')+' d');
-  const dexAvg = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
-  function dexMedian(a){ if(!a.length) return null; const s=a.slice().sort((x,y)=>x-y), m=Math.floor(s.length/2); return s.length%2?s[m]:(s[m-1]+s[m])/2; }
-  const dexBucket = d => d<=1?DEX_BUCKETS[0]:d<=3?DEX_BUCKETS[1]:d<=7?DEX_BUCKETS[2]:d<=15?DEX_BUCKETS[3]:DEX_BUCKETS[4];
   const dexPct = (a,b) => b ? Math.round(a*100/b)+'%' : '—';
-  const dexQuem = r => String(r.quemErrou||'').split(/[,;\/]+/).map(x=>x.trim()).filter(Boolean);
-  const dexSituacao = r => r.status==='ok'?'Finalizada':r.status==='aceito'?'Em tratamento':r.status==='pendente_criador'?'Devolvida ao criador':'Aguardando aceite';
-  const dexStCls = r => r.status==='ok'?'ok':r.status==='aceito'?'tr':r.status==='pendente_criador'?'dv':'pe';
+  const dexBucket = d => d<=3?DEX_BUCKETS[0]:d<=7?DEX_BUCKETS[1]:d<=15?DEX_BUCKETS[2]:d<=30?DEX_BUCKETS[3]:DEX_BUCKETS[4];
+  const dexDias = d => d==null ? '—' : Math.floor(d).toLocaleString('pt-BR')+' d';
+  const dexMesLabel = k => { const [y,m]=k.split('-'); return MES_ABBR[+m-1]+'/'+y.slice(2); };
+  function dexParseDate(s){ const m=String(s||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m ? new Date(+m[3], +m[2]-1, +m[1]) : null; }
+  const dexAberta = r => r.status !== 'FINALIZADA' && r.status !== 'CANCELADA';
 
-  // Mesma migração de status que o sistema faz ao abrir (sem gravar nada).
-  function dexNormalize(state){
-    const regs = Array.isArray(state && state.registros) ? state.registros : [];
-    return regs.filter(r => r && !r.excluido).map(r0 => {
-      const r = Object.assign({}, r0);
-      if(!Array.isArray(r.hist)) r.hist = [];
-      if(r.status==='aberto') r.status='pendente_resp';
-      else if(r.status==='tratamento') r.status='aceito';
-      else if(!['pendente_resp','pendente_criador','aceito','ok'].includes(r.status)) r.status='pendente_resp';
-      if(r.pendCom===undefined) r.pendCom = r.status==='ok' ? '' : (r.status==='pendente_criador' ? r.criadoPor : r.resp);
-      return r;
+  async function fetchNCPage(){
+    let lastErr = null;
+    for(const base of NC_SOURCES){
+      try{
+        const res = await fetch(base + '?_=' + Date.now(), { cache:'no-store' });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        return await res.text();
+      }catch(err){ lastErr = err; }
+    }
+    throw new Error('não foi possível acessar a página de Não Conformidades (' + (lastErr ? lastErr.message : 'erro desconhecido') + ')');
+  }
+  function parseNCExp(html){
+    const marker = 'const DATA = ', i = html.indexOf(marker);
+    if(i === -1) throw new Error('objeto DATA não encontrado na página de Não Conformidades');
+    const j = html.indexOf('\n', i);
+    let txt = html.slice(i + marker.length, j === -1 ? undefined : j).trim();
+    if(txt.endsWith(';')) txt = txt.slice(0, -1);
+    const DATA = JSON.parse(txt);
+    const gm = html.match(/gerado em\s+(\d{2}\/\d{2}\/\d{4}(?:\s+\d{2}:\d{2})?)/i);
+    const seen = new Set(), regs = [], now = Date.now();
+    Object.keys(DATA).forEach(key => {
+      const km = key.match(/^(\d{4})(\d{2})_(.+)$/);
+      if(!km || km[3] !== NC_SETOR_EXP) return;
+      (DATA[key]||[]).forEach(r => {
+        const id = (r.empresa||'') + '|' + (r.codigo||'');
+        if(seen.has(id)) return; seen.add(id);
+        const dt = dexParseDate(r.data), prazo = dexParseDate(r.prazo);
+        const status = String(r.status||'').trim().toUpperCase() || 'SEM STATUS';
+        const reg = {
+          ...r, status,
+          categoria: String(r.categoria||'').trim() || 'SEM CATEGORIA',
+          responsavel: String(r.responsavel||'').trim() || 'Não atribuído',
+          causa: String(r.causa_raiz||'').trim(),
+          plano: String(r.plano_acao||'').trim(),
+          cliente: String(r.cliente||'').trim() || '—',
+          empresa: String(r.empresa||'').trim() || '—',
+          mk: dt ? dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0') : km[1]+'-'+km[2],
+          ts: dt ? dt.getTime() : 0, prazoTs: prazo ? prazo.getTime() : null
+        };
+        reg.idade = dexAberta(reg) && dt ? Math.max(0, (now - dt.getTime())/DEX_DAY) : null;
+        reg.vencida = dexAberta(reg) && reg.prazoTs != null && reg.prazoTs + DEX_DAY <= now;
+        reg.sortKey = reg.ts + (parseInt(String(r.hora||'').replace(/\D/g,'')||'0',10) / 1e6);
+        regs.push(reg);
+      });
     });
+    regs.sort((a,b) => b.sortKey - a.sortKey);
+    return { regs, geradoEm: gm ? gm[1] : null };
   }
-  function dexInfo(r){
-    const h = r.hist;
-    const ab = dexTs(r.dataCad) || (h[0] && dexTs(h[0].quando)) || null;
-    const aceiteH = h.find(x => x.aceite==='S');
-    let okH = null;
-    if(r.status==='ok'){ for(let i=h.length-1;i>=0;i--){ if(/^Concluído|^Encerr/.test(h[i].acao||'')){ okH=h[i]; break; } } }
-    return {
-      tAce: aceiteH&&ab ? Math.max(0,(dexTs(aceiteH.quando)-ab)/DEX_DAY) : null,
-      tOk: okH&&ab ? Math.max(0,(dexTs(okH.quando)-ab)/DEX_DAY) : null,
-      idade: (r.status!=='ok'&&ab) ? Math.max(0,(Date.now()-ab)/DEX_DAY) : null,
-      recusas: h.filter(x=>x.aceite==='N').length,
-      devol: h.filter(x=>/^Devolveu/.test(x.acao||'')).length,
-      reab: h.filter(x=>/^Reabriu/.test(x.acao||'')).length,
-      custo: dexParseMoney(r.custo)
-    };
-  }
-  const dexPass = r => (dexVert==='ambas'||r.vert===dexVert) && (!dexMes || dexMonthKey(r.data)===dexMes);
-  const dexRegs = () => DEX ? DEX.regs.filter(r => dexIsExp(r.resp) && dexPass(r)) : [];
-
+  const dexRegs = () => DEX ? DEX.regs.filter(r => (!dexMes || r.mk===dexMes) && (!dexEmp || r.empresa===dexEmp)) : [];
+  function countBy(list, fn){ const m=new Map(); list.forEach(r=>{ const k=fn(r); m.set(k,(m.get(k)||0)+1); }); return [...m.entries()].sort((a,b)=>b[1]-a[1]); }
   function dexKpi(label, value, sub, cls){
     const d=document.createElement('div'); d.className='kpi '+(cls||'');
     d.innerHTML=`<div class="kpi-label">${label}</div><div class="kpi-value">${value}</div><div class="kpi-foot"><span>${sub}</span></div>`;
     return d;
   }
-  function dexFillMeses(){
-    const sel=document.getElementById('dexMes'); if(!sel||!DEX) return;
-    const set=new Set();
-    DEX.regs.filter(r=>dexIsExp(r.resp)).forEach(r=>{ const k=dexMonthKey(r.data); if(k) set.add(k); });
-    const keys=[...set].sort();
-    sel.innerHTML='<option value="">Todos os meses</option>'+keys.map(k=>`<option value="${k}">${dexMesLabel(k)}</option>`).join('');
-    if(!keys.includes(dexMes)) dexMes='';
-    sel.value=dexMes;
+  function dexFillFilters(){
+    if(!DEX) return;
+    const ms=[...new Set(DEX.regs.map(r=>r.mk))].sort(), es=[...new Set(DEX.regs.map(r=>r.empresa))].sort();
+    const selM=document.getElementById('dexMes'), selE=document.getElementById('dexEmp');
+    selM.innerHTML='<option value="">Todos os meses</option>'+ms.map(k=>`<option value="${k}">${dexMesLabel(k)}</option>`).join('');
+    selE.innerHTML='<option value="">Todas</option>'+es.map(e=>`<option value="${escHtml(e)}">${escHtml(e)}</option>`).join('');
+    if(!ms.includes(dexMes)) dexMes=''; if(!es.includes(dexEmp)) dexEmp='';
+    selM.value=dexMes; selE.value=dexEmp;
   }
   function setOceStatus(html, warn){
     const el=document.getElementById('oce-status'); if(!el) return;
     el.className='insight'+(warn?' warn':''); el.style.display=html?'':'none'; el.innerHTML=html||'';
   }
+  const dexStCls = r => r.status==='FINALIZADA' ? 'ok' : r.status==='CANCELADA' ? 'dv' : 'pe';
 
   function renderDex(){
     const grid=document.getElementById('kpi-ocorr_exp'); if(!grid) return;
-    const regs=dexRegs();
-    const info=new Map(regs.map(r=>[r,dexInfo(r)]));
-    const I=r=>info.get(r);
-    const tot=regs.length;
-    const ok=regs.filter(r=>r.status==='ok').length;
-    const trat=regs.filter(r=>r.status==='aceito').length;
-    const pend=regs.filter(r=>r.status==='pendente_resp').length;
-    const dev=regs.filter(r=>r.status==='pendente_criador').length;
-    const ident=regs.filter(r=>dexQuem(r).length).length;
-    const comPlano=regs.filter(r=>(r.plano||'').trim()).length;
-    const tAce=regs.map(r=>I(r).tAce).filter(x=>x!=null);
-    const tOk=regs.map(r=>I(r).tOk).filter(x=>x!=null);
-    const custo=regs.reduce((a,r)=>a+I(r).custo,0);
-    const comCusto=regs.filter(r=>I(r).custo>0).length;
-    const reab=regs.reduce((a,r)=>a+I(r).reab,0);
-    const recEvents=regs.reduce((a,r)=>a+I(r).recusas,0);
-    const aceitas=regs.filter(r=>r.hist.some(h=>h.aceite==='S')).length;
-    const atrasadas=regs.filter(r=>{ const d=I(r).idade; return d!=null&&d>7; }).length;
-    const redirec=DEX ? DEX.regs.filter(r=>!dexIsExp(r.resp)&&dexPass(r)&&r.hist.some(h=>h.aceite==='N'&&dexIsExp(h.quem))).length : 0;
+    const regs=dexRegs(), tot=regs.length;
+    const fin=regs.filter(r=>r.status==='FINALIZADA').length;
+    const canc=regs.filter(r=>r.status==='CANCELADA').length;
+    const ab=regs.filter(dexAberta);
+    const ab7=ab.filter(r=>r.idade!=null && r.idade>7).length;
+    const venc=regs.filter(r=>r.vencida).length;
+    const comCausa=regs.filter(r=>r.causa).length, comPlano=regs.filter(r=>r.plano).length, comPrazo=regs.filter(r=>r.prazoTs!=null).length;
+    const idades=ab.map(r=>r.idade).filter(x=>x!=null);
+    const idadeMed=idades.length ? idades.reduce((a,b)=>a+b,0)/idades.length : null;
+    const clientes=new Set(regs.map(r=>r.cliente)).size;
 
-    document.getElementById('dexNote').innerHTML = (tot && ident<tot)
-      ? `<div class="dex-note">ℹ️ ${fmt(tot-ident)} de ${fmt(tot)} ocorrência(s) ainda sem o nome de quem errou — informe no sistema Não Conformidades (aba Dash Expedição ou Trâmite).</div>` : '';
+    document.getElementById('dexNote').innerHTML = (tot && comCausa<tot)
+      ? `<div class="dex-note">ℹ️ ${fmt(tot-comCausa)} de ${fmt(tot)} ocorrência(s) ainda sem causa raiz e ${fmt(tot-comPlano)} sem plano de ação registrados no Brudam.</div>` : '';
 
     grid.innerHTML='';
-    grid.appendChild(dexKpi('Recebidas para tratar',fmt(tot),'responsável: Expedição / Log. Interna','accent'));
-    grid.appendChild(dexKpi('Finalizadas (OK)',fmt(ok),dexPct(ok,tot)+' do total','green'));
-    grid.appendChild(dexKpi('Em tratamento',fmt(trat),'aceitas, aguardando OK','yellow'));
-    grid.appendChild(dexKpi('Aguardando aceite',fmt(pend),dev?(fmt(dev)+' devolvida(s) ao criador'):'nenhuma devolvida','red'));
-    grid.appendChild(dexKpi('Em aberto há +7 dias',fmt(atrasadas),'sem OK há mais de uma semana','red'));
-    grid.appendChild(dexKpi('Tempo médio p/ aceitar',dexDias(dexAvg(tAce)),'mediana '+dexDias(dexMedian(tAce)),''));
-    grid.appendChild(dexKpi('Tempo médio p/ finalizar',dexDias(dexAvg(tOk)),'mediana '+dexDias(dexMedian(tOk)),''));
-    grid.appendChild(dexKpi('Taxa de aceite',dexPct(aceitas,aceitas+recEvents),fmt(recEvents)+' recusa(s) · '+fmt(redirec)+' redirecionada(s)','purple'));
+    grid.appendChild(dexKpi('Ocorrências',fmt(tot),'setor Logística Interna'+(dexMes?' · '+dexMesLabel(dexMes):''),'accent'));
+    grid.appendChild(dexKpi('Finalizadas',fmt(fin),dexPct(fin,tot)+' do total'+(canc?' · '+fmt(canc)+' cancelada(s)':''),'green'));
+    grid.appendChild(dexKpi('Em aberto',fmt(ab.length),dexPct(ab.length,tot)+' do total','red'));
+    grid.appendChild(dexKpi('Abertas há +7 dias',fmt(ab7),'idade média '+dexDias(idadeMed),'red'));
+    grid.appendChild(dexKpi('Com causa raiz',dexPct(comCausa,tot),fmt(comCausa)+' de '+fmt(tot),'purple'));
     grid.appendChild(dexKpi('Com plano de ação',dexPct(comPlano,tot),fmt(comPlano)+' de '+fmt(tot),'green'));
-    grid.appendChild(dexKpi('Quem errou identificado',dexPct(ident,tot),fmt(ident)+' de '+fmt(tot)+' ocorrências','yellow'));
-    grid.appendChild(dexKpi('Custo total','R$ '+dexMoney(custo),fmt(comCusto)+' ocorrência(s) com custo','red'));
-    grid.appendChild(dexKpi('Reaberturas',fmt(reab),'ocorrências que voltaram após OK',''));
+    grid.appendChild(dexKpi('Prazo vencido',fmt(venc),fmt(comPrazo)+' com prazo definido','yellow'));
+    grid.appendChild(dexKpi('Clientes afetados',fmt(clientes),'clientes distintos',''));
 
     const hBar=(id,entries,color)=>mkChart(id,{type:'bar',
       data:{labels:entries.map(e=>e[0]),datasets:[{label:'Ocorrências',data:entries.map(e=>e[1]),backgroundColor:color,borderRadius:6,datalabels:dl(color,'end','end')}]},
       options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}});
-    const vBar=(id,labels,data,colors)=>mkChart(id,{type:'bar',
-      data:{labels,datasets:[{label:'Ocorrências',data,backgroundColor:colors,borderRadius:6,datalabels:dl('#e8ecf5','end','end')}]},
+    const tipoEntries=countBy(regs,r=>r.categoria);
+    hBar('chDexTipo',tipoEntries.slice(0,12),DEX_C.blue);
+    hBar('chDexResp',countBy(regs,r=>r.responsavel).slice(0,12),DEX_C.orange);
+    hBar('chDexCausa',countBy(regs,r=>r.causa||'Não definida').slice(0,8),DEX_C.purple);
+
+    const stL=['Em aberto','Finalizadas'], stV=[ab.length,fin], stC=[DEX_C.red,DEX_C.green];
+    if(canc){ stL.push('Canceladas'); stV.push(canc); stC.push(DEX_C.gray); }
+    mkChart('chDexStatus',{type:'doughnut',data:{labels:stL,datasets:[{data:stV,backgroundColor:stC,borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}},
+        datalabels:{color:'#0b0f1a',font:{size:12,weight:'700'},formatter:v=>v?fmt(v):''}}}});
+    mkChart('chDexAge',{type:'bar',data:{labels:DEX_BUCKETS,datasets:[{label:'Abertas',data:DEX_BUCKETS.map(b=>idades.filter(d=>dexBucket(d)===b).length),
+        backgroundColor:DEX_BUCKETS.map((b,i)=>i<2?DEX_C.yellow:DEX_C.red),borderRadius:6,datalabels:dl('#e8ecf5','end','end')}]},
       options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},scales:baseScales,plugins:{legend:{display:false}}}});
 
-    const byT=new Map(); regs.forEach(r=>{ const t=r.tipo||'Não especificado'; byT.set(t,(byT.get(t)||0)+1); });
-    hBar('chDexTipo',[...byT].sort((a,b)=>b[1]-a[1]).slice(0,12),DEX_C.blue);
-
-    const byQ=new Map(); regs.forEach(r=>dexQuem(r).forEach(n=>byQ.set(n,(byQ.get(n)||0)+1)));
-    const qEnt=[...byQ].sort((a,b)=>b[1]-a[1]).slice(0,12);
-    document.getElementById('chDexQuemEmpty').style.display = qEnt.length?'none':'flex';
-    document.getElementById('chDexQuem').style.display = qEnt.length?'':'none';
-    hBar('chDexQuem',qEnt,DEX_C.orange);
-
-    mkChart('chDexStatus',{type:'doughnut',
-      data:{labels:['Finalizada','Em tratamento','Aguardando aceite','Devolvida ao criador'],datasets:[{data:[ok,trat,pend,dev],backgroundColor:[DEX_C.green,DEX_C.yellow,DEX_C.red,DEX_C.gray],borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}},
-        datalabels:{color:'#0b0f1a',font:{size:11,weight:'700'},formatter:v=>v?fmt(v):''}}}});
-    vBar('chDexLead',DEX_BUCKETS,DEX_BUCKETS.map(b=>tOk.filter(d=>dexBucket(d)===b).length),DEX_C.green);
-    const ages=regs.map(r=>I(r).idade).filter(x=>x!=null);
-    vBar('chDexAge',DEX_BUCKETS,DEX_BUCKETS.map(b=>ages.filter(d=>dexBucket(d)===b).length),DEX_BUCKETS.map((b,i)=>i<2?DEX_C.yellow:DEX_C.red));
-
-    const months=new Map();
-    regs.forEach(r=>{ const k=dexMonthKey(r.data)||dexMonthKey(r.dataCad)||'s/ data'; if(!months.has(k)) months.set(k,{ok:0,tr:0,pe:0}); const m=months.get(k); if(r.status==='ok')m.ok++; else if(r.status==='aceito')m.tr++; else m.pe++; });
-    const mk=[...months.keys()].sort();
-    const stackDl=c=>({color:'#0b0f1a',font:{size:10,weight:'700'},formatter:v=>v?fmt(v):''});
+    const mk=[...new Set(regs.map(r=>r.mk))].sort();
+    const stackDl={color:'#0b0f1a',font:{size:10,weight:'700'},formatter:v=>v?fmt(v):''};
     mkChart('chDexMes',{type:'bar',data:{labels:mk.map(dexMesLabel),datasets:[
-        {label:'Finalizadas',data:mk.map(k=>months.get(k).ok),backgroundColor:DEX_C.green,borderRadius:4,datalabels:stackDl()},
-        {label:'Em tratamento',data:mk.map(k=>months.get(k).tr),backgroundColor:DEX_C.yellow,borderRadius:4,datalabels:stackDl()},
-        {label:'Pendentes',data:mk.map(k=>months.get(k).pe),backgroundColor:DEX_C.red,borderRadius:4,datalabels:stackDl()}]},
+        {label:'Finalizadas',data:mk.map(k=>regs.filter(r=>r.mk===k&&r.status==='FINALIZADA').length),backgroundColor:DEX_C.green,borderRadius:4,datalabels:stackDl},
+        {label:'Em aberto',data:mk.map(k=>regs.filter(r=>r.mk===k&&dexAberta(r)).length),backgroundColor:DEX_C.red,borderRadius:4,datalabels:stackDl},
+        {label:'Canceladas',data:mk.map(k=>regs.filter(r=>r.mk===k&&r.status==='CANCELADA').length),backgroundColor:DEX_C.gray,borderRadius:4,datalabels:stackDl}]},
       options:{responsive:true,maintainAspectRatio:false,scales:{x:{...baseScales.x,stacked:true},y:{...baseScales.y,stacked:true}},plugins:{legend:{position:'top',align:'end'}}}});
 
-    // Ranking de colaboradores
-    const rk=new Map();
-    regs.forEach(r=>{ const i=I(r); dexQuem(r).forEach(n=>{
-      if(!rk.has(n)) rk.set(n,{n,q:0,ok:0,custo:0,tipos:new Map(),ult:''});
-      const o=rk.get(n); o.q++; if(r.status==='ok') o.ok++; o.custo+=i.custo; o.tipos.set(r.tipo,(o.tipos.get(r.tipo)||0)+1);
-      const d=r.data||''; const iso=/^\d{4}-/.test(d)?d:(dexMonthKey(d)?d.split('/').reverse().join('-'):''); if(iso>o.ult) o.ult=iso;
-    }); });
-    const rkL=[...rk.values()].sort((a,b)=>b.q-a.q||b.custo-a.custo);
-    document.getElementById('dexRank').innerHTML = !rkL.length
-      ? '<tbody><tr><td class="dex-none">Sem nomes informados neste filtro.</td></tr></tbody>'
-      : '<thead><tr><th>#</th><th>Colaborador</th><th>Erros</th><th>Finalização</th><th>Tipo mais comum</th><th>Custo</th><th>Último</th></tr></thead><tbody>'+rkL.map((o,i)=>{
-          const top=[...o.tipos].sort((a,b)=>b[1]-a[1])[0];
-          return `<tr><td>${i+1}</td><td><span class="dex-quem">${escHtml(o.n)}</span></td><td><b>${o.q}</b></td>
-            <td><div style="display:flex;align-items:center;gap:7px"><div class="dex-bar"><i style="width:${Math.round(o.ok*100/o.q)}%"></i></div><span style="font-size:11px">${o.ok}/${o.q}</span></div></td>
-            <td>${escHtml(top?top[0]:'—')}${top&&top[1]>1?` <span class="dex-sub" style="display:inline">(${top[1]}×)</span>`:''}</td><td>${o.custo?'R$ '+dexMoney(o.custo):'—'}</td><td>${dexData(o.ult)}</td></tr>`;
+    // Ranking de clientes
+    const byCli=new Map();
+    regs.forEach(r=>{ if(!byCli.has(r.cliente)) byCli.set(r.cliente,{n:r.cliente,q:0,ab:0,cats:new Map(),ult:0,ultTxt:''});
+      const o=byCli.get(r.cliente); o.q++; if(dexAberta(r)) o.ab++; o.cats.set(r.categoria,(o.cats.get(r.categoria)||0)+1); if(r.ts>o.ult){ o.ult=r.ts; o.ultTxt=r.data; } });
+    const rk=[...byCli.values()].sort((a,b)=>b.q-a.q||b.ab-a.ab).slice(0,12);
+    document.getElementById('dexRank').innerHTML = !rk.length ? '<tbody><tr><td class="dex-none">Sem ocorrências neste filtro.</td></tr></tbody>'
+      : '<thead><tr><th>#</th><th>Cliente</th><th>Ocorr.</th><th>Abertas</th><th>Categoria mais comum</th><th>Última</th></tr></thead><tbody>'+rk.map((o,i)=>{
+          const top=[...o.cats].sort((a,b)=>b[1]-a[1])[0];
+          return `<tr><td>${i+1}</td><td style="max-width:240px"><b>${escHtml(o.n)}</b></td><td><b>${o.q}</b></td><td class="${o.ab?'dex-hot':''}">${o.ab||'—'}</td><td>${escHtml(top?top[0]:'—')}</td><td>${escHtml(o.ultTxt||'—')}</td></tr>`;
         }).join('')+'</tbody>';
 
     // Pendências mais antigas
-    const old=regs.filter(r=>r.status!=='ok').sort((a,b)=>(I(b).idade||0)-(I(a).idade||0)).slice(0,10);
-    document.getElementById('dexOld').innerHTML = !old.length
-      ? '<tbody><tr><td class="dex-none">Nenhuma pendência em aberto. 👏</td></tr></tbody>'
-      : '<thead><tr><th>Em aberto</th><th>Ocorrência</th><th>Situação</th><th>Com quem</th></tr></thead><tbody>'+old.map(r=>{ const d=I(r).idade;
-          return `<tr><td class="${d>7?'dex-hot':''}">${dexDias(d)}</td><td style="max-width:260px"><b>${escHtml(r.ocorr||'—')}</b><div class="dex-sub">${dexData(r.data)} · ${escHtml(r.tipo)}</div></td><td><span class="dex-st ${dexStCls(r)}">${escHtml(dexSituacao(r))}</span></td><td>${escHtml(r.pendCom||r.resp)}</td></tr>`;
-        }).join('')+'</tbody>';
+    const old=ab.slice().sort((a,b)=>(b.idade||0)-(a.idade||0)).slice(0,10);
+    document.getElementById('dexOld').innerHTML = !old.length ? '<tbody><tr><td class="dex-none">Nenhuma ocorrência em aberto. 👏</td></tr></tbody>'
+      : '<thead><tr><th>Em aberto</th><th>Ocorrência</th><th>Responsável</th><th>Prazo</th></tr></thead><tbody>'+old.map(r=>
+          `<tr><td class="${r.idade>7?'dex-hot':''}">${dexDias(r.idade)}</td><td style="max-width:260px"><b>${escHtml(r.codigo)} · ${escHtml(r.cliente)}</b><div class="dex-sub">${escHtml(r.data)} · ${escHtml(r.categoria)}</div></td><td>${escHtml(r.responsavel)}</td><td class="${r.vencida?'dex-hot':''}">${escHtml(r.prazo||'—')}</td></tr>`
+        ).join('')+'</tbody>';
 
     renderDexTable();
 
-    const topT=[...byT].sort((a,b)=>b[1]-a[1])[0];
+    const topT=tipoEntries[0];
     setInsight('ocorr_exp', tot
-      ? `<strong>Expedição${dexMes?' · '+dexMesLabel(dexMes):''}:</strong> ${fmt(tot)} ocorrência(s) para tratar — ${fmt(ok)} finalizadas (${dexPct(ok,tot)}), ${fmt(trat)} em tratamento e ${fmt(pend+dev)} aguardando. ${atrasadas?`<strong>${fmt(atrasadas)}</strong> em aberto há mais de 7 dias. `:''}Tipo mais recorrente: "${escHtml(topT?topT[0]:'—')}"${topT?` (${fmt(topT[1])})`:''}.`
-      : 'Nenhuma tratativa da Expedição neste filtro.', atrasadas ? 'warn' : '');
+      ? `<strong>Expedição${dexMes?' · '+dexMesLabel(dexMes):''}:</strong> ${fmt(tot)} não conformidade(s) — ${fmt(fin)} finalizada(s) (${dexPct(fin,tot)}) e ${fmt(ab.length)} em aberto${ab7?`, das quais <strong>${fmt(ab7)}</strong> há mais de 7 dias`:''}. Categoria mais recorrente: "${escHtml(topT?topT[0]:'—')}"${topT?` (${fmt(topT[1])})`:''}. ${tot-comCausa?`<strong>${fmt(tot-comCausa)}</strong> ainda sem causa raiz.`:'Todas com causa raiz definida.'}`
+      : 'Nenhuma não conformidade da Expedição neste filtro.', (ab7 || tot-comCausa) ? 'warn' : '');
   }
 
   function renderDexTable(){
     const tb=document.getElementById('tableOce'); if(!tb) return;
     const q=(document.getElementById('dexSearch').value||'').toLowerCase();
     let regs=dexRegs();
-    if(q) regs=regs.filter(r=>[r.ocorr,r.ref,r.placa,r.tipo,r.quemErrou,r.obs,r.plano,r.criadoPor].join(' ').toLowerCase().includes(q));
-    regs.sort((a,b)=>(b.id||0)-(a.id||0));
-    if(!regs.length){ tb.innerHTML='<tbody><tr><td class="dex-none">Nenhuma tratativa da Expedição neste filtro.</td></tr></tbody>'; return; }
-    tb.innerHTML='<thead><tr><th>Data</th><th>Ocorrência</th><th>Tipo</th><th>Quem errou</th><th>Situação</th><th>Plano de ação</th><th>Aceite em</th><th>OK em</th><th>Recusas / devol.</th><th>Custo</th><th>Aberta por</th></tr></thead><tbody>'+regs.map(r=>{
-      const i=dexInfo(r), qs=dexQuem(r);
-      return `<tr>
-        <td>${dexData(r.data)}</td>
-        <td style="max-width:260px"><b>${escHtml(r.ocorr||'—')}</b>${r.ref?`<div class="dex-sub">Ref: ${escHtml(r.ref)}</div>`:''}<div class="dex-sub">${r.vert==='ERRO'?'Erro operacional':'Não conformidade'}${r.origem==='painel'?' · nova base':r.origem==='planilha'?' · planilha':''}</div></td>
-        <td>${escHtml(r.tipo)}</td>
-        <td>${qs.length?qs.map(n=>`<span class="dex-quem">${escHtml(n)}</span>`).join(''):'<span class="dex-none">não informado</span>'}</td>
-        <td><span class="dex-st ${dexStCls(r)}">${escHtml(dexSituacao(r))}</span></td>
+    if(q) regs=regs.filter(r=>[r.codigo,r.cliente,r.minuta,r.categoria,r.responsavel,r.causa,r.plano,r.resumo,r.solicitante,r.atendente].join(' ').toLowerCase().includes(q));
+    if(!regs.length){ tb.innerHTML='<tbody><tr><td class="dex-none">Nenhuma não conformidade da Expedição neste filtro.</td></tr></tbody>'; return; }
+    tb.innerHTML='<thead><tr><th>Código</th><th>Data</th><th>Cliente</th><th>Categoria</th><th>Responsável</th><th>Situação</th><th>Em aberto</th><th>Prazo</th><th>Causa raiz</th><th>Plano de ação</th><th>Minuta</th><th>Empresa</th></tr></thead><tbody>'+regs.map(r=>`<tr title="${escHtml(r.resumo||'')}">
+        <td><b>${escHtml(r.codigo)}</b></td><td>${escHtml(r.data)}</td>
+        <td style="max-width:220px">${escHtml(r.cliente)}<div class="dex-sub">Solic.: ${escHtml(r.solicitante||'—')}</div></td>
+        <td>${escHtml(r.categoria)}</td><td>${escHtml(r.responsavel)}</td>
+        <td><span class="dex-st ${dexStCls(r)}">${escHtml(r.status)}</span></td>
+        <td class="${r.idade>7?'dex-hot':''}">${dexDias(r.idade)}</td>
+        <td class="${r.vencida?'dex-hot':''}">${escHtml(r.prazo||'—')}</td>
+        <td style="max-width:200px">${r.causa?escHtml(r.causa):'<span class="dex-none">não definida</span>'}</td>
         <td style="max-width:240px;font-size:11.5px">${r.plano?escHtml(r.plano):'<span class="dex-none">sem plano</span>'}</td>
-        <td>${dexDias(i.tAce)}</td><td>${dexDias(i.tOk)}</td>
-        <td>${i.recusas||i.devol?(i.recusas+' / '+i.devol):'—'}</td>
-        <td>${i.custo?'R$ '+dexMoney(i.custo):'—'}</td>
-        <td>${escHtml(r.criadoPor||'—')}</td></tr>`;
-    }).join('')+'</tbody>';
+        <td>${escHtml(r.minuta||'—')}</td><td>${escHtml(r.empresa)}</td></tr>`).join('')+'</tbody>';
   }
 
   function exportDexCSV(){
-    const regs=dexRegs().sort((a,b)=>(b.id||0)-(a.id||0));
-    const head=['Data','Vertente','Ocorrência','Tipo','Referência','Placa','Quem errou','Situação','Plano de ação','Dias até aceite','Dias até OK','Dias em aberto','Recusas','Devoluções','Reaberturas','Custo (R$)','Aberta por','Origem'];
+    const regs=dexRegs();
+    const head=['Código','Empresa','Data','Hora','Cliente','Categoria','Responsável','Solicitante','Atendente','Status','Dias em aberto','Prazo','Prazo vencido','Causa raiz','Plano de ação','Minuta','Resumo'];
     const cell=v=>{ v=v==null?'':String(v); return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
-    const n=d=>d==null?'':(Math.round(d*10)/10).toString().replace('.',',');
-    const rows=regs.map(r=>{ const i=dexInfo(r); return [dexData(r.data),r.vert==='ERRO'?'Erro operacional':'Não conformidade',r.ocorr,r.tipo,r.ref,r.placa,r.quemErrou||'',dexSituacao(r),r.plano||'',n(i.tAce),n(i.tOk),n(i.idade),i.recusas,i.devol,i.reab,i.custo?dexMoney(i.custo):'',r.criadoPor,r.origem||'cadastro'].map(cell).join(';'); });
+    const rows=regs.map(r=>[r.codigo,r.empresa,r.data,r.hora,r.cliente,r.categoria,r.responsavel,r.solicitante,r.atendente,r.status,r.idade==null?'':Math.floor(r.idade),r.prazo,r.vencida?'SIM':'',r.causa,r.plano,r.minuta,r.resumo].map(cell).join(';'));
     const blob=new Blob(['﻿'+[head.join(';'),...rows].join('\n')],{type:'text/csv;charset=utf-8'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tratativas_expedicao_'+new Date().toISOString().slice(0,10)+'.csv';
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='nao_conformidades_expedicao_'+new Date().toISOString().slice(0,10)+'.csv';
     document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
   }
 
-  document.querySelectorAll('#dexVertSeg .toggle-btn').forEach(b=>b.addEventListener('click',()=>{
-    dexVert=b.dataset.v;
-    document.querySelectorAll('#dexVertSeg .toggle-btn').forEach(x=>x.classList.toggle('active',x===b));
-    renderDex();
-  }));
   document.getElementById('dexMes').addEventListener('change',e=>{ dexMes=e.target.value; renderDex(); });
+  document.getElementById('dexEmp').addEventListener('change',e=>{ dexEmp=e.target.value; renderDex(); });
   document.getElementById('dexSearch').addEventListener('input',renderDexTable);
   document.getElementById('dexCsv').addEventListener('click',exportDexCSV);
 
   async function loadOcorrExp(){
     try{
-      const res=await fetch(DEX_DOC_URL,{cache:'no-store'});
-      if(!res.ok) throw new Error('HTTP '+res.status+' ao ler o Firestore do sistema Não Conformidades');
-      const doc=await res.json();
-      const raw=doc && doc.fields && doc.fields.state && doc.fields.state.stringValue;
-      if(!raw) throw new Error('documento portoex/nc sem o campo "state"');
-      const tsF=doc.fields.ts||{};
-      const ts=parseInt(tsF.integerValue||tsF.doubleValue||'0',10)||Date.parse(doc.updateTime)||null;
-      DEX={ regs: dexNormalize(JSON.parse(raw)), ts };
-      dexFillMeses();
+      DEX = parseNCExp(await fetchNCPage());
+      dexFillFilters();
       renderDex();
-      setOceStatus(ts?`Fonte <strong>Não Conformidades</strong> · última alteração no sistema em ${new Date(ts).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}.`:'', false);
+      setOceStatus(DEX.geradoEm ? `Fonte <strong>Não Conformidades</strong> (Brudam) · página gerada em ${escHtml(DEX.geradoEm)}.` : '', false);
     }catch(err){
       console.error('[Dash Expedição]',err);
       setOceStatus('<strong>Não foi possível atualizar o Dash Expedição:</strong> '+escHtml(err.message)+(DEX?' — exibindo a última leitura.':''), true);
@@ -2499,7 +2431,7 @@ body.locked > *:not(#loginScreen){display:none !important}
 
   // ---- Equipe Interna (aba 16): tamanho de equipe por função, mensal ----
   // Segue o mesmo período global das demais abas — sem filtros próprios.
-  const TEAM_COLORS = { 'LÍDER':'#a78bfa', 'CONFERENTE':'#4d9fff', 'AJUDANTE':'#3ddc97' };
+  const TEAM_COLORS = { 'LÍDER':'#a78bfa', 'ANALISTA':'#ffa552', 'CONFERENTE':'#4d9fff', 'AJUDANTE':'#3ddc97' };
   function renderEquipeInterna(agg){
     const grid = document.getElementById('kpi-colab_equipe'); grid.innerHTML='';
     if(!agg.keys.length){
@@ -2579,7 +2511,172 @@ body.locked > *:not(#loginScreen){display:none !important}
     document.getElementById('equipeDetailTable').innerHTML = html;
 
     const dd = delta(utilCurr, utilPrev, true);
-    setInsight('colab_equipe', `<strong>Leitura do mês:</strong> equipe de ${fmt(tamanhoCurr)} pessoas em ${agg.meses[lastIdx]} (Líder ${fmt(agg.teams['LÍDER'].headcount[lastIdx])}, Conferente ${fmt(agg.teams['CONFERENTE'].headcount[lastIdx])}, Ajudante ${fmt(agg.teams['AJUDANTE'].headcount[lastIdx])}), com ${fmt(pRealCurr)} presenças reais de ${fmt(estimadoCurr)} estimadas (${utilCurr!=null?utilCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—'} de utilização, ${dd.arrow} ${dd.text} vs. ${agg.meses[prevIdx]||'—'}).`);
+    setInsight('colab_equipe', `<strong>Leitura do mês:</strong> equipe de ${fmt(tamanhoCurr)} pessoas em ${agg.meses[lastIdx]} (${TEAM_LABELS.filter(t=>agg.teams[t].headcount[lastIdx]).map(t=>t.charAt(0)+t.slice(1).toLowerCase()+' '+fmt(agg.teams[t].headcount[lastIdx])).join(', ')||'sem presenças'}), com ${fmt(pRealCurr)} presenças reais de ${fmt(estimadoCurr)} estimadas (${utilCurr!=null?utilCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—'} de utilização, ${dd.arrow} ${dd.text} vs. ${agg.meses[prevIdx]||'—'}).`);
+  }
+
+  // ============ BASE ABSENTEÍSMO (abas 02, 13, 14, 15 e 16) ============
+  // Fonte: sistema "Frequência da equipe" (andreluis-star.github.io/ABSENTEISMO),
+  // que grava no Realtime Database do Firebase (projeto absenteismo-fc544, nó
+  // "frequencia"): colab/{id} (nome, admissão, funções com data de início,
+  // desligamento), mes/{AAAA-MM}/{id}/{DD} = {c: sigla}, feriados/{AAAA-MM-DD}
+  // e config/codigos. Lemos via REST, só leitura.
+  const ABS_DB = 'https://absenteismo-fc544-default-rtdb.firebaseio.com/frequencia';
+  const ABS_DEFAULT_CODES = [
+    {c:'P',n:'Presente',cat:'trabalho'},{c:'FA',n:'Falta',cat:'ausencia'},{c:'AT',n:'Atestado',cat:'ausencia'},
+    {c:'FE',n:'Férias',cat:'abonado'},{c:'FO',n:'Folga',cat:'abonado'},{c:'H',n:'Home office',cat:'trabalho'},
+    {c:'LT',n:'Luto',cat:'ausencia'},{c:'AP',n:'Aviso prévio',cat:'trabalho'},{c:'AF',n:'Afastamento',cat:'abonado'},
+    {c:'DV',n:'Demissão voluntária',cat:'desligamento'},{c:'D',n:'Demitido',cat:'desligamento'}];
+  let ABSD = null; // { people, mes, feriados, CM, WORK, AUS }
+  const absPad = n => String(n).padStart(2,'0');
+  const absIso = d => d.getFullYear()+'-'+absPad(d.getMonth()+1)+'-'+absPad(d.getDate());
+  const absPd = s => { const [a,b,c]=s.split('-').map(Number); return new Date(a,b-1,c||1); };
+  const absAdd = (s,n) => { const d=absPd(s); d.setDate(d.getDate()+n); return absIso(d); };
+  const absToday = () => absIso(new Date());
+  const absMonthEnd = ym => { const d=absPd(ym+'-01'); d.setMonth(d.getMonth()+1); d.setDate(0); return absIso(d); };
+  const absArr = v => Array.isArray(v) ? v.filter(x=>x!=null) : (v && typeof v==='object') ? Object.values(v) : [];
+  const absInicio = p => p.admissao || (p.fns[0]||{}).inicio || '0000-00-00';
+  const absAtivo = (p,d) => absInicio(p)<=d && (!p.desligamento || d<p.desligamento);
+  const absFnEm = (p,d) => { let r = p.fns[0] ? p.fns[0].funcao : 'SEM FUNÇÃO'; for(const x of p.fns) if(x.inicio<=d) r=x.funcao; return String(r).trim().toUpperCase(); };
+  const absReg = (pid,d) => { const m=ABSD.mes[d.slice(0,7)]; const e=m&&m[pid]&&m[pid][d.slice(8,10)]; return e&&e.c ? String(e.c).toUpperCase() : null; };
+  const absIsUtil = d => { const w=absPd(d).getDay(); return w!==0 && w!==6 && !ABSD.feriados[d]; };
+  const absYmLabel = ym => MES_ABBR[+ym.slice(5,7)-1]+'/'+ym.slice(2,4);
+  const absInRange = (ym, range) => { if(!range) return true; const k=monthKey(absYmLabel(ym)); return k!=null && k>=range.start && k<=range.end; };
+  // Sigla do sistema -> sigla usada nos gráficos do painel.
+  function absPanelCode(c){
+    c = normalizeSigla(c);
+    if(CODE_INFO[c]) return c;
+    const def = ABSD.CM[c];
+    if(def && def.cat==='trabalho') return 'P';          // ex.: AP (aviso prévio) = dia trabalhado
+    CODE_INFO[c] = { label: def ? def.n : c, color:'#7f8c9a' }; // sigla nova cadastrada no sistema
+    if(!OUTRAS_CODES_ORDER.includes(c)) OUTRAS_CODES_ORDER.push(c);
+    if(!CODE_LIST.includes(c)) CODE_LIST.push(c);
+    return c;
+  }
+  async function absGet(path){
+    const r = await fetch(`${ABS_DB}/${path}.json`, { cache:'no-store' });
+    if(!r.ok) throw new Error('HTTP '+r.status+' ao ler "'+path+'" da base ABSENTEÍSMO');
+    return r.json();
+  }
+  async function loadAbsenteismo(){
+    const [colab, mes, feriados, codigos] = await Promise.all([absGet('colab'), absGet('mes'), absGet('feriados'), absGet('config/codigos')]);
+    const codes = absArr(codigos).filter(x=>x&&x.c);
+    const list = codes.length ? codes : ABS_DEFAULT_CODES;
+    const people = Object.entries(colab||{}).filter(([,c])=>c && c.nome).map(([id,c]) => ({
+      id, nome:String(c.nome).trim(), admissao:c.admissao||'', desligamento:c.desligamento||'',
+      fns: absArr(c.funcoes).filter(f=>f&&f.funcao).sort((a,b)=>a.inicio<b.inicio?-1:1)
+    }));
+    if(!people.length) throw new Error('nenhum colaborador cadastrado na base ABSENTEÍSMO');
+    ABSD = {
+      people, mes: mes||{}, feriados: feriados||{},
+      CM: Object.fromEntries(list.map(x=>[String(x.c).toUpperCase(), x])),
+      WORK: new Set(list.filter(x=>x.cat==='trabalho'||x.cat==='ausencia').map(x=>String(x.c).toUpperCase())),
+      AUS: new Set(list.filter(x=>x.cat==='ausencia').map(x=>String(x.c).toUpperCase()))
+    };
+    return buildColabFromAbs();
+  }
+  // Monta a mesma estrutura que a antiga leitura da planilha "ABS VERTICAL"
+  // gerava ({employees, days, teamDaily}), para as abas 02, 13 e 16 seguirem
+  // com os mesmos cálculos. Cada pessoa vira uma "coluna" por função que já
+  // ocupou, e o lançamento do dia vai para a função que ela tinha naquele dia.
+  function buildColabFromAbs(){
+    const months = Object.keys(ABSD.mes).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();
+    if(!months.length) throw new Error('nenhum lançamento encontrado na base ABSENTEÍSMO');
+    const t = absToday();
+    let last = absMonthEnd(months[months.length-1]); if(last > t) last = t;
+    const employees = [];
+    ABSD.people.forEach(p => {
+      const roles = [...new Set((p.fns.length ? p.fns.map(f=>String(f.funcao).trim().toUpperCase()) : ['SEM FUNÇÃO']))];
+      roles.forEach(role => employees.push({ col:p.id+'#'+role, name:p.nome, role, pid:p.id }));
+    });
+    const days = [], teamDaily = [];
+    for(let d = months[0]+'-01'; d <= last; d = absAdd(d,1)){
+      const values = {}, teams = {};
+      TEAM_LABELS.forEach(x => teams[x] = {});
+      ABSD.people.forEach(p => {
+        const c = absReg(p.id, d); if(!c) return;
+        const role = absFnEm(p, d), code = absPanelCode(c);
+        values[p.id+'#'+role] = code;
+        if(teams[role]) teams[role][code] = (teams[role][code]||0) + 1;
+      });
+      const [y,m,dd] = d.split('-').map(Number);
+      days.push({ day:dd, month:m, year:y, values });
+      teamDaily.push({ day:dd, month:m, year:y, teams });
+    }
+    return { employees, days, teamCols:{}, teamDaily };
+  }
+
+  // ---- Abas 14 (Ajudantes) e 15 (Conferentes): quadro e absenteísmo por função ----
+  function absRoleMonthly(role, range){
+    const t = absToday();
+    const months = Object.keys(ABSD.mes).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();
+    const out = [];
+    if(!months.length) return out;
+    for(let ym = months[0]; ym <= t.slice(0,7); ym = absIso(new Date(+ym.slice(0,4), +ym.slice(5,7), 1)).slice(0,7)){
+      if(!absInRange(ym, range)) continue;
+      const a = ym+'-01', bFull = absMonthEnd(ym), b = bFull > t ? t : bFull;
+      const codes = {}, people = [];
+      let aus = 0, work = 0, adm = 0, dem = 0;
+      ABSD.people.forEach(p => {
+        let ativo = false, du = 0; const pc = {}; let pAus = 0, pWork = 0;
+        for(let d=a; d<=b; d=absAdd(d,1)){
+          const on = absAtivo(p,d) && absFnEm(p,d)===role;
+          if(on){ ativo = true; if(absIsUtil(d)) du++; }
+          const c = absReg(p.id,d); if(!c || absFnEm(p,d)!==role) continue;
+          const pcode = absPanelCode(c);
+          codes[pcode] = (codes[pcode]||0) + 1; pc[pcode] = (pc[pcode]||0) + 1;
+          if(ABSD.WORK.has(c)){ work++; pWork++; } if(ABSD.AUS.has(c)){ aus++; pAus++; }
+        }
+        if(p.admissao && p.admissao>=a && p.admissao<=bFull && absFnEm(p,p.admissao)===role) adm++;
+        if(p.desligamento && p.desligamento>=a && p.desligamento<=bFull && absFnEm(p,absAdd(p.desligamento,-1))===role) dem++;
+        if(ativo || Object.keys(pc).length) people.push({ nome:p.nome, du, pc, rate: pWork ? pAus/pWork : null, saiu: p.desligamento && p.desligamento<=bFull ? p.desligamento : '' });
+      });
+      out.push({ ym, label:absYmLabel(ym), quadro: people.filter(x=>x.du>0||x.pc.P).length, codes, rate: work ? aus/work : null, aus, adm, dem, people });
+    }
+    return out;
+  }
+  const absPctFmt = v => v==null ? '—' : v.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%';
+  function renderRoleTab(pid, role, nomePlural, color, canvas, range){
+    const grid = document.getElementById('kpi-'+pid); if(!grid) return;
+    grid.innerHTML = '';
+    const M = absRoleMonthly(role, range);
+    if(!M.length){
+      grid.innerHTML = '<div class="mo-note">Nenhum lançamento de '+nomePlural.toLowerCase()+' no período selecionado.</div>';
+      [canvas, canvas+'Siglas'].forEach(id => mkChart(id, {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}}));
+      document.getElementById('table-'+pid).innerHTML = '';
+      setInsight(pid, 'Nenhum lançamento de '+nomePlural.toLowerCase()+' no período selecionado.');
+      return;
+    }
+    const cur = M[M.length-1], prev = M.length>1 ? M[M.length-2] : null;
+    const pctCur = cur.rate!=null ? cur.rate*100 : null, pctPrev = prev && prev.rate!=null ? prev.rate*100 : null;
+    const faP = cur.people.filter(x=>x.pc.FA).length;
+    grid.appendChild(kpiCard(`Quadro ${cur.label}`, fmt(cur.quadro), prev?`vs. ${prev.label}: ${fmt(prev.quadro)}`:'pessoas na função', delta(cur.quadro, prev?prev.quadro:null, true), 'accent'));
+    grid.appendChild(kpiCard('Absenteísmo', absPctFmt(pctCur), 'faltas + atestados + luto ÷ dias de trabalho', delta(pctCur, pctPrev, false), 'red'));
+    grid.appendChild(kpiCard('Faltas', fmt(cur.codes.FA||0), `${fmt(faP)} pessoa(s) · atestados: ${fmt(cur.codes.AT||0)}`, delta(cur.codes.FA||0, prev?(prev.codes.FA||0):null, false), 'yellow'));
+    grid.appendChild(kpiCard('Movimentação', `+${fmt(cur.adm)} / −${fmt(cur.dem)}`, 'admissões / desligamentos no mês', {cls:'flat',arrow:'',text:cur.label}, 'purple'));
+
+    comboChart(canvas, M.map(x=>x.label), M.map(x=>x.quadro), 'Quadro', color, M.map(x=>x.rate==null?null:+(x.rate*100).toFixed(1)), 'Absenteísmo %', '#ff4d6d', null, v => v==null ? '' : absPctFmt(v));
+    const siglas = [...ATIVO_CODES_ORDER, ...OUTRAS_CODES_ORDER].filter(c => M.some(x=>x.codes[c]));
+    mkChart(canvas+'Siglas', {
+      type:'bar',
+      data:{labels:M.map(x=>x.label), datasets: siglas.map(c => ({ label:c+' · '+CODE_INFO[c].label, data:M.map(x=>x.codes[c]||0), backgroundColor:CODE_INFO[c].color, borderRadius:3 }))},
+      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20,right:14}},scales:{x:{...baseScales.x,stacked:true},y:{...baseScales.y,stacked:true}},plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10}}}}
+    });
+
+    document.getElementById('sub-'+pid).textContent = 'Lançamentos de '+cur.label+' (último mês do período), maior absenteísmo primeiro';
+    const cols = ['P','FA','AT','LT','FE','FO'].concat(siglas.filter(c=>!['P','FA','AT','LT','FE','FO'].includes(c)));
+    const ppl = cur.people.slice().sort((x,y)=>(y.rate||0)-(x.rate||0) || x.nome.localeCompare(y.nome,'pt-BR'));
+    let html = '<thead><tr><th>Colaborador</th><th>Dias úteis</th>'+cols.map(c=>`<th title="${CODE_INFO[c]?CODE_INFO[c].label:c}">${c}</th>`).join('')+'<th>Absent.</th></tr></thead><tbody>';
+    if(!ppl.length) html += `<tr><td colspan="${cols.length+3}">Ninguém na função neste mês.</td></tr>`;
+    ppl.forEach(x => {
+      const r = x.rate==null ? '—' : absPctFmt(x.rate*100);
+      const rc = x.rate>0.05 ? 'color:var(--red);font-weight:700' : x.rate>0.02 ? 'color:var(--yellow);font-weight:700' : '';
+      html += `<tr><td>${escHtml(x.nome)}${x.saiu?` <span style="color:var(--red);font-size:11px">· saiu ${x.saiu.split('-').reverse().join('/')}</span>`:''}</td><td>${fmt(x.du)}</td>`+
+        cols.map(c=>`<td>${x.pc[c]?fmt(x.pc[c]):''}</td>`).join('')+`<td style="${rc}">${r}</td></tr>`;
+    });
+    document.getElementById('table-'+pid).innerHTML = html + '</tbody>';
+
+    const d = delta(pctCur, pctPrev, false);
+    setInsight(pid, `<strong>Leitura do mês:</strong> ${fmt(cur.quadro)} ${nomePlural.toLowerCase()} em ${cur.label}, com absenteísmo de ${absPctFmt(pctCur)}${prev?` (${d.arrow} ${d.text} vs. ${prev.label})`:''} — ${fmt(cur.codes.FA||0)} falta(s), ${fmt(cur.codes.AT||0)} dia(s) de atestado e ${fmt(cur.codes.FE||0)} dia(s) de férias.${cur.adm||cur.dem?` Movimentação: ${fmt(cur.adm)} admissão(ões) e ${fmt(cur.dem)} desligamento(s).`:''}`, pctCur!=null && pctCur>3 ? 'warn' : '');
   }
 
   // ============ PERÍODO CONFIGURÁVEL (compartilhado por todas as abas) ============
@@ -2651,6 +2748,8 @@ body.locked > *:not(#loginScreen){display:none !important}
     renderColabOverview(agg);
     renderColabMensal(agg);
     renderEquipeInterna(aggregateEquipeMonthly(colabFullData, range));
+    renderRoleTab('ajudantes', 'AJUDANTE', 'Ajudantes', '#3ddc97', 'chartAjudantes', range);
+    renderRoleTab('conferentes', 'CONFERENTE', 'Conferentes', '#4d9fff', 'chartConferentes', range);
   }
   function onPeriodChange(){
     if(!fullData) return;
@@ -2673,11 +2772,11 @@ body.locked > *:not(#loginScreen){display:none !important}
   // mesmo intervalo.
   async function init(){
     setStatus('Carregando dados da planilha…', false);
-    loadOcorrExp(); // aba 18 · Dash Expedição (Firestore do sistema NAO-CONFORMIDADES)
+    loadOcorrExp(); // aba 18 · Dash Expedição (base NaoConformidades.html)
     const [jemResult, moResult, colabResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
       loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
-      loadRows(SHEET_NAME_COLAB, 'A1:BZ5000').then(buildColaboradores)
+      loadAbsenteismo() // abas 02, 13–16 · base ABSENTEÍSMO (Firebase)
     ]);
     const errors = [];
     if(jemResult.status==='fulfilled'){
@@ -2701,7 +2800,7 @@ body.locked > *:not(#loginScreen){display:none !important}
       renderColabFiltered();
     }else{
       console.error(colabResult.reason);
-      errors.push('aba "'+SHEET_NAME_COLAB+'": '+colabResult.reason.message);
+      errors.push('base ABSENTEÍSMO: '+colabResult.reason.message);
     }
     if(!errors.length){
       clearStatus();
