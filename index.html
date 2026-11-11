@@ -764,10 +764,12 @@ body.locked > *:not(#loginScreen){display:none !important}
         <option value="30" selected>Últimos 30 dias</option><option value="60">Últimos 60 dias</option><option value="90">Últimos 90 dias</option>
         <option value="mes">Mês atual</option><option value="mesant">Mês anterior</option></select></label>
       <input id="pspBusca" class="dex-search" placeholder="Buscar placa, motorista, cliente…">
+      <label class="dex-mes" title="Os paletes da BRAFT para Guarulhos vão no mesmo veículo da transferência. Marcado, eles são descontados do total SP (os de SP Filial e Sul não entram)."><input type="checkbox" id="pspDescBraft" checked style="accent-color:#a569bd;width:16px;height:16px"> Descontar paletes BRAFT (Guarulhos)</label>
       <div style="flex:1"></div>
       <button class="toggle-btn" id="pspCsv">Exportar CSV</button>
     </div>
     <div id="psp-status" class="insight" style="display:none"></div>
+    <div id="psp-braft" class="dex-note" style="display:none"></div>
     <div class="kpi-grid" id="kpi-psp"></div>
     <div class="row cols-2">
       <div class="card">
@@ -4095,56 +4097,154 @@ body.locked > *:not(#loginScreen){display:none !important}
       +(pend.length?"<strong>"+fmt(pend.length)+"</strong> saída(s) ainda sem retorno.":"Nenhuma saída pendente de retorno.");
     window.__palGestao = lista;
   }
-  function gestaoHtml(lista, sp){
+  function gestaoHtml(lista, sp, desc){
     if(!lista.length) return '<tbody><tr><td class="dex-none">Nenhum registro neste filtro.</td></tr></tbody>';
-    return '<thead><tr><th>Data saída</th><th>Placa</th><th>Motorista</th><th>Cliente</th>'+(sp?'<th>Destino dos paletes</th>':'')+'<th>Saiu PBR</th><th>Saiu Desc.</th><th>Saiu Outros</th><th>Saiu total</th><th>Retorno</th><th>Voltou</th><th>Dif.</th><th>Situação</th><th>Conferente</th></tr></thead><tbody>'
+    return '<thead><tr><th>Data saída</th><th>Placa</th><th>Motorista</th><th>Cliente</th>'+(sp?'<th>Destino dos paletes</th>':'')+'<th>Saiu PBR</th><th>Saiu Desc.</th><th>Saiu Outros</th><th>Saiu total</th>'+(sp?'<th>BRAFT Guarulhos</th><th>'+(desc?'Líquido SP':'SP sem BRAFT')+'</th>':'')+'<th>Retorno</th><th>Voltou</th><th>Dif.</th><th>Situação</th><th>Conferente</th></tr></thead><tbody>'
       + lista.map(function(p){
           var s=p.s, e=p.e, ts=s?porTipo(s._pal):null;
           return '<tr><td>'+(s?br(s._k):'<span class="dex-none">—</span>')+'</td><td><b>'+esc((s||e).placa)+'</b></td><td>'+esc((s&&s.motorista)||(e&&e.motorista)||"—")+'</td><td style="max-width:180px">'+esc((s&&s.cliente)||(e&&e.cliente)||"—")+'</td>'
             +(sp?'<td>'+esc(s?destinos(s._pal)||"—":"—")+'</td>':'')
-            +'<td>'+(ts&&ts.PBR?fmt(ts.PBR):"—")+'</td><td>'+(ts&&ts.DESCARTAVEL?fmt(ts.DESCARTAVEL):"—")+'</td><td>'+(ts&&ts.OUTROS?fmt(ts.OUTROS):"—")+'</td><td><b>'+(p.ts!=null?fmt(p.ts):"—")+'</b></td>'
+            +'<td>'+(ts&&ts.PBR?fmt(ts.PBR):"—")+'</td><td>'+(ts&&ts.DESCARTAVEL?fmt(ts.DESCARTAVEL):"—")+'</td><td>'+(ts&&ts.OUTROS?fmt(ts.OUTROS):"—")+'</td><td><b>'+(p.tsBruto!=null?fmt(p.tsBruto):(p.ts!=null?fmt(p.ts):"—"))+'</b></td>'
+            +(sp?'<td style="color:#e056fd">'+(p.braft?"−"+fmt(p.braft):"—")+'</td><td><b>'+(p.tsBruto!=null?fmt(p.tsBruto-(p.braft||0)):"—")+'</b></td>':'')
             +'<td>'+(e?br(e._k):"—")+'</td><td>'+(p.te!=null?fmt(p.te):"—")+'</td><td class="'+(p.diff<0?"dex-hot":"")+'">'+(p.diff!=null?(p.diff>0?"+":"")+fmt(p.diff):"—")+'</td>'
             +'<td><span class="dex-st '+SIT_CLS[p.sit]+'">'+SIT_LBL[p.sit]+'</span></td><td>'+esc((s&&s.conferenteNome)||(e&&e.conferenteNome)||"—")+'</td></tr>';
         }).join("")+'</tbody>';
   }
 
-  // ================= ABA 21 · TRANSFERÊNCIA SP =================
+  // ================= ABA 20 · TRANSFERÊNCIA SP =================
+  // Paletes BRAFT (Guarulhos) viajam no mesmo veículo da transferência SP. Eles vêm
+  // da planilha "CONTROLE PBR1 · aba BRAFT" (mesma base da aba BRAFT): A=data,
+  // B=Guarulhos, C=SP Filial, D=Sul, E=veículo. Só Guarulhos é descontado.
+  var BRAFT_SHEET = "1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I", BRAFT_GID = "574891819";
+  var BRAFT = null, braftErro = "";
+  function braftNum(v){ if(v==null) return 0; var n=parseFloat(String(v).trim().replace(/\./g,"").replace(",",".")); return isNaN(n)?0:n; }
+  function braftParse(rows){
+    var out=[];
+    (rows||[]).forEach(function(r){
+      if(!r) return;
+      var m=String(r[0]||"").trim().match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/); if(!m) return;
+      var yy=m[3]||String(new Date().getFullYear()); if(yy.length===2) yy="20"+yy;
+      var gua=braftNum(r[1]); if(!gua) return;
+      var veic=String(r[4]||"").trim();
+      out.push({ k:yy+"-"+pad(+m[2])+"-"+pad(+m[1]), gua:gua, veic:veic, placaKey:veic.toUpperCase().replace(/[^A-Z0-9]/g,"") });
+    });
+    return out;
+  }
+  function loadBraft(){
+    var url="https://docs.google.com/spreadsheets/d/"+BRAFT_SHEET+"/gviz/tq?tqx=out:csv&gid="+BRAFT_GID+"&_="+Date.now();
+    var viaFetch=fetch(url).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); }).then(function(t){ return Papa.parse(t,{skipEmptyLines:false}).data; });
+    return viaFetch.catch(function(){
+      return new Promise(function(resolve,reject){
+        var cb="pspBraftCB_"+Math.random().toString(36).slice(2), to=setTimeout(function(){ done(); reject(new Error("tempo esgotado")); },15000);
+        function done(){ clearTimeout(to); delete window[cb]; if(sc.parentNode) sc.parentNode.removeChild(sc); }
+        window[cb]=function(dt){ done(); try{
+          var RE=/^Date\((\d+),\s*(\d+),\s*(\d+)/;
+          resolve((dt.table.rows||[]).map(function(row){ return (row.c||[]).map(function(c){ if(!c) return ""; var v=c.v!=null?String(c.v):""; var dm=v.match(RE); if(dm) return pad(+dm[3])+"/"+pad(+dm[2]+1)+"/"+dm[1]; return c.f!=null?String(c.f):v; }); }));
+        }catch(e){ reject(e); } };
+        var sc=document.createElement("script"); sc.src="https://docs.google.com/spreadsheets/d/"+BRAFT_SHEET+"/gviz/tq?gid="+BRAFT_GID+"&tqx=out:json;responseHandler:"+cb+"&_="+Date.now();
+        sc.onerror=function(){ done(); reject(new Error("falha ao carregar a planilha BRAFT")); }; document.body.appendChild(sc);
+      });
+    }).then(braftParse);
+  }
+  // Distribui cada lançamento BRAFT (Guarulhos) numa saída de transferência do mesmo dia:
+  // 1º pela placa do veículo; sem placa correspondente, na maior saída SP do dia.
+  // Dia sem saída de transferência = não descontado (não há como ter ido junto).
+  function alocarBraft(ops){
+    var aloc=new Map(), porDia={}, info={total:0,placa:0,dia:0,sem:0,semQ:0,porDia:{}};
+    ops.forEach(function(o){ if(o.transferencia && dirOf(o)==="s" && o._tot>0) (porDia[o._k]=porDia[o._k]||[]).push(o); });
+    (BRAFT||[]).forEach(function(b){
+      info.porDia[b.k]=(info.porDia[b.k]||0)+b.gua;
+      var cands=porDia[b.k]||[], alvo=null, porPlaca=false;
+      if(b.placaKey.length>=6) alvo=cands.find(function(o){ return o._placaKey.length>=6 && (b.placaKey.indexOf(o._placaKey)>=0 || o._placaKey.indexOf(b.placaKey)>=0); })||null;
+      if(alvo) porPlaca=true; else if(cands.length) alvo=cands.slice().sort(function(x,y){ return y._tot-x._tot; })[0];
+      if(!alvo){ b._aloc=null; return; }
+      aloc.set(alvo,(aloc.get(alvo)||0)+b.gua); b._aloc=alvo; b._porPlaca=porPlaca;
+    });
+    return aloc;
+  }
   function renderSP(){
     var per=periodo("#pspPer");
+    var desc=!!($("#pspDescBraft")||{}).checked && !!BRAFT;
     var ops=OPS.filter(function(o){ return !!o.transferencia; });
+    var aloc=BRAFT ? alocarBraft(OPS) : new Map();
+    var bq=function(o){ return Math.min(o._tot, aloc.get(o)||0); };
+    var liq=function(o){ return dirOf(o)==="s" ? o._tot-(desc?bq(o):0) : o._tot; };
     var opsPer=ops.filter(function(o){ return o._k>=per.a && o._k<=per.b; });
     var saidas=opsPer.filter(function(o){ return dirOf(o)==="s" && o._tot>0; });
-    var env=saidas.reduce(function(s,o){ return s+o._tot; },0), rec=opsPer.filter(function(o){ return dirOf(o)==="e"; }).reduce(function(s,o){ return s+o._tot; },0);
-    var placas={}; saidas.forEach(function(o){ var k=String(o.placa||"?").toUpperCase(); placas[k]=placas[k]||{n:0,q:0}; placas[k].n++; placas[k].q+=o._tot; });
-    var pares=paresDesde(per.a).filter(function(p){ return p.s && p.s.transferencia && p.s._k>=per.a && p.s._k<=per.b; });
+    var bruto=saidas.reduce(function(s,o){ return s+o._tot; },0);
+    var braftDesc=saidas.reduce(function(s,o){ return s+bq(o); },0);
+    var env=desc ? bruto-braftDesc : bruto;
+    var rec=opsPer.filter(function(o){ return dirOf(o)==="e"; }).reduce(function(s,o){ return s+o._tot; },0);
+    var brPer=(BRAFT||[]).filter(function(b){ return b.k>=per.a && b.k<=per.b; });
+    var brTot=brPer.reduce(function(s,b){ return s+b.gua; },0), brSem=brPer.filter(function(b){ return !b._aloc; });
+    var brPlaca=brPer.filter(function(b){ return b._aloc && b._porPlaca; }).length, brDia=brPer.filter(function(b){ return b._aloc && !b._porPlaca; }).length;
+    var placas={}; saidas.forEach(function(o){ var k=String(o.placa||"?").toUpperCase(); placas[k]=placas[k]||{n:0,q:0}; placas[k].n++; placas[k].q+=liq(o); });
+    var pares=paresDesde(per.a).filter(function(p){ return p.s && p.s.transferencia && p.s._k>=per.a && p.s._k<=per.b; }).map(function(p){
+      var b=bq(p.s), ts=desc ? p.ts-b : p.ts, diff=p.te!=null ? p.te-ts : null;
+      return Object.assign({}, p, { braft:b, tsBruto:p.ts, ts:ts, diff:diff, sit: p.te==null ? "pend" : (p.te>=ts ? "ok" : "dif") });
+    });
     var pend=pares.filter(function(p){ return p.sit==="pend"; }).length;
+
     var k=document.getElementById("kpi-psp"); k.innerHTML="";
-    kpiCard(k,"Enviados a SP",fmt(env),"paletes em transferência · "+per.lbl,"accent");
-    kpiCard(k,"Viagens",fmt(saidas.length),fmt(Object.keys(placas).length)+" veículo(s) diferentes","purple");
-    kpiCard(k,"Média por viagem",saidas.length?(env/saidas.length).toLocaleString("pt-BR",{maximumFractionDigits:1}):"—","paletes por veículo","yellow");
+    kpiCard(k, desc?"Enviados a SP (líquido)":"Enviados a SP", fmt(env), desc ? "total "+fmt(bruto)+" − BRAFT "+fmt(braftDesc)+" · "+per.lbl : "paletes em transferência · "+per.lbl, "accent");
+    kpiCard(k,"BRAFT Guarulhos",fmt(brTot), BRAFT ? (fmt(braftDesc)+" no veículo da transferência"+(desc?" (descontados)":" (não descontados)")+(brSem.length?" · "+fmt(brSem.reduce(function(s,b){return s+b.gua;},0))+" em dias sem transferência":"")) : "planilha BRAFT indisponível", "purple");
+    kpiCard(k,"Viagens",fmt(saidas.length),fmt(Object.keys(placas).length)+" veículo(s) · média "+(saidas.length?(env/saidas.length).toLocaleString("pt-BR",{maximumFractionDigits:1}):"—")+" paletes","yellow");
     kpiCard(k,"Recebidos de SP",fmt(rec),"saldo "+(rec-env>0?"+":"")+fmt(rec-env)+(pend?" · "+fmt(pend)+" sem retorno":""),(rec-env)<0?"red":"green");
 
-    $("#pspSubDia").textContent="Paletes em transferência por dia · "+per.lbl;
-    chartsFluxo(ops, per, "chartPspDia", "chartPspMes", C.sp, C.spRec, "Enviados a SP", "Retornos de SP");
+    var nota=$("#psp-braft");
+    if(nota){
+      nota.style.display="";
+      nota.innerHTML = !BRAFT ? "⚠️ Não foi possível ler a planilha BRAFT ("+esc(braftErro||"sem resposta")+") — o desconto está desligado."
+        : (desc ? "🔻 Descontando <b>"+fmt(braftDesc)+"</b> paletes BRAFT (Guarulhos) que foram nos veículos da transferência" : "ℹ️ Desconto BRAFT desligado — totais SP incluem <b>"+fmt(braftDesc)+"</b> paletes BRAFT (Guarulhos)")
+          + " · "+fmt(brPlaca)+" lançamento(s) ligados pela placa, "+fmt(brDia)+" pela data"+(brSem.length?", "+fmt(brSem.length)+" sem veículo de transferência no dia (não descontados)":"")+".";
+    }
+
+    // Diário e mensal: SP (líquido ou total), BRAFT Guarulhos e retornos
+    var dias=diasEntre(per.a,per.b), d={}, m={};
+    ops.forEach(function(o){
+      if(!o._tot) return; var dir=dirOf(o), q=liq(o), ym=o._k.slice(0,7);
+      if(o._k>=per.a && o._k<=per.b){ var x=d[o._k]=d[o._k]||{s:0,e:0,b:0}; x[dir]+=q; }
+      var y=m[ym]=m[ym]||{s:0,e:0,b:null}; y[dir]+=q;
+    });
+    (BRAFT||[]).forEach(function(b){ var ym=b.k.slice(0,7); if(b.k>=per.a && b.k<=per.b){ (d[b.k]=d[b.k]||{s:0,e:0,b:0}).b+=b.gua; } var mm=(m[ym]=m[ym]||{s:0,e:0,b:null}); mm.b=(mm.b||0)+b.gua; });
+    var lblSP = desc ? "Transferência SP (líquido)" : "Enviados a SP (total)";
+    var C_BR="#e056fd";
+    $("#pspSubDia").textContent="Paletes em transferência por dia · "+per.lbl+(desc?" · BRAFT descontado":"");
+    mk("chartPspDia",{ type:"bar", data:{ labels:dias.map(function(k){ return k.slice(8,10)+"/"+k.slice(5,7); }), datasets:[
+      { label:lblSP, data:dias.map(function(k){ return d[k]?d[k].s:0; }), backgroundColor:C.sp, borderRadius:4, datalabels:dlc(C.sp) },
+      { label:"BRAFT Guarulhos", data:dias.map(function(k){ return d[k]?d[k].b:0; }), backgroundColor:C_BR, borderRadius:4, datalabels:dlc(C_BR) },
+      { label:"Retornos de SP", data:dias.map(function(k){ return d[k]?d[k].e:0; }), backgroundColor:C.spRec, borderRadius:4, datalabels:dlc(C.spRec) } ]},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:22,right:10}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
+    var mks=Object.keys(m).sort();
+    mk("chartPspMes",{ type:"bar", data:{ labels:mks.map(ymLbl), datasets:[
+      { label:lblSP, data:mks.map(function(k){ return m[k].s; }), backgroundColor:C.sp, borderRadius:6, datalabels:dlc(C.sp) },
+      { label:"BRAFT Guarulhos", data:mks.map(function(k){ return m[k].b; }), backgroundColor:C_BR, borderRadius:6, datalabels:dlc(C_BR) },
+      { label:"Retornos de SP", data:mks.map(function(k){ return m[k].e; }), backgroundColor:C.spRec, borderRadius:6, datalabels:dlc(C.spRec) } ]},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:24,right:14}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
+
     var pk=Object.keys(placas).sort(function(a,b){ return placas[b].q-placas[a].q; }).slice(0,12);
-    mk("chartPspPlaca",{ type:"bar", data:{ labels:pk.map(function(p){ return p+" ("+placas[p].n+"x)"; }), datasets:[{ label:"Enviados", data:pk.map(function(p){ return placas[p].q; }), backgroundColor:C.sp, borderRadius:6, datalabels:dlc(C.sp) }] },
+    mk("chartPspPlaca",{ type:"bar", data:{ labels:pk.map(function(p){ return p+" ("+placas[p].n+"x)"; }), datasets:[{ label:desc?"Enviados (líquido)":"Enviados", data:pk.map(function(p){ return placas[p].q; }), backgroundColor:C.sp, borderRadius:6, datalabels:dlc(C.sp) }] },
       options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}}, scales:scales, plugins:{ legend:{display:false} } } });
-    tabelaTipos("tablePspTipo", opsPer);
+    var t=tabelaTipos("tablePspTipo", opsPer);
+    if(desc && braftDesc){ // BRAFT é PBR1: o desconto sai da linha PBR
+      var tb=document.getElementById("tablePspTipo");
+      tb.querySelector("tbody").insertAdjacentHTML("beforeend",'<tr style="color:'+C_BR+'"><td>− BRAFT Guarulhos (PBR)</td><td>−'+fmt(braftDesc)+'</td><td>—</td><td>—</td></tr><tr style="font-weight:700"><td>Total SP líquido</td><td>'+fmt(env)+'</td><td>'+fmt(rec)+'</td><td style="color:'+((rec-env)<0?"var(--red)":"var(--green)")+'">'+(rec-env>0?"+":"")+fmt(rec-env)+'</td></tr>');
+    }
     tabelaClientes("tablePspCliente", opsPer, false);
     var q=busca("#pspBusca");
     var lista=pares.filter(function(p){ return !q||hayPar(p).indexOf(q)>=0; });
-    document.getElementById("tablePspEnvios").innerHTML = gestaoHtml(lista, true);
+    document.getElementById("tablePspEnvios").innerHTML = gestaoHtml(lista, true, desc);
     var top=pk[0];
     var ins=document.getElementById("insight-psp");
     ins.className="insight"+(pend?" warn":"");
-    ins.innerHTML="<strong>Transferências SP · "+esc(per.lbl)+":</strong> "+fmt(env)+" paletes enviados em "+fmt(saidas.length)+" viagem(ns)"+(top?"; veículo com mais envios: <strong>"+esc(top)+"</strong> ("+fmt(placas[top].q)+" paletes em "+placas[top].n+" viagem(ns))":"")+". Retornos de SP: "+fmt(rec)+"."+(pend?" "+fmt(pend)+" envio(s) ainda sem retorno da placa.":"");
-    window.__pspEnvios = lista;
+    ins.innerHTML="<strong>Transferências SP · "+esc(per.lbl)+":</strong> "+fmt(env)+" paletes"+(desc?" (líquido, já sem os "+fmt(braftDesc)+" da BRAFT Guarulhos)":"")+" em "+fmt(saidas.length)+" viagem(ns)"+(top?"; veículo com mais envios: <strong>"+esc(top)+"</strong> ("+fmt(placas[top].q)+" paletes em "+placas[top].n+" viagem(ns))":"")+". BRAFT Guarulhos no período: "+fmt(brTot)+". Retornos de SP: "+fmt(rec)+"."+(pend?" "+fmt(pend)+" envio(s) ainda sem retorno da placa.":"");
+    window.__pspEnvios = lista; window.__pspDesc = desc;
   }
 
   function exportar(lista, nome, sp){
     var cell=function(v){ v=v==null?"":String(v); return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
-    var head=["Data saída","Placa","Motorista","Cliente"].concat(sp?["Destino dos paletes"]:[]).concat(["Saiu PBR","Saiu Descartável","Saiu Outros","Saiu total","Data retorno","Voltou","Diferença","Situação","Conferente"]);
-    var linhas=(lista||[]).map(function(p){ var s=p.s, e=p.e, ts=s?porTipo(s._pal):{}; return [s?br(s._k):"", (s||e).placa, (s&&s.motorista)||(e&&e.motorista)||"", (s&&s.cliente)||(e&&e.cliente)||""].concat(sp?[s?destinos(s._pal):""]:[]).concat([ts.PBR||"", ts.DESCARTAVEL||"", ts.OUTROS||"", p.ts!=null?p.ts:"", e?br(e._k):"", p.te!=null?p.te:"", p.diff!=null?p.diff:"", SIT_LBL[p.sit], (s&&s.conferenteNome)||(e&&e.conferenteNome)||""]).map(cell).join(";"); });
+    var head=["Data saída","Placa","Motorista","Cliente"].concat(sp?["Destino dos paletes"]:[]).concat(["Saiu PBR","Saiu Descartável","Saiu Outros","Saiu total"]).concat(sp?["BRAFT Guarulhos","SP sem BRAFT"]:[]).concat(["Data retorno","Voltou","Diferença","Situação","Conferente"]);
+    var linhas=(lista||[]).map(function(p){ var s=p.s, e=p.e, ts=s?porTipo(s._pal):{}; return [s?br(s._k):"", (s||e).placa, (s&&s.motorista)||(e&&e.motorista)||"", (s&&s.cliente)||(e&&e.cliente)||""].concat(sp?[s?destinos(s._pal):""]:[]).concat([ts.PBR||"", ts.DESCARTAVEL||"", ts.OUTROS||"", p.tsBruto!=null?p.tsBruto:(p.ts!=null?p.ts:"")]).concat(sp?[p.braft||"", p.tsBruto!=null?p.tsBruto-(p.braft||0):""]:[]).concat([e?br(e._k):"", p.te!=null?p.te:"", p.diff!=null?p.diff:"", SIT_LBL[p.sit], (s&&s.conferenteNome)||(e&&e.conferenteNome)||""]).map(cell).join(";"); });
     var blob=new Blob(["﻿"+[head.join(";")].concat(linhas).join("\n")],{type:"text/csv;charset=utf-8"});
     var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nome+"_"+iso(new Date())+".csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
   }
@@ -4154,7 +4254,8 @@ body.locked > *:not(#loginScreen){display:none !important}
   function loadAll(){
     if(loading) return; loading=true;
     if(!loaded){ status("#pal-status","Carregando operações do Conferência Geral…"); status("#psp-status","Carregando operações do Conferência Geral…"); }
-    fetchOps().then(function(ops){
+    var braftP = loadBraft().then(function(b){ BRAFT=b; braftErro=""; }).catch(function(e){ console.warn("[Paletes SP] planilha BRAFT:",e.message); braftErro=e.message; if(!BRAFT) BRAFT=null; });
+    Promise.all([fetchOps(), braftP]).then(function(res){ return res[0]; }).then(function(ops){
       OPS=ops; loaded=true; renderTudo();
       status("#pal-status", ops.length?"":"Nenhuma operação encontrada desde janeiro do ano passado.", !ops.length);
       status("#psp-status", ops.some(function(o){ return o.transferencia; })?"":"Nenhum veículo marcado como transferência SC × SP desde janeiro do ano passado.", false);
@@ -4172,6 +4273,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   $("#palBusca").addEventListener("input",function(){ if(loaded) renderGeral(); });
   $("#pspPer").addEventListener("change",function(){ if(loaded) renderSP(); });
   $("#pspBusca").addEventListener("input",function(){ if(loaded) renderSP(); });
+  $("#pspDescBraft").addEventListener("change",function(){ if(loaded) renderSP(); });
   $("#palCsv").addEventListener("click",function(){ exportar(window.__palGestao,"paletes_gestao_veiculos",false); });
   $("#pspCsv").addEventListener("click",function(){ exportar(window.__pspEnvios,"paletes_transferencia_sp",true); });
   function maybeLoad(){
