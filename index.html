@@ -125,6 +125,13 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
 @media (max-width:640px){.header-inner,.nav,main,.footer{padding-left:16px;padding-right:16px}.kpi-grid{grid-template-columns:1fr}.page-head h2{font-size:24px}}
 /* ---- Mão de Obra: grade "por operação/mês" ---- */
 .op-months-grid{display:grid;gap:14px}
+.op-month-label .op-yoy-vs{color:var(--ink-muted);font-weight:500}
+.op-yoy-tracks{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.op-yoy-tracks .op-bar-track{flex:none}
+.op-yoy-prev{height:16px!important}
+.op-yoy-prev .op-bar-fill span{font-size:10px;color:#e8ecf5}
+.op-yoy-legend{display:flex;gap:14px;margin-top:10px;font-size:11px;color:var(--ink-muted)}
+.op-yoy-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
 .op-month-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px}
 .op-month-label{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .op-bars{display:flex;flex-direction:column;gap:8px}
@@ -152,7 +159,7 @@ table.data tr:hover td{background:rgba(255,255,255,.02)}
 #colabResultTable th:first-child,#colabResultTable td:first-child{left:0;min-width:110px}
 #colabResultTable th:nth-child(2),#colabResultTable td:nth-child(2){left:110px;min-width:180px;box-shadow:2px 0 0 var(--border)}
 #colabResultTable td{text-align:center}
-/* Colaboradores disponíveis por mês (aba 14): um "chip" por nome, colorido por função */
+/* Colaboradores disponíveis por mês (aba 12): um "chip" por nome, colorido por função */
 .colab-name-list{display:flex;flex-direction:column;gap:6px}
 .colab-name-chip{font-size:11.5px;font-weight:700;color:#0b0f1a;padding:6px 10px;border-radius:7px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default;letter-spacing:.01em}
@@ -330,10 +337,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-jem"></div>
   </section>
 
-  <!-- 14 · AJUDANTES (base ABSENTEÍSMO) -->
+  <!-- 13 · AJUDANTES (base ABSENTEÍSMO) -->
   <section class="page" data-page="ajudantes">
     <div class="page-head">
-      <div class="eyebrow">14 · Equipe</div>
+      <div class="eyebrow">13 · Equipe</div>
       <h2>Ajudantes · quadro e absenteísmo</h2>
       <p>Quadro de ajudantes por mês, presença e ausências lançadas no sistema <strong>Frequência da equipe</strong> (andreluis-star.github.io/ABSENTEISMO). Segue o período selecionado no topo; quem foi promovido conta na função antiga até a data da promoção.</p>
     </div>
@@ -349,10 +356,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-ajudantes"></div>
   </section>
 
-  <!-- 15 · CONFERENTES (base ABSENTEÍSMO) -->
+  <!-- 14 · CONFERENTES (base ABSENTEÍSMO) -->
   <section class="page" data-page="conferentes">
     <div class="page-head">
-      <div class="eyebrow">15 · Equipe</div>
+      <div class="eyebrow">14 · Equipe</div>
       <h2>Conferentes · quadro e absenteísmo</h2>
       <p>Quadro de conferentes por mês, presença e ausências lançadas no sistema <strong>Frequência da equipe</strong> (andreluis-star.github.io/ABSENTEISMO). Segue o período selecionado no topo; quem foi promovido conta na função antiga até a data da promoção.</p>
     </div>
@@ -368,10 +375,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-conferentes"></div>
   </section>
 
-  <!-- 03 · ATRASO EXPRESSO -->
+  <!-- 02 · ATRASO EXPRESSO -->
   <section class="page" data-page="atraso_expresso">
     <div class="page-head">
-      <div class="eyebrow">03 · Tempos críticos</div>
+      <div class="eyebrow">02 · Tempos críticos</div>
       <h2>Atraso expresso</h2>
       <p>Tempo total de atraso e dias excedidos para saída de cargas expressas. Quanto menor, melhor.</p>
     </div>
@@ -380,10 +387,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-atraso_expresso"></div>
   </section>
 
-  <!-- 04 · SAÍDA A+ -->
+  <!-- 03 · SAÍDA A+ -->
   <section class="page" data-page="saida_a">
     <div class="page-head">
-      <div class="eyebrow">04 · Tempos críticos</div>
+      <div class="eyebrow">03 · Tempos críticos</div>
       <h2>Saída A+</h2>
       <p>Tempo total de atraso e dias excedidos para saída de cargas regulares. Quanto menor, melhor.</p>
     </div>
@@ -392,10 +399,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-saida_a"></div>
   </section>
 
-  <!-- 05 · MANIFESTOS -->
+  <!-- 04 · MANIFESTOS -->
   <section class="page" data-page="manifestos">
     <div class="page-head">
-      <div class="eyebrow">05 · Operação fim</div>
+      <div class="eyebrow">04 · Operação fim</div>
       <h2>Manifestos & operação</h2>
       <p>Documentos manifestados versus o volume operacional total (entregas + coletas).</p>
     </div>
@@ -404,10 +411,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-manifestos"></div>
   </section>
 
-  <!-- 06 · PERSONALIZADOS -->
+  <!-- 05 · PERSONALIZADOS -->
   <section class="page" data-page="personalizados">
     <div class="page-head">
-      <div class="eyebrow">06 · Operação fim</div>
+      <div class="eyebrow">05 · Operação fim</div>
       <h2>Personalizados</h2>
       <p>Volumes personalizados frente ao total entregue/coletado no mês.</p>
     </div>
@@ -416,10 +423,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-personalizados"></div>
   </section>
 
-  <!-- 07 · CUBAGEM -->
+  <!-- 06 · CUBAGEM -->
   <section class="page" data-page="cubagem">
     <div class="page-head">
-      <div class="eyebrow">07 · Cubagem</div>
+      <div class="eyebrow">06 · Cubagem</div>
       <h2>Volumes cubados & NFs</h2>
       <p>Quantidade de notas fiscais cubadas e volume total medido. Indicador relevante para faturamento e ocupação do galpão.</p>
     </div>
@@ -440,10 +447,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-cubagem"></div>
   </section>
 
-  <!-- 08 · MÃO DE OBRA · VISÃO GERAL -->
+  <!-- 07 · MÃO DE OBRA · VISÃO GERAL -->
   <section class="page" data-page="mo_overview">
     <div class="page-head">
-      <div class="eyebrow">08 · Mão de Obra</div>
+      <div class="eyebrow">07 · Mão de Obra</div>
       <h2>Ajudantes terceiros · Visão geral</h2>
       <p>Quantidade de ajudantes terceiros alocados por mês, segmentados entre Rota e Expedição. Fonte: sistema <strong>Controle de Mão de Obra</strong> (alacosta27-png.github.io/CONTROLE-MAO-DE-OBRA) — cada pessoa escalada num dia conta 1 diária; ausentes não contam.</p>
     </div>
@@ -460,10 +467,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mo_overview"></div>
   </section>
 
-  <!-- 09 · ROTA X EXPEDIÇÃO -->
+  <!-- 08 · ROTA X EXPEDIÇÃO -->
   <section class="page" data-page="mo_rota_exp">
     <div class="page-head">
-      <div class="eyebrow">09 · Mão de Obra</div>
+      <div class="eyebrow">08 · Mão de Obra</div>
       <h2>Rota × Expedição</h2>
       <p>Comparativo mensal entre ajudantes alocados em Rota e em Expedição.</p>
     </div>
@@ -475,30 +482,30 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mo_rota_exp"></div>
   </section>
 
-  <!-- 10 · POR OPERAÇÃO -->
+  <!-- 09 · POR OPERAÇÃO -->
   <section class="page" data-page="mo_operacao">
     <div class="page-head">
-      <div class="eyebrow">10 · Mão de Obra</div>
+      <div class="eyebrow">09 · Mão de Obra</div>
       <h2>Ajudantes por operação</h2>
       <p>Todas as operações e meses com dados em uma única visão.</p>
     </div>
     <div class="op-months-grid" id="mo-op-grid"></div>
   </section>
 
-  <!-- 11 · POR FORNECEDOR -->
+  <!-- 10 · POR FORNECEDOR -->
   <section class="page" data-page="mo_fornecedor">
     <div class="page-head">
-      <div class="eyebrow">11 · Mão de Obra</div>
+      <div class="eyebrow">10 · Mão de Obra</div>
       <h2>Pessoas por fornecedor</h2>
       <p>Volume de ajudantes alocados por fornecedor, mês a mês.</p>
     </div>
     <div class="row cols-2" id="mo-forn-grid"></div>
   </section>
 
-  <!-- 12 · RESUMO ANUAL -->
+  <!-- 11 · RESUMO ANUAL -->
   <section class="page" data-page="mo_resumo">
     <div class="page-head">
-      <div class="eyebrow">12 · Mão de Obra</div>
+      <div class="eyebrow">11 · Mão de Obra</div>
       <h2>Resumo anual</h2>
       <p>Totais acumulados por operação e por tipo no período com dados.</p>
     </div>
@@ -509,10 +516,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
   </section>
 
-  <!-- 13 · COLABORADORES · VISÃO GERAL -->
+  <!-- 12 · COLABORADORES · VISÃO GERAL -->
   <section class="page" data-page="colab_overview">
     <div class="page-head">
-      <div class="eyebrow">13 · Colaboradores</div>
+      <div class="eyebrow">12 · Colaboradores</div>
       <h2>Expedição · Visão geral</h2>
       <p>Dias trabalhados e colaboradores disponíveis por mês. Ativo = FO, FE, FA, P, AT ou LT no dia; trabalhado = P. Fonte: sistema <strong>Frequência da equipe</strong> (ABSENTEISMO), ao vivo.</p>
     </div>
@@ -532,27 +539,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-colab_overview"></div>
   </section>
 
-  <!-- 02 · COLABORADORES · ESTATÍSTICAS MENSAIS -->
-  <section class="page" data-page="colab_mensal">
-    <div class="page-head">
-      <div class="eyebrow">02 · Colaboradores</div>
-      <h2>Estatísticas mensais</h2>
-      <p>Contagem de dias por sigla, mês a mês, para os colaboradores ativos e para as demais situações (home office, afastamento, não contratado, desligamento).</p>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><h3>Situações ativas por mês</h3><div class="sub">Folga, Férias, Falta, Presente, Atestado, Luto</div></div><span class="card-tag">ATIVOS</span></div>
-      <div class="chart-wrap tall"><canvas id="chartColabAtivos"></canvas></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Outras situações por mês</h3><div class="sub">Home office, Afastado, Não contratado, Demissão voluntária, Demitido</div></div><span class="card-tag">OUTROS</span></div>
-      <div class="chart-wrap tall"><canvas id="chartColabOutros"></canvas></div>
-    </div>
-  </section>
-
-  <!-- 16 · COLABORADORES · EQUIPE INTERNA -->
+  <!-- 15 · COLABORADORES · EQUIPE INTERNA -->
   <section class="page" data-page="colab_verificacao">
     <div class="page-head">
-      <div class="eyebrow">16 · Colaboradores</div>
+      <div class="eyebrow">15 · Colaboradores</div>
       <h2>Equipe Interna</h2>
       <p>Tamanho de equipe por função (Líder, Conferente, Ajudante): presença real ("P") comparada à estimativa de dias úteis do mês. Segue o mesmo período selecionado nas demais abas, sempre de 1º ao último dia de cada mês; dias úteis já descontam os feriados lançados. Fonte: sistema <strong>Frequência da equipe</strong> (ABSENTEISMO).</p>
     </div>
@@ -577,11 +567,11 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-colab_equipe"></div>
   </section>
 
-  <!-- 17 · OCORRÊNCIAS -->
-  <!-- 17 · OCORRÊNCIAS (Não Conformidades — todos os setores) -->
+  <!-- 16 · OCORRÊNCIAS -->
+  <!-- 16 · OCORRÊNCIAS (Não Conformidades — todos os setores) -->
   <section class="page" data-page="ocorrencias">
     <div class="page-head">
-      <div class="eyebrow">17 · Ocorrências</div>
+      <div class="eyebrow">16 · Ocorrências</div>
       <h2>Não conformidades — geral</h2>
       <p>Todas as não conformidades registradas no período, de todos os setores. Fonte: sistema Não Conformidades (Portoex).</p>
     </div>
@@ -602,12 +592,12 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-ocorrencias"></div>
   </section>
 
-  <!-- 18 · DASH EXPEDIÇÃO (base NaoConformidades.html — setor LOGÍSTICA INTERNA) -->
+  <!-- 17 · DASH EXPEDIÇÃO (base NaoConformidades.html — setor LOGÍSTICA INTERNA) -->
   <section class="page" data-page="ocorr_exp">
     <div class="page-head">
-      <div class="eyebrow">18 · Dash Expedição</div>
+      <div class="eyebrow">17 · Dash Expedição</div>
       <h2>Dash de não conformidades — Expedição</h2>
-      <p>Não conformidades do setor <strong>Logística Interna (Expedição)</strong>: situação, categorias, responsáveis, causa raiz, plano de ação e pendências. Fonte: painel <strong>Não Conformidades</strong> (franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html), gerado a partir do Brudam — mesma base da aba 17.</p>
+      <p>Não conformidades do setor <strong>Logística Interna (Expedição)</strong>: situação, categorias, responsáveis, causa raiz, plano de ação e pendências. Fonte: painel <strong>Não Conformidades</strong> (franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html), gerado a partir do Brudam — mesma base da aba 16.</p>
     </div>
     <div class="dex-toolbar">
       <label class="dex-mes">Mês
@@ -643,10 +633,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-ocorr_exp"></div>
   </section>
 
-  <!-- 19 · MATTEL (planilha NOTAS MATTEL 2026 × sistema ETIQUETAS-MATTEL) -->
+  <!-- 18 · MATTEL (planilha NOTAS MATTEL 2026 × sistema ETIQUETAS-MATTEL) -->
   <section class="page" data-page="mattel">
     <div class="page-head">
-      <div class="eyebrow">19 · Mattel</div>
+      <div class="eyebrow">18 · Mattel</div>
       <h2>Expedição &amp; coleta Mattel</h2>
       <p>Cruzamento entre a planilha <strong>NOTAS MATTEL 2026</strong> e o sistema <strong>ETIQUETAS-MATTEL</strong> (coleta/expedição e minutas), conectados pelo número da Nota Fiscal. Dados carregados ao vivo das duas fontes.</p>
     </div>
@@ -712,10 +702,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mattel"></div>
 
   </section>
-  <!-- 20 · PALETES (sistema Conferência Geral — Firestore conferenciaptx) -->
+  <!-- 19 · PALETES (sistema Conferência Geral — Firestore conferenciaptx) -->
   <section class="page" data-page="paletes">
     <div class="page-head">
-      <div class="eyebrow">20 · Paletes</div>
+      <div class="eyebrow">19 · Paletes</div>
       <h2>Controle de paletes</h2>
       <p>Movimentação de paletes (enviados e recebidos) do sistema <strong>Conferência Geral</strong>, por dia e por mês, com transferências SC&times;SP, modelos e controle por cliente. Dados ao vivo do Firestore.</p>
     </div>
@@ -747,10 +737,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-paletes"></div>
   </section>
-  <!-- 21 · PALETES SP (planilha CONTROLE PBR1 · ITJ → SP) -->
+  <!-- 20 · PALETES SP (planilha CONTROLE PBR1 · ITJ → SP) -->
   <section class="page" data-page="paletes_sp">
     <div class="page-head">
-      <div class="eyebrow">21 · Paletes SP</div>
+      <div class="eyebrow">20 · Paletes SP</div>
       <h2>Paletes PBR1 · Itajaí &rarr; São Paulo</h2>
       <p>Controle de envios de paletes PBR1 de Itajaí para São Paulo, com destaque para os <strong>envios à BRAFT</strong> por dia e por mês. O retorno de paletes vem consolidado (sem separação por destino), então é exibido como total geral.</p>
       <a class="psp-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=1100141065#gid=1100141065" target="_blank" rel="noopener">
@@ -792,10 +782,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-psp"></div>
   </section>
-  <!-- 22 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
+  <!-- 21 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
   <section class="page" data-page="braft">
     <div class="page-head">
-      <div class="eyebrow">22 · BRAFT</div>
+      <div class="eyebrow">21 · BRAFT</div>
       <h2>Fluxo de paletes BRAFT</h2>
       <p>Checklist completo da BRAFT: paletes enviados (por destino), o que <strong>ficou lá</strong>, stretch, e o resumo de NFs, volumes e peso atualizados pelo grupo. Dados ao vivo da aba BRAFT da planilha.</p>
       <a class="braft-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=574891819#gid=574891819" target="_blank" rel="noopener">
@@ -946,6 +936,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     }catch(e){ console.warn('[comparativo ano a ano]', e); return cfg; }
   }
   window.portoexYoY=yoy;
+  window.portoexMute=mute;
 })();
 </script>
 <script>
@@ -954,7 +945,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   const SHEET_NAME = 'MONTAGENS GRAF';
   const SHEET_NAME_MO = 'ACOMP M.O.3º';
   const SHEET_NAME_COLAB = 'ABS VERTICAL';
-  // Fonte externa (planilha separada) usada pela aba 17 · Ocorrências.
+  // Fonte externa (planilha separada) usada pela aba 16 · Ocorrências.
   const SHEET_ID_OCORRENCIAS = '1D7C9_0iKZypa8F7nh_iOtxaTZArMchdj';
   const SHEET_NAME_OCORRENCIAS = 'Ocorrências';
   // A busca sem "range" explícito às vezes traz um intervalo usado menor do
@@ -1452,7 +1443,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     }
     return count;
   }
-  // Tamanho de equipe por mês/função (aba 16 · Equipe Interna): dias úteis do
+  // Tamanho de equipe por mês/função (aba 15 · Equipe Interna): dias úteis do
   // mês, "P" real (somado dos blocos agregados por equipe), colaboradores
   // disponíveis (quem teve ao menos 1 "P" no mês — só isso indica que estava
   // contratado e vindo na operação) e a quantidade estimada (dias úteis ×
@@ -1543,27 +1534,26 @@ body.locked > *:not(#loginScreen){display:none !important}
   const pages = [
     {id:'overview', label:'Visão Geral', num:'00'},
     {id:'jem', label:'JEM', num:'01'},
-    {id:'colab_mensal', label:'Estatísticas Mensais', num:'02'},
-    {id:'atraso_expresso', label:'Atraso Expresso', num:'03'},
-    {id:'saida_a', label:'Saída A+', num:'04'},
-    {id:'manifestos', label:'Manifestos', num:'05'},
-    {id:'personalizados', label:'Personalizados', num:'06'},
-    {id:'cubagem', label:'Cubagem', num:'07'},
-    {id:'mo_overview', label:'Mão de Obra', num:'08'},
-    {id:'mo_rota_exp', label:'Rota x Expedição', num:'09'},
-    {id:'mo_operacao', label:'Por Operação', num:'10'},
-    {id:'mo_fornecedor', label:'Por Fornecedor', num:'11'},
-    {id:'mo_resumo', label:'Resumo Anual MO', num:'12'},
-    {id:'colab_overview', label:'Colaboradores', num:'13'},
-    {id:'ajudantes', label:'Ajudantes', num:'14'},
-    {id:'conferentes', label:'Conferentes', num:'15'},
-    {id:'colab_verificacao', label:'Equipe Interna', num:'16'},
-    {id:'ocorrencias', label:'Ocorrências', num:'17'},
-    {id:'ocorr_exp', label:'Dash Expedição', num:'18'},
-    {id:'mattel', label:'Mattel', num:'19'},
-    {id:'paletes', label:'Paletes', num:'20'},
-    {id:'paletes_sp', label:'Paletes SP', num:'21'},
-    {id:'braft', label:'BRAFT', num:'22'},
+    {id:'atraso_expresso', label:'Atraso Expresso', num:'02'},
+    {id:'saida_a', label:'Saída A+', num:'03'},
+    {id:'manifestos', label:'Manifestos', num:'04'},
+    {id:'personalizados', label:'Personalizados', num:'05'},
+    {id:'cubagem', label:'Cubagem', num:'06'},
+    {id:'mo_overview', label:'Mão de Obra', num:'07'},
+    {id:'mo_rota_exp', label:'Rota x Expedição', num:'08'},
+    {id:'mo_operacao', label:'Por Operação', num:'09'},
+    {id:'mo_fornecedor', label:'Por Fornecedor', num:'10'},
+    {id:'mo_resumo', label:'Resumo Anual MO', num:'11'},
+    {id:'colab_overview', label:'Colaboradores', num:'12'},
+    {id:'ajudantes', label:'Ajudantes', num:'13'},
+    {id:'conferentes', label:'Conferentes', num:'14'},
+    {id:'colab_verificacao', label:'Equipe Interna', num:'15'},
+    {id:'ocorrencias', label:'Ocorrências', num:'16'},
+    {id:'ocorr_exp', label:'Dash Expedição', num:'17'},
+    {id:'mattel', label:'Mattel', num:'18'},
+    {id:'paletes', label:'Paletes', num:'19'},
+    {id:'paletes_sp', label:'Paletes SP', num:'20'},
+    {id:'braft', label:'BRAFT', num:'21'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -2047,7 +2037,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   // ============ 18 · DASH EXPEDIÇÃO (base NaoConformidades.html) ============
   // A página do painel de Não Conformidades (gerada do Brudam) traz os dados
   // embutidos em `const DATA = {...}`, com chaves "AAAAMM_setor". Usamos só o
-  // setor "logisticainterna" (Expedição). A aba 17 lê a mesma página.
+  // setor "logisticainterna" (Expedição). A aba 16 lê a mesma página.
   const NC_SOURCES = [
     'https://franciscosilva-sys.github.io/portoex-painel/NaoConformidades.html',
     'https://raw.githubusercontent.com/franciscosilva-sys/portoex-painel/main/NaoConformidades.html'
@@ -2265,6 +2255,12 @@ body.locked > *:not(#loginScreen){display:none !important}
     const totalActive = mo.active.map(i=>mo.grand[i]);
     const rotaActive = mo.active.map(i=>mo.rota[i]);
     const expActive = mo.active.map(i=>mo.exp[i]);
+    // Comparativo ano × ano anterior: para cada mês do período, traz também o
+    // mesmo mês do ano anterior (se houver dado), mesmo que esteja fora do período.
+    mo.prevIdx = i => { const k = monthKey(mo.meses[i]); if(k==null) return -1; return mo.meses.findIndex((l,j) => monthKey(l)===k-12 && mo.grand[j]>0); };
+    const cmpSet = new Set(mo.active); mo.active.forEach(i => { const j = mo.prevIdx(i); if(j>=0) cmpSet.add(j); });
+    const cmpIdx = [...cmpSet].sort((a,b)=>a-b);
+    const cmp = { meses:cmpIdx.map(i=>mo.meses[i]), total:cmpIdx.map(i=>mo.grand[i]), rota:cmpIdx.map(i=>mo.rota[i]), exp:cmpIdx.map(i=>mo.exp[i]) };
     footerMO = 'MÃO DE OBRA ATUALIZADA ' + (activeMeses[activeMeses.length-1]||'—');
     updateFooter();
     if(!mo.active.length){
@@ -2274,15 +2270,15 @@ body.locked > *:not(#loginScreen){display:none !important}
       setInsight('mo_overview', 'Nenhum dado de mão de obra no período selecionado.');
       setInsight('mo_rota_exp', 'Nenhum dado de mão de obra no período selecionado.');
     }else{
-      renderMOOverview(mo, activeMeses, totalActive, rotaActive, expActive);
-      renderMORotaExp(mo, activeMeses, totalActive, rotaActive, expActive);
+      renderMOOverview(mo, activeMeses, totalActive, rotaActive, expActive, cmp);
+      renderMORotaExp(mo, activeMeses, totalActive, rotaActive, expActive, cmp);
       renderMOOperacao(mo);
-      renderMOResumo(mo, activeMeses, rotaActive, expActive);
+      renderMOResumo(mo, activeMeses, rotaActive, expActive, cmp);
     }
     renderMOFornecedor(forn);
   }
 
-  function renderMOOverview(mo, meses, total, rota, exp){
+  function renderMOOverview(mo, meses, total, rota, exp, cmp){
     const grid = document.getElementById('kpi-mo_overview'); grid.innerHTML='';
     const t = last2(total), r = last2(rota), e = last2(exp);
     const peak = peakInfo(total, meses);
@@ -2292,13 +2288,13 @@ body.locked > *:not(#loginScreen){display:none !important}
     grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
 
     mkChart('chartMOTotal', {
-      type:'bar', data:{labels:meses,datasets:[{label:'Total ajudantes',data:total,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')}]},
+      type:'bar', data:{labels:cmp.meses,datasets:[{label:'Total ajudantes',data:cmp.total,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')}]},
       options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{display:false}}}
     });
     mkChart('chartMORotaExpMini', {
-      type:'bar', data:{labels:meses,datasets:[
-        {label:'Rota',data:rota,backgroundColor:'#ff5b3a',borderRadius:5,datalabels:dl('#ff5b3a','end','end')},
-        {label:'Expedição',data:exp,backgroundColor:'#4d9fff',borderRadius:5,datalabels:dl('#4d9fff','end','end')}
+      type:'bar', data:{labels:cmp.meses,datasets:[
+        {label:'Rota',data:cmp.rota,backgroundColor:'#ff5b3a',borderRadius:5,datalabels:dl('#ff5b3a','end','end')},
+        {label:'Expedição',data:cmp.exp,backgroundColor:'#4d9fff',borderRadius:5,datalabels:dl('#4d9fff','end','end')}
       ]},
       options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,right:8}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
     });
@@ -2313,7 +2309,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     setInsight('mo_overview', `<strong>Leitura do mês:</strong> ${fmt(t.curr)} ajudantes em ${meses[meses.length-1]}, variação de ${d.arrow} ${d.text} frente a ${meses[meses.length-2]||'—'} — ${fmt(r.curr)} em Rota e ${fmt(e.curr)} em Expedição.`);
   }
 
-  function renderMORotaExp(mo, meses, total, rota, exp){
+  function renderMORotaExp(mo, meses, total, rota, exp, cmp){
     const grid = document.getElementById('kpi-mo_rota_exp'); grid.innerHTML='';
     const rotaSum = rota.reduce((a,b)=>a+b,0), expSum = exp.reduce((a,b)=>a+b,0), grandSum = rotaSum+expSum;
     const r = last2(rota), e = last2(exp);
@@ -2323,9 +2319,9 @@ body.locked > *:not(#loginScreen){display:none !important}
     grid.appendChild(kpiCard('Exp. último mês', fmt(e.curr), meses[meses.length-1]||'—', delta(e.curr,e.prev,true)));
 
     mkChart('chartMORotaExp', {
-      type:'bar', data:{labels:meses,datasets:[
-        {label:'Rota',data:rota,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
-        {label:'Expedição',data:exp,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
+      type:'bar', data:{labels:cmp.meses,datasets:[
+        {label:'Rota',data:cmp.rota,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
+        {label:'Expedição',data:cmp.exp,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
       ]},
       options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
     });
@@ -2335,26 +2331,41 @@ body.locked > *:not(#loginScreen){display:none !important}
   function renderMOOperacao(mo){
     const grid = document.getElementById('mo-op-grid'); grid.innerHTML='';
     let globalMax = 0;
-    mo.ops.forEach(o => mo.active.forEach(m => { if(o.monthly[m]>globalMax) globalMax=o.monthly[m]; }));
+    const prevOf = m => (mo.prevIdx ? mo.prevIdx(m) : -1);
+    mo.ops.forEach(o => mo.active.forEach(m => { const j=prevOf(m); globalMax=Math.max(globalMax, o.monthly[m]||0, j>=0?(o.monthly[j]||0):0); }));
+    const mute = window.portoexMute || (c=>c);
     if(!globalMax) globalMax = 1;
     grid.style.gridTemplateColumns = `repeat(${Math.min(mo.active.length,4)},1fr)`;
     mo.active.forEach(m => {
-      const opsWithData = mo.ops.filter(o => o.monthly[m]>0);
+      const j = prevOf(m);
+      const opsWithData = mo.ops.filter(o => o.monthly[m]>0 || (j>=0 && o.monthly[j]>0));
       const card = document.createElement('div');
       card.className = 'op-month-card';
-      card.innerHTML = `<div class="op-month-label">${mo.meses[m]}</div><div class="op-bars"></div>`;
+      card.innerHTML = `<div class="op-month-label">${mo.meses[m]}${j>=0?` <span class="op-yoy-vs">× ${mo.meses[j]}</span>`:''}</div><div class="op-bars"></div>`;
       const barsEl = card.querySelector('.op-bars');
-      opsWithData.sort((a,b)=>b.monthly[m]-a.monthly[m]).forEach(op => {
-        const v = op.monthly[m];
+      opsWithData.sort((a,b)=>b.monthly[m]-a.monthly[m] || (j>=0?b.monthly[j]-a.monthly[j]:0)).forEach(op => {
+        const v = op.monthly[m]||0;
         const widthPct = Math.round(v/globalMax*100);
         const isRota = op.type==='ROTA';
+        const cor = isRota?'#ff5b3a':'#4d9fff';
         const row = document.createElement('div');
         row.className = 'op-bar-row';
+        let trilhos = `<div class="op-bar-track"><div class="op-bar-fill" style="width:${widthPct}%;background:${cor}"><span>${v?fmt(v):''}</span></div></div>`;
+        if(j>=0){
+          const pv = op.monthly[j]||0;
+          trilhos = `<div class="op-yoy-tracks">${trilhos}<div class="op-bar-track op-yoy-prev" title="${mo.meses[j]}: ${fmt(pv)}"><div class="op-bar-fill" style="width:${Math.round(pv/globalMax*100)}%;background:${mute(cor,1)};outline:1px dashed ${cor}"><span>${pv?fmt(pv):''}</span></div></div></div>`;
+        }
         row.innerHTML = `<div class="op-bar-name" title="${op.name}">${op.name}</div>
-          <div class="op-bar-track"><div class="op-bar-fill" style="width:${widthPct}%;background:${isRota?'#ff5b3a':'#4d9fff'}"><span>${fmt(v)}</span></div></div>
+          ${trilhos}
           <span class="op-type-badge ${isRota?'op-type-rota':'op-type-exp'}">${isRota?'ROTA':'EXP'}</span>`;
         barsEl.appendChild(row);
       });
+      if(j>=0){
+        const leg = document.createElement('div');
+        leg.className = 'op-yoy-legend';
+        leg.innerHTML = `<span><i style="background:#e8ecf5"></i>${mo.meses[m]}</span><span><i style="background:#6b7489;outline:1px dashed #a4adc4"></i>${mo.meses[j]}</span>`;
+        card.appendChild(leg);
+      }
       if(!opsWithData.length){
         const empty = document.createElement('div');
         empty.style.cssText = 'font-size:11px;color:var(--ink-muted);padding:8px 0';
@@ -2372,23 +2383,30 @@ body.locked > *:not(#loginScreen){display:none !important}
       wrap.innerHTML = '<div class="mo-note">Nenhum dado de fornecedor no período selecionado.</div>';
       return;
     }
+    const tem = i => forn.suppliers.some(s=>s.monthly[i]>0);
+    const prevF = m => { const k = monthKey(forn.meses[m]); if(k==null) return -1; return forn.meses.findIndex((l,i)=>monthKey(l)===k-12 && tem(i)); };
+    const mute = window.portoexMute || (c=>c);
     idxs.forEach(m => {
-      const names = forn.suppliers.filter(s=>s.monthly[m]>0).map(s=>s.name);
-      const vals = forn.suppliers.filter(s=>s.monthly[m]>0).map(s=>s.monthly[m]);
-      if(!names.length) return;
+      const j = prevF(m);
+      const sups = forn.suppliers.filter(s=>s.monthly[m]>0 || (j>=0 && s.monthly[j]>0)).sort((a,b)=>b.monthly[m]-a.monthly[m]);
+      if(!sups.length) return;
+      const names = sups.map(s=>s.name);
       const card = document.createElement('div');
       card.className = 'card';
       const cid = 'chartMOForn'+m;
-      card.innerHTML = `<div class="card-head"><div><h3>Fornecedores — ${forn.meses[m]}</h3></div></div><div class="chart-wrap" style="height:220px"><canvas id="${cid}"></canvas></div>`;
+      card.innerHTML = `<div class="card-head"><div><h3>Fornecedores — ${forn.meses[m]}${j>=0?` <span style="color:var(--ink-muted);font-weight:500">× ${forn.meses[j]}</span>`:''}</h3></div></div><div class="chart-wrap" style="height:220px"><canvas id="${cid}"></canvas></div>`;
       wrap.appendChild(card);
+      const ds = [];
+      if(j>=0) ds.push({label:forn.meses[j],data:sups.map(s=>s.monthly[j]||null),backgroundColor:mute('#4d9fff',1),borderColor:'#4d9fff',borderWidth:1.5,borderDash:[4,3],borderRadius:6,skipNull:true,datalabels:dl(mute('#4d9fff',1),'end','end')});
+      ds.push({label:forn.meses[m],data:sups.map(s=>s.monthly[m]||null),backgroundColor:'#4d9fff',borderRadius:6,skipNull:true,datalabels:dl('#4d9fff','end','end')});
       mkChart(cid, {
-        type:'bar', data:{labels:names,datasets:[{data:vals,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}]},
-        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,right:8}},scales:baseScales,plugins:{legend:{display:false}}}
+        type:'bar', data:{labels:names,datasets:ds},
+        options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22,right:8}},scales:baseScales,plugins:{legend:j>=0?{display:true,position:'top',align:'end',labels:{boxWidth:12,boxHeight:10}}:{display:false}}}
       });
     });
   }
 
-  function renderMOResumo(mo, meses, rota, exp){
+  function renderMOResumo(mo, meses, rota, exp, cmp){
     const grid = document.getElementById('kpi-mo_resumo'); grid.innerHTML='';
     const rotaSum = mo.rota.reduce((a,b)=>a+b,0), expSum = mo.exp.reduce((a,b)=>a+b,0), grand = rotaSum+expSum;
     const topOp = Object.entries(mo.opTotals).sort((a,b)=>b[1]-a[1])[0] || ['—',0];
@@ -2397,25 +2415,38 @@ body.locked > *:not(#loginScreen){display:none !important}
     grid.appendChild(kpiCard('Total Expedição', fmt(expSum), grand?Math.round(expSum/grand*100)+'% do total':'—', {cls:'flat',arrow:'',text:'período'}, 'green'));
     grid.appendChild(kpiCard('Principal operação', topOp[0], fmt(topOp[1])+' ajudantes', {cls:'flat',arrow:'',text:'—'}, 'yellow'));
 
-    const opNames = Object.keys(mo.opTotals);
-    const opVals = opNames.map(n=>mo.opTotals[n]);
+    const opNames = Object.keys(mo.opTotals).sort((a,b)=>mo.opTotals[b]-mo.opTotals[a]);
     const opColors = opNames.map(n=>mo.opType[n]==='ROTA' ? '#ff5b3a' : '#4d9fff');
-    const h = Math.max(280, opNames.length*40+80);
+    // Ano × ano anterior: total acumulado de cada operação, uma barra por ano.
+    const anos = [...new Set(mo.meses.map(l => (String(l).match(/\/(\d{2})$/)||[])[1]).filter(Boolean))].sort();
+    const porAno = anos.map(yy => opNames.map(n => { const o = mo.ops.find(x=>x.name===n); return o ? o.monthly.reduce((s,v,i)=>s+(String(mo.meses[i]).endsWith('/'+yy)?v:0),0) : 0; }));
+    const anosComDado = anos.filter((_,k)=>porAno[k].some(v=>v>0));
+    const yoyOp = anosComDado.length > 1;
+    const h = Math.max(280, opNames.length*(yoyOp?24*anosComDado.length+16:40)+80);
     document.getElementById('moOpWrap').style.height = h+'px';
+    const mute = window.portoexMute || (c=>c);
+    const dsOp = yoyOp
+      ? anos.map((yy,k) => ({ yy, vals:porAno[k] })).filter(x=>x.vals.some(v=>v>0)).map((x,k,arr) => {
+          const age = arr.length-1-k;
+          return { label:'20'+x.yy, data:x.vals, backgroundColor: age ? mute(opColors, age) : opColors, borderColor: age ? opColors : undefined, borderWidth: age ? 1.5 : 0, borderDash: age ? [4,3] : undefined, borderRadius:6,
+            datalabels:{...dl(age ? '#8b95ab' : '#e8ecf5','end','end'),formatter:v=>v>0?fmt(v):''} };
+        })
+      : [{ data:opNames.map(n=>mo.opTotals[n]), backgroundColor:opColors, borderRadius:6, datalabels:{...dl('#e8ecf5','end','end'),formatter:v=>v>0?fmt(v):''} }];
     mkChart('chartMOOpTotal', {
-      type:'bar', data:{labels:opNames,datasets:[{data:opVals,backgroundColor:opColors,borderRadius:6,datalabels:{...dl('#e8ecf5','end','end'),formatter:v=>v>0?fmt(v):''}}]},
-      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}
+      type:'bar', data:{labels:opNames,datasets:dsOp},
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,
+        plugins:{legend: yoyOp ? {display:true,position:'top',align:'end',labels:{boxWidth:12,boxHeight:10,generateLabels:ch=>ch.data.datasets.map((d,i)=>({text:d.label,fillStyle:i<ch.data.datasets.length-1?'#6b7489':'#e8ecf5',strokeStyle:'transparent',datasetIndex:i,hidden:!ch.isDatasetVisible(i),fontColor:'#a4adc4'}))}} : {display:false}}}
     });
     mkChart('chartMOTipoAnual', {
-      type:'bar', data:{labels:meses,datasets:[
-        {label:'Rota',data:rota,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
-        {label:'Expedição',data:exp,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
+      type:'bar', data:{labels:cmp.meses,datasets:[
+        {label:'Rota',data:cmp.rota,backgroundColor:'#ff5b3a',borderRadius:6,datalabels:dl('#ff5b3a','end','end')},
+        {label:'Expedição',data:cmp.exp,backgroundColor:'#4d9fff',borderRadius:6,datalabels:dl('#4d9fff','end','end')}
       ]},
       options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24,right:14}},scales:baseScales,plugins:{legend:{position:'top',align:'end'}}}
     });
   }
 
-  // ============ COLABORADORES · RENDER (abas 14-16) ============
+  // ============ COLABORADORES · RENDER (abas 12-15) ============
   const ATIVO_CODES_ORDER = ['P','FO','FE','FA','AT','LT'];
   const OUTRAS_CODES_ORDER = ['H','AF','NC','DV','D'];
 
@@ -2487,35 +2518,9 @@ body.locked > *:not(#loginScreen){display:none !important}
     setInsight('colab_overview', `<strong>Leitura do mês:</strong> ${fmt(w.curr)} dias trabalhados em ${agg.meses[agg.meses.length-1]} (${dd.arrow} ${dd.text} vs. ${agg.meses[agg.meses.length-2]||'—'}), com ${fmt(d.curr)} colaboradores disponíveis e taxa de presença de ${taxa!=null?taxa.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—'}.`);
   }
 
-  function renderColabMensal(agg){
-    if(!agg.meses.length){
-      mkChart('chartColabAtivos', {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
-      mkChart('chartColabOutros', {type:'bar',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false}});
-      return;
-    }
-    const stackedScales = {
-      x:{...baseScales.x, stacked:true},
-      y:{...baseScales.y, stacked:true},
-    };
-    mkChart('chartColabAtivos', {
-      type:'bar',
-      data:{labels:agg.meses, datasets: ATIVO_CODES_ORDER.map(c=>({
-        label:c+' · '+CODE_INFO[c].label, data:agg.codeCounts.map(cc=>cc[c]||0), backgroundColor:CODE_INFO[c].color, borderRadius:3,
-      }))},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20,right:14}},scales:stackedScales,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10}}}}
-    });
-    mkChart('chartColabOutros', {
-      type:'bar',
-      data:{labels:agg.meses, datasets: OUTRAS_CODES_ORDER.map(c=>({
-        label:c+' · '+CODE_INFO[c].label, data:agg.codeCounts.map(cc=>cc[c]||0), backgroundColor:CODE_INFO[c].color, borderRadius:3,
-      }))},
-      options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:20,right:14}},scales:stackedScales,plugins:{legend:{position:'top',align:'end',labels:{boxWidth:10,boxHeight:10}}}}
-    });
-  }
-
   let colabFullData = null;   // { employees, days, teamCols, teamDaily } sem filtro
 
-  // ---- Equipe Interna (aba 16): tamanho de equipe por função, mensal ----
+  // ---- Equipe Interna (aba 15): tamanho de equipe por função, mensal ----
   // Segue o mesmo período global das demais abas — sem filtros próprios.
   const TEAM_COLORS = { 'LÍDER':'#a78bfa', 'ANALISTA':'#ffa552', 'CONFERENTE':'#4d9fff', 'AJUDANTE':'#3ddc97' };
   function renderEquipeInterna(agg){
@@ -2600,7 +2605,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     setInsight('colab_equipe', `<strong>Leitura do mês:</strong> equipe de ${fmt(tamanhoCurr)} pessoas em ${agg.meses[lastIdx]} (${TEAM_LABELS.filter(t=>agg.teams[t].headcount[lastIdx]).map(t=>t.charAt(0)+t.slice(1).toLowerCase()+' '+fmt(agg.teams[t].headcount[lastIdx])).join(', ')||'sem presenças'}), com ${fmt(pRealCurr)} presenças reais de ${fmt(estimadoCurr)} estimadas (${utilCurr!=null?utilCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—'} de utilização, ${dd.arrow} ${dd.text} vs. ${agg.meses[prevIdx]||'—'}).`);
   }
 
-  // ============ MÃO DE OBRA · SISTEMA CONTROLE-MAO-DE-OBRA (abas 08–12) ============
+  // ============ MÃO DE OBRA · SISTEMA CONTROLE-MAO-DE-OBRA (abas 07–11) ============
   // Fonte principal: Realtime Database do sistema Controle de Mão de Obra
   // (projeto vagas-terceirizados-portoex), nó "acompanhamento": um registro por
   // pessoa escalada por dia, com data (AAAA-MM-DD), opNome, opCC (ROTA /
@@ -2699,7 +2704,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     return out;
   }
 
-  // ============ BASE ABSENTEÍSMO (abas 02, 13, 14, 15 e 16) ============
+  // ============ BASE ABSENTEÍSMO (abas 12, 13, 14 e 15) ============
   // Fonte: sistema "Frequência da equipe" (andreluis-star.github.io/ABSENTEISMO),
   // que grava no Realtime Database do Firebase (projeto absenteismo-fc544, nó
   // "frequencia"): colab/{id} (nome, admissão, funções com data de início,
@@ -2760,7 +2765,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     return buildColabFromAbs();
   }
   // Monta a mesma estrutura que a antiga leitura da planilha "ABS VERTICAL"
-  // gerava ({employees, days, teamDaily}), para as abas 02, 13 e 16 seguirem
+  // gerava ({employees, days, teamDaily}), para as abas 12 e 15 seguirem
   // com os mesmos cálculos. Cada pessoa vira uma "coluna" por função que já
   // ocupou, e o lançamento do dia vai para a função que ela tinha naquele dia.
   function buildColabFromAbs(){
@@ -2790,7 +2795,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     return { employees, days, teamCols:{}, teamDaily };
   }
 
-  // ---- Abas 14 (Ajudantes) e 15 (Conferentes): quadro e absenteísmo por função ----
+  // ---- Abas 13 (Ajudantes) e 14 (Conferentes): quadro e absenteísmo por função ----
   function absRoleMonthly(role, range){
     const t = absToday();
     const months = Object.keys(ABSD.mes).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();
@@ -2867,7 +2872,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   // ============ PERÍODO CONFIGURÁVEL (compartilhado por todas as abas) ============
   let fullData = null;   // { D, meses } · dados JEM sem filtro de período
   let moFullData = null; // { mo, forn } · dados de Mão de Obra sem filtro de período
-  let OCORR = null;      // dados de Ocorrências (recorte de Expedição; não é mais usado pela aba 18)
+  let OCORR = null;      // dados de Ocorrências (recorte de Expedição; não é mais usado pela aba 17)
   const MES_ABBR = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
   function monthKey(label){
     if(!label) return null;
@@ -2931,7 +2936,6 @@ body.locked > *:not(#loginScreen){display:none !important}
     const range = getSelectedPeriodRange();
     const agg = aggregateColabMonthly(colabFullData, range);
     renderColabOverview(agg);
-    renderColabMensal(agg);
     renderEquipeInterna(aggregateEquipeMonthly(colabFullData, range));
     renderRoleTab('ajudantes', 'AJUDANTE', 'Ajudantes', '#3ddc97', 'chartAjudantes', range);
     renderRoleTab('conferentes', 'CONFERENTE', 'Conferentes', '#4d9fff', 'chartConferentes', range);
@@ -2957,11 +2961,11 @@ body.locked > *:not(#loginScreen){display:none !important}
   // mesmo intervalo.
   async function init(){
     setStatus('Carregando dados da planilha…', false);
-    loadOcorrExp(); // aba 18 · Dash Expedição (base NaoConformidades.html)
+    loadOcorrExp(); // aba 17 · Dash Expedição (base NaoConformidades.html)
     const [jemResult, moResult, colabResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
-      loadMaoDeObra(), // abas 08–12 · sistema Controle de Mão de Obra (+ histórico da planilha)
-      loadAbsenteismo() // abas 02, 13–16 · base ABSENTEÍSMO (Firebase)
+      loadMaoDeObra(), // abas 07–11 · sistema Controle de Mão de Obra (+ histórico da planilha)
+      loadAbsenteismo() // abas 12–15 · base ABSENTEÍSMO (Firebase)
     ]);
     const errors = [];
     if(jemResult.status==='fulfilled'){
@@ -4386,8 +4390,8 @@ body.locked > *:not(#loginScreen){display:none !important}
 </script>
 
 
-<!-- ============ ABA 17 · NÃO CONFORMIDADES GERAL (independente) ============ -->
-<!-- A aba 18 (Dash Expedição) tem loader próprio no script principal (loadOcorrExp). -->
+<!-- ============ ABA 16 · NÃO CONFORMIDADES GERAL (independente) ============ -->
+<!-- A aba 17 (Dash Expedição) tem loader próprio no script principal (loadOcorrExp). -->
 <script>
 (function(){
   "use strict";
