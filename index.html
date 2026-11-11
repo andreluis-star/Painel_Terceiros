@@ -702,123 +702,107 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="insight" id="insight-mattel"></div>
 
   </section>
-  <!-- 19 · PALETES (sistema Conferência Geral — Firestore conferenciaptx) -->
+  <!-- 19 · PALETES (controle geral — sistema Conferência Geral, coleção operacoes) -->
   <section class="page" data-page="paletes">
     <div class="page-head">
       <div class="eyebrow">19 · Paletes</div>
-      <h2>Controle de paletes</h2>
-      <p>Movimentação de paletes (enviados e recebidos) do sistema <strong>Conferência Geral</strong>, por dia e por mês, com transferências SC&times;SP, modelos e controle por cliente. Dados ao vivo do Firestore.</p>
+      <h2>Controle geral de paletes</h2>
+      <p>Paletes enviados (saídas) e recebidos (entradas) lançados pelos conferentes no sistema <strong>Conferência Geral</strong>, com a mesma regra do admin: veículos marcados como <strong>transferência SC × SP</strong> ficam de fora (estão na aba Paletes SP) e cada saída é comparada com a <strong>1ª chegada posterior da mesma placa</strong>. Dados ao vivo do Firestore.</p>
+    </div>
+    <div class="dex-toolbar">
+      <label class="dex-mes">Período <select id="palPer">
+        <option value="30" selected>Últimos 30 dias</option><option value="60">Últimos 60 dias</option><option value="90">Últimos 90 dias</option>
+        <option value="mes">Mês atual</option><option value="mesant">Mês anterior</option></select></label>
+      <label class="dex-mes">Situação <select id="palSit">
+        <option value="">Todas</option><option value="pend">Sem retorno</option><option value="dif">Com diferença</option><option value="ok">OK</option><option value="semsaida">Chegada sem saída</option></select></label>
+      <input id="palBusca" class="dex-search" placeholder="Buscar placa, motorista, cliente…">
+      <div style="flex:1"></div>
+      <button class="toggle-btn" id="palCsv">Exportar CSV</button>
     </div>
     <div id="pal-status" class="insight" style="display:none"></div>
     <div class="kpi-grid" id="kpi-paletes"></div>
     <div class="row cols-2">
       <div class="card">
-        <div class="card-head"><div><h3>Enviados &amp; recebidos por dia</h3><div class="sub">Últimos 30 dias — entradas e saídas de paletes</div></div><span class="card-tag" style="border-color:#f0a500;color:#f0a500">DIÁRIO</span></div>
+        <div class="card-head"><div><h3>Enviados &amp; recebidos por dia</h3><div class="sub" id="palSubDia">Período selecionado</div></div><span class="card-tag" style="border-color:#f0a500;color:#f0a500">DIÁRIO</span></div>
         <div class="chart-wrap tall"><canvas id="chartPalDia"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-head"><div><h3>Por modelo</h3><div class="sub">PBR · Descartável · Outros</div></div><span class="card-tag">MODELO</span></div>
-        <div class="chart-wrap"><canvas id="chartPalModelo"></canvas></div>
-      </div>
-    </div>
-    <div class="row cols-2">
-      <div class="card">
-        <div class="card-head"><div><h3>Enviados &amp; recebidos por mês</h3><div class="sub">Entradas e saídas de paletes por mês</div></div><span class="card-tag">MENSAL</span></div>
-        <div class="chart-wrap"><canvas id="chartPalMes"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><div><h3>Transferências SC&times;SP</h3><div class="sub">Paletes em transferência vs. operação normal</div></div><span class="card-tag" style="border-color:#0c7c8c;color:#0c7c8c">TRANSFERÊNCIA</span></div>
-        <div class="chart-wrap"><canvas id="chartPalTransf"></canvas></div>
+        <div class="card-head"><div><h3>Totais por tipo de palete</h3><div class="sub">Entradas × saídas no período (sem transferência)</div></div><span class="card-tag">MODELO</span></div>
+        <div class="table-wrap"><table class="data dex-table" id="tablePalTipo"></table></div>
+        <div class="chart-wrap short" style="margin-top:10px"><canvas id="chartPalModelo"></canvas></div>
       </div>
     </div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Controle paralelo por cliente</h3><div class="sub">Paletes por cliente de destino (BRAFT, MATTEL, THOMPSON…)</div></div><span class="card-tag">CLIENTE</span></div>
-      <div class="table-wrap"><table class="data" id="tablePalCliente"></table></div>
+      <div class="card-head"><div><h3>Enviados &amp; recebidos por mês</h3><div class="sub">Desde janeiro do ano passado — compara com o mesmo mês do ano anterior</div></div><span class="card-tag">MENSAL</span></div>
+      <div class="chart-wrap"><canvas id="chartPalMes"></canvas></div>
+    </div>
+    <div class="row cols-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-head"><div><h3>Controle paralelo por cliente</h3><div class="sub">Paletes por cliente de destino no período (inclui transferências)</div></div><span class="card-tag">CLIENTE</span></div>
+        <div class="table-wrap"><table class="data dex-table" id="tablePalCliente"></table></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Veículos sem retorno</h3><div class="sub">Saídas do período com paletes ainda sem chegada posterior da placa</div></div><span class="card-tag" style="border-color:#ff4d6d;color:#ff4d6d">PENDÊNCIAS</span></div>
+        <div class="table-wrap"><table class="data dex-table" id="tablePalPend"></table></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Gestão por veículo · saída × 1ª chegada posterior</h3><div class="sub" id="palSubGestao">Cada saída do período comparada com o retorno da mesma placa</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data dex-table" id="tablePalGestao"></table></div>
     </div>
     <div class="insight" id="insight-paletes"></div>
   </section>
-  <!-- 20 · CONSUMO DE INSUMOS / STRETCH (sistema Conferência Geral — coleção movimentacoes) -->
-  <section class="page" data-page="consumo">
-    <div class="page-head">
-      <div class="eyebrow">20 · Consumo</div>
-      <h2>Consumo de insumos · Stretch</h2>
-      <p>Envios (saídas/consumo) e recebimentos (entradas) de insumos lançados no sistema <strong>Conferência Geral</strong>, por mês e por dia. Abre no stretch; troque o produto no seletor. Inventário e ajustes avulsos não entram nos totais. Dados ao vivo do Firestore.</p>
-    </div>
-    <div class="dex-toolbar">
-      <label class="dex-mes">Produto <select id="conProd"></select></label>
-      <label class="dex-mes">Dias <select id="conDias"><option value="31" selected>Últimos 31 dias</option><option value="60">Últimos 60 dias</option><option value="90">Últimos 90 dias</option></select></label>
-      <div style="flex:1"></div>
-      <button class="toggle-btn" id="conCsv">Exportar CSV</button>
-    </div>
-    <div id="con-status" class="insight" style="display:none"></div>
-    <div class="kpi-grid" id="kpi-consumo"></div>
-    <div class="card">
-      <div class="card-head"><div><h3>Envio × recebimento por mês</h3><div class="sub" id="conSubMes">Saídas (consumo) e entradas por mês</div></div><span class="card-tag">MENSAL</span></div>
-      <div class="chart-wrap tall"><canvas id="chartConMes"></canvas></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Envio × recebimento por dia</h3><div class="sub" id="conSubDia">Saídas e entradas por dia</div></div><span class="card-tag" style="border-color:#f0a500;color:#f0a500">DIÁRIO</span></div>
-      <div class="chart-wrap tall"><canvas id="chartConDia"></canvas></div>
-    </div>
-    <div class="row cols-2" style="margin-top:14px">
-      <div class="card"><div class="card-head"><div><h3>Consumo por veículo</h3><div class="sub" id="conSubPlaca">Saídas por placa no mês atual</div></div><span class="card-tag">PLACA</span></div><div class="chart-wrap tall"><canvas id="chartConPlaca"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Resumo por produto</h3><div class="sub" id="conSubProd">Mês atual × mês anterior</div></div><span class="card-tag">INSUMOS</span></div><div class="table-wrap"><table class="data dex-table" id="tableConProd"></table></div></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Movimento diário</h3><div class="sub">Entradas, saídas e saldo do período diário</div></div><span class="card-tag">DADOS BRUTOS</span></div>
-      <div class="table-wrap"><table class="data dex-table" id="tableConDia"></table></div>
-    </div>
-    <div class="insight" id="insight-consumo"></div>
-  </section>
-  <!-- 21 · PALETES SP (planilha CONTROLE PBR1 · ITJ → SP) -->
+  <!-- 20 · PALETES SP (transferências SC × SP — sistema Conferência Geral) -->
   <section class="page" data-page="paletes_sp">
     <div class="page-head">
-      <div class="eyebrow">21 · Paletes SP</div>
-      <h2>Paletes PBR1 · Itajaí &rarr; São Paulo</h2>
-      <p>Controle de envios de paletes PBR1 de Itajaí para São Paulo, com destaque para os <strong>envios à BRAFT</strong> por dia e por mês. O retorno de paletes vem consolidado (sem separação por destino), então é exibido como total geral.</p>
-      <a class="psp-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=1100141065#gid=1100141065" target="_blank" rel="noopener">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="vertical-align:-2px;margin-right:6px"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>PESQUISAR BASE
-      </a>
+      <div class="eyebrow">20 · Paletes SP</div>
+      <h2>Paletes · transferência Itajaí &rarr; São Paulo</h2>
+      <p>Envios e retornos de paletes dos veículos marcados como <strong>transferência SC × SP</strong> no sistema <strong>Conferência Geral</strong>, com o detalhe de cada envio por veículo (tipo de palete, cliente de destino, motorista e retorno). Dados ao vivo do Firestore.</p>
     </div>
-    <style>
-      .page[data-page="paletes_sp"] .psp-btn-base{ display:inline-flex; align-items:center; margin-top:12px;
-        background:#6c3483; color:#fff; text-decoration:none; font-weight:700; font-size:0.8rem; letter-spacing:.03em;
-        padding:9px 16px; border-radius:8px; box-shadow:0 4px 14px -6px rgba(108,52,131,.8); transition:filter .15s, transform .1s; }
-      .page[data-page="paletes_sp"] .psp-btn-base:hover{ filter:brightness(1.12); }
-      .page[data-page="paletes_sp"] .psp-btn-base:active{ transform:translateY(1px); }
-    </style>
+    <div class="dex-toolbar">
+      <label class="dex-mes">Período <select id="pspPer">
+        <option value="30" selected>Últimos 30 dias</option><option value="60">Últimos 60 dias</option><option value="90">Últimos 90 dias</option>
+        <option value="mes">Mês atual</option><option value="mesant">Mês anterior</option></select></label>
+      <input id="pspBusca" class="dex-search" placeholder="Buscar placa, motorista, cliente…">
+      <div style="flex:1"></div>
+      <button class="toggle-btn" id="pspCsv">Exportar CSV</button>
+    </div>
     <div id="psp-status" class="insight" style="display:none"></div>
     <div class="kpi-grid" id="kpi-psp"></div>
     <div class="row cols-2">
       <div class="card">
-        <div class="card-head"><div><h3>Envios BRAFT por dia</h3><div class="sub">Paletes PBR1 enviados à BRAFT, por data de envio</div></div><span class="card-tag" style="border-color:#6c3483;color:#a569bd">BRAFT · DIÁRIO</span></div>
-        <div class="chart-wrap tall"><canvas id="chartPspBraftDia"></canvas></div>
+        <div class="card-head"><div><h3>Envios × retornos SP por dia</h3><div class="sub" id="pspSubDia">Período selecionado</div></div><span class="card-tag" style="border-color:#a569bd;color:#a569bd">DIÁRIO</span></div>
+        <div class="chart-wrap tall"><canvas id="chartPspDia"></canvas></div>
       </div>
       <div class="card">
-        <div class="card-head"><div><h3>Envios BRAFT por mês</h3><div class="sub">Total de paletes à BRAFT por mês</div></div><span class="card-tag" style="border-color:#6c3483;color:#a569bd">BRAFT · MENSAL</span></div>
-        <div class="chart-wrap"><canvas id="chartPspBraftMes"></canvas></div>
-      </div>
-    </div>
-    <div class="row cols-2">
-      <div class="card">
-        <div class="card-head"><div><h3>Destino dos envios</h3><div class="sub">BRAFT vs. Filial SP — total de paletes enviados</div></div><span class="card-tag">DESTINO</span></div>
-        <div class="chart-wrap"><canvas id="chartPspDestino"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><div><h3>Envios &times; devoluções por mês</h3><div class="sub">Saídas (todos destinos) e retornos consolidados</div></div><span class="card-tag">FLUXO</span></div>
-        <div class="chart-wrap"><canvas id="chartPspFluxo"></canvas></div>
+        <div class="card-head"><div><h3>Envios por veículo</h3><div class="sub">Paletes enviados a SP por placa no período</div></div><span class="card-tag">PLACA</span></div>
+        <div class="chart-wrap tall"><canvas id="chartPspPlaca"></canvas></div>
       </div>
     </div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Últimos envios à BRAFT</h3><div class="sub">Registro mais recente de envios PBR1 para a BRAFT</div></div><span class="card-tag">DADOS BRUTOS</span></div>
-      <div class="table-wrap"><table class="data" id="tablePspBraft"></table></div>
+      <div class="card-head"><div><h3>Envios × retornos SP por mês</h3><div class="sub">Desde janeiro do ano passado — compara com o mesmo mês do ano anterior</div></div><span class="card-tag">MENSAL</span></div>
+      <div class="chart-wrap"><canvas id="chartPspMes"></canvas></div>
+    </div>
+    <div class="row cols-2" style="margin-top:14px">
+      <div class="card">
+        <div class="card-head"><div><h3>Por tipo de palete</h3><div class="sub">Enviados e recebidos nas transferências do período</div></div><span class="card-tag">MODELO</span></div>
+        <div class="table-wrap"><table class="data dex-table" id="tablePspTipo"></table></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Por cliente de destino</h3><div class="sub">Paletes enviados a SP por cliente (BRAFT, MATTEL…)</div></div><span class="card-tag">CLIENTE</span></div>
+        <div class="table-wrap"><table class="data dex-table" id="tablePspCliente"></table></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Detalhamento dos envios por veículo</h3><div class="sub">Cada saída marcada como transferência SP, com a 1ª chegada posterior da placa</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data dex-table" id="tablePspEnvios"></table></div>
     </div>
     <div class="insight" id="insight-psp"></div>
   </section>
-  <!-- 22 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
+  <!-- 21 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
   <section class="page" data-page="braft">
     <div class="page-head">
-      <div class="eyebrow">22 · BRAFT</div>
+      <div class="eyebrow">21 · BRAFT</div>
       <h2>Fluxo de paletes BRAFT</h2>
       <p>Checklist completo da BRAFT: paletes enviados (por destino), o que <strong>ficou lá</strong>, stretch, e o resumo de NFs, volumes e peso atualizados pelo grupo. Dados ao vivo da aba BRAFT da planilha.</p>
       <a class="braft-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=574891819#gid=574891819" target="_blank" rel="noopener">
@@ -837,16 +821,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </style>
     <div id="braft-status" class="insight" style="display:none"></div>
     <div class="kpi-grid" id="kpi-braft"></div>
-    <div class="row cols-2">
-      <div class="card">
+    <div class="card">
         <div class="card-head"><div><h3>Paletes enviados por mês</h3><div class="sub">Total de paletes enviados à BRAFT por mês</div></div><span class="card-tag" style="border-color:#8e44ad;color:#a569bd">ENVIOS</span></div>
         <div class="chart-wrap tall"><canvas id="chartBraftMes"></canvas></div>
       </div>
-      <div class="card">
-        <div class="card-head"><div><h3>Enviado × Saldo na TAC por mês</h3><div class="sub">Paletes que retornaram vs. que ficaram na BRAFT</div></div><span class="card-tag">FLUXO</span></div>
-        <div class="chart-wrap tall"><canvas id="chartBraftFluxo"></canvas></div>
-      </div>
-    </div>
     <div class="row cols-2">
       <div class="card">
         <div class="card-head"><div><h3>Envios por destino</h3><div class="sub">Guarulhos · SP Filial · Sul</div></div><span class="card-tag">DESTINO</span></div>
@@ -878,6 +856,39 @@ body.locked > *:not(#loginScreen){display:none !important}
       <div class="table-wrap"><table class="data" id="tableBraft"></table></div>
     </div>
     <div class="insight" id="insight-braft"></div>
+  </section>
+  <!-- 22 · CONSUMO DE INSUMOS / STRETCH (sistema Conferência Geral — coleção movimentacoes) -->
+  <section class="page" data-page="consumo">
+    <div class="page-head">
+      <div class="eyebrow">22 · Consumo</div>
+      <h2>Consumo de insumos · Stretch</h2>
+      <p>Envios (saídas/consumo) e recebimentos (entradas) de insumos lançados no sistema <strong>Conferência Geral</strong>, por mês e por dia. Abre no stretch; troque o produto no seletor. Inventário e ajustes avulsos não entram nos totais. Dados ao vivo do Firestore.</p>
+    </div>
+    <div class="dex-toolbar">
+      <label class="dex-mes">Produto <select id="conProd"></select></label>
+      <label class="dex-mes">Dias <select id="conDias"><option value="31" selected>Últimos 31 dias</option><option value="60">Últimos 60 dias</option><option value="90">Últimos 90 dias</option></select></label>
+      <div style="flex:1"></div>
+      <button class="toggle-btn" id="conCsv">Exportar CSV</button>
+    </div>
+    <div id="con-status" class="insight" style="display:none"></div>
+    <div class="kpi-grid" id="kpi-consumo"></div>
+    <div class="card">
+      <div class="card-head"><div><h3>Envio × recebimento por mês</h3><div class="sub" id="conSubMes">Saídas (consumo) e entradas por mês</div></div><span class="card-tag">MENSAL</span></div>
+      <div class="chart-wrap tall"><canvas id="chartConMes"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Envio × recebimento por dia</h3><div class="sub" id="conSubDia">Saídas e entradas por dia</div></div><span class="card-tag" style="border-color:#f0a500;color:#f0a500">DIÁRIO</span></div>
+      <div class="chart-wrap tall"><canvas id="chartConDia"></canvas></div>
+    </div>
+    <div class="row cols-2" style="margin-top:14px">
+      <div class="card"><div class="card-head"><div><h3>Consumo por veículo</h3><div class="sub" id="conSubPlaca">Saídas por placa no mês atual</div></div><span class="card-tag">PLACA</span></div><div class="chart-wrap tall"><canvas id="chartConPlaca"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Resumo por produto</h3><div class="sub" id="conSubProd">Mês atual × mês anterior</div></div><span class="card-tag">INSUMOS</span></div><div class="table-wrap"><table class="data dex-table" id="tableConProd"></table></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Movimento diário</h3><div class="sub">Entradas, saídas e saldo do período diário</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data dex-table" id="tableConDia"></table></div>
+    </div>
+    <div class="insight" id="insight-consumo"></div>
   </section>
 </main>
 
@@ -1585,9 +1596,9 @@ body.locked > *:not(#loginScreen){display:none !important}
     {id:'ocorr_exp', label:'Dash Expedição', num:'17'},
     {id:'mattel', label:'Mattel', num:'18'},
     {id:'paletes', label:'Paletes', num:'19'},
-    {id:'consumo', label:'Consumo', num:'20'},
-    {id:'paletes_sp', label:'Paletes SP', num:'21'},
-    {id:'braft', label:'BRAFT', num:'22'},
+    {id:'paletes_sp', label:'Paletes SP', num:'20'},
+    {id:'braft', label:'BRAFT', num:'21'},
+    {id:'consumo', label:'Consumo', num:'22'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -3900,431 +3911,279 @@ body.locked > *:not(#loginScreen){display:none !important}
 })();
 </script>
 
-<!-- ============ ABA PALETES (independente) ============ -->
+<!-- ============ ABAS PALETES (19) E PALETES SP (20) · coleção operacoes (independente) ============ -->
 <script>
 (function(){
   "use strict";
-  var FS_PROJECT = "conferenciaptx";
-  var FS_BASE = "https://firestore.googleapis.com/v1/projects/"+FS_PROJECT+"/databases/(default)/documents";
-  var FS_QUERY = "https://firestore.googleapis.com/v1/projects/"+FS_PROJECT+"/databases/(default)/documents:runQuery";
-  var DIAS_JANELA = 30;
+  // Fonte: sistema Conferência Geral (Firestore conferenciaptx), coleção "operacoes".
+  // Cada operação: placa, tipoExecucao (ENTRADA|SAIDA), timestamp, dataRef, cliente,
+  // transferencia (SC×SP), paletes [{tipo: PBR|DESCARTAVEL|OUTROS, tipoCustom, quantidade, destino}],
+  // conferenteNome, motorista, status. Lemos só esses campos (as fotos ficam de fora).
+  // Regras iguais às do admin: transferência fora do total geral; cada saída é pareada
+  // (fila FIFO por placa) com a 1ª entrada posterior da mesma placa.
+  var FS_QUERY = "https://firestore.googleapis.com/v1/projects/conferenciaptx/databases/(default)/documents:runQuery";
+  var CAMPOS = ["placa","tipoExecucao","timestamp","dataRef","cliente","transferencia","paletes","conferenteNome","motorista","status"];
   var REFRESH_MS = 5*60*1000;
-  var loaded=false, charts={};
+  var MES = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
+  var C = { env:"#ff8a3d", rec:"#3ddc97", sp:"#a569bd", spRec:"#4d9fff" };
+  var OPS = [], loaded = false, loading = false, charts = {};
 
-  function $(s,r){ return (r||document).querySelector(s); }
-  function fmtInt(n){ return (n||0).toLocaleString("pt-BR"); }
-  function setStatus(msg,err){ var el=$("#pal-status"); if(!el) return; if(!msg){el.style.display="none";return;} el.style.display="block"; el.className="insight"+(err?" warn":""); el.textContent=msg; }
-  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  function $(s){ return document.querySelector(s); }
+  function fmt(n){ return (n||0).toLocaleString("pt-BR"); }
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function iso(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function br(k){ return k ? k.slice(8,10)+"/"+k.slice(5,7)+"/"+k.slice(0,4) : "—"; }
+  function ymLbl(ym){ return MES[+ym.slice(5,7)-1]+"/"+ym.slice(2,4); }
+  function mk(id,cfg){ var c=document.getElementById(id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"), window.portoexYoY?window.portoexYoY(cfg):cfg); }
+  function dlc(color){ return { color:color, anchor:"end", align:"end", font:{family:"'JetBrains Mono', monospace", weight:"700", size:10}, formatter:function(v){ return v ? fmt(v) : ""; } }; }
+  var scales = { x:{ grid:{color:"rgba(255,255,255,.05)"}, ticks:{color:"#8b95ab",font:{size:11}} }, y:{ beginAtZero:true, grid:{color:"rgba(255,255,255,.05)"}, ticks:{color:"#8b95ab",font:{size:11}} } };
+  function status(sel, html, err){ var el=$(sel); if(!el) return; if(!html){ el.style.display="none"; return; } el.style.display="block"; el.className="insight"+(err?" warn":""); el.innerHTML=html; }
 
-  // ---- Firestore REST: converte um "fields" tipado em objeto JS simples ----
   function fsVal(v){
     if(v==null) return null;
-    if("stringValue" in v) return v.stringValue;
-    if("integerValue" in v) return parseInt(v.integerValue,10);
-    if("doubleValue" in v) return v.doubleValue;
-    if("booleanValue" in v) return v.booleanValue;
-    if("timestampValue" in v) return v.timestampValue;
-    if("nullValue" in v) return null;
-    if("mapValue" in v) return fsFields((v.mapValue&&v.mapValue.fields)||{});
-    if("arrayValue" in v){ var a=(v.arrayValue&&v.arrayValue.values)||[]; return a.map(fsVal); }
+    if("stringValue" in v) return v.stringValue; if("integerValue" in v) return parseInt(v.integerValue,10);
+    if("doubleValue" in v) return v.doubleValue; if("booleanValue" in v) return v.booleanValue;
+    if("timestampValue" in v) return v.timestampValue; if("nullValue" in v) return null;
+    if("mapValue" in v){ var o={}, f=(v.mapValue&&v.mapValue.fields)||{}; Object.keys(f).forEach(function(k){ o[k]=fsVal(f[k]); }); return o; }
+    if("arrayValue" in v) return ((v.arrayValue&&v.arrayValue.values)||[]).map(fsVal);
     return null;
   }
-  function fsFields(f){ var o={}; Object.keys(f||{}).forEach(function(k){ o[k]=fsVal(f[k]); }); return o; }
-
-  // Busca operações dos últimos N dias via runQuery (filtra por timestamp)
-  function fetchOperacoes(){
-    var desde=new Date(); desde.setDate(desde.getDate()-DIAS_JANELA); desde.setHours(0,0,0,0);
-    var body={ structuredQuery:{
-      from:[{collectionId:"operacoes"}],
-      where:{ fieldFilter:{ field:{fieldPath:"timestamp"}, op:"GREATER_THAN_OR_EQUAL",
-        value:{ timestampValue: desde.toISOString() } } },
-      orderBy:[{ field:{fieldPath:"timestamp"}, direction:"DESCENDING" }]
-    }};
+  function fetchOps(){
+    var desde = new Date(new Date().getFullYear()-1, 0, 1);
+    var body = { structuredQuery:{ from:[{collectionId:"operacoes"}],
+      select:{ fields: CAMPOS.map(function(f){ return {fieldPath:f}; }) },
+      where:{ fieldFilter:{ field:{fieldPath:"timestamp"}, op:"GREATER_THAN_OR_EQUAL", value:{ timestampValue: desde.toISOString() } } },
+      orderBy:[{ field:{fieldPath:"timestamp"}, direction:"ASCENDING" }] } };
     return fetch(FS_QUERY,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) })
-      .then(function(r){
-        if(r.status===403) throw new Error("permission-denied");
-        if(!r.ok) throw new Error("HTTP "+r.status);
-        return r.json();
-      })
+      .then(function(r){ if(r.status===403) throw new Error("permission-denied"); if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(arr){
-        // runQuery devolve [{document:{fields}}, ...]; linhas sem "document" são ignoradas
-        return (arr||[]).filter(function(x){return x.document;}).map(function(x){
-          var o=fsFields(x.document.fields||{});
-          o._ts = x.document.fields && x.document.fields.timestamp ? x.document.fields.timestamp.timestampValue : null;
+        return (arr||[]).filter(function(x){ return x.document; }).map(function(x){
+          var o={}, f=x.document.fields||{}; Object.keys(f).forEach(function(k){ o[k]=fsVal(f[k]); });
+          var d = o.timestamp ? new Date(o.timestamp) : null;
+          if((!d || isNaN(d)) && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(o.dataRef||"")){ var p=o.dataRef.split("/"); d=new Date(+p[2],+p[1]-1,+p[0]); }
+          o._d = d && !isNaN(d) ? d : null; o._ms = o._d ? o._d.getTime() : 0; o._k = o._d ? iso(o._d) : "";
+          o._pal = Array.isArray(o.paletes) ? o.paletes.filter(Boolean) : [];
+          o._tot = o._pal.reduce(function(s,p){ return s+(parseInt(p.quantidade,10)||0); },0);
+          o._placaKey = String(o.placa||"").toUpperCase().replace(/[^A-Z0-9]/g,"") || "?";
           return o;
-        });
+        }).filter(function(o){ return o._d; });
       });
   }
 
-  // ---- Helpers de palete (espelham a lógica do admin.html) ----
-  function palLabel(p){
-    if(!p) return "Outros";
-    if(p.tipo==="PBR") return "PBR";
-    if(p.tipo==="DESCARTAVEL") return "Descartável";
-    if(p.tipo==="OUTROS") return (p.tipoCustom&&String(p.tipoCustom).trim())?String(p.tipoCustom).trim():"Outros";
-    return p.tipo||"Outros";
-  }
-  function dataDaOp(op){
-    var d = op._ts ? new Date(op._ts) : null;
-    if(d && !isNaN(d)) return d;
-    // fallback: dataRef DD/MM/AAAA
-    var dr=op.dataRef; if(dr && /^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dr)){ var p=dr.split("/"); return new Date(+p[2],+p[1]-1,+p[0]); }
-    return null;
-  }
-  var MES_LBL=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
-
-  function analyze(ops){
-    var modelo={PBR:{e:0,s:0},DESCARTAVEL:{e:0,s:0},OUTROS:{e:0,s:0}};
-    var porDia={}, porMes={}, transf={normal:0,transf:0}, cliente={};
-    var totalEnv=0, totalReb=0, opsComPalete=0;
-
-    ops.forEach(function(op){
-      var pals=Array.isArray(op.paletes)?op.paletes:[];
-      if(!pals.length) return;
-      opsComPalete++;
-      var dir = (op.tipoExecucao==="SAIDA")?"s":"e";
-      var d=dataDaOp(op);
-      var diaKey = d? (String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")) : "—";
-      var mesKey = d? (d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")) : "—";
-
-      pals.forEach(function(p){
-        var q=parseInt(p.quantidade,10)||0; if(!q) return;
-        // Totais por direção
-        if(dir==="s") totalEnv+=q; else totalReb+=q;
-        // Por dia / mês (exclui transferência do fluxo normal, como no admin)
-        if(!op.transferencia){
-          (porDia[diaKey]=porDia[diaKey]||{e:0,s:0})[dir]+=q;
-          (porMes[mesKey]=porMes[mesKey]||{e:0,s:0})[dir]+=q;
-          var mk = p.tipo==="PBR"?"PBR":p.tipo==="DESCARTAVEL"?"DESCARTAVEL":"OUTROS";
-          modelo[mk][dir]+=q;
-        }
-        // Transferência
-        if(op.transferencia) transf.transf+=q; else transf.normal+=q;
-        // Cliente (controle paralelo)
-        if(p.destino){ var c=cliente[p.destino]=cliente[p.destino]||{e:0,s:0,t:0}; c[dir]+=q; if(op.transferencia)c.t+=q; }
+  // ---- regras do admin ----
+  function tipoKey(p){ return p.tipo==="PBR" ? "PBR" : p.tipo==="DESCARTAVEL" ? "DESCARTAVEL" : "OUTROS"; }
+  function tipoLbl(p){ if(p.tipo==="PBR") return "PBR"; if(p.tipo==="DESCARTAVEL") return "Descartável"; if(p.tipo==="OUTROS") return (p.tipoCustom&&String(p.tipoCustom).trim())||"Outros"; return p.tipo||"Outros"; }
+  function porTipo(pals){ var m={PBR:0,DESCARTAVEL:0,OUTROS:0}; (pals||[]).forEach(function(p){ m[tipoKey(p)]+=parseInt(p.quantidade,10)||0; }); return m; }
+  function destinos(pals){ var m={}; (pals||[]).forEach(function(p){ var d=String(p.destino||"").trim().toUpperCase(); if(d) m[d]=(m[d]||0)+(parseInt(p.quantidade,10)||0); }); return Object.keys(m).sort().map(function(k){ return k+" "+m[k]; }).join(" · "); }
+  function parear(ops){
+    var porPlaca={}, out=[];
+    ops.filter(function(o){ return o._tot>0; }).forEach(function(o){ (porPlaca[o._placaKey]=porPlaca[o._placaKey]||[]).push(o); });
+    Object.keys(porPlaca).forEach(function(k){
+      var fila=[];
+      porPlaca[k].sort(function(a,b){ return a._ms-b._ms; }).forEach(function(op){
+        if(op.tipoExecucao==="SAIDA") fila.push(op);
+        else if(op.tipoExecucao==="ENTRADA") out.push(par(fila.shift()||null, op));
       });
+      fila.forEach(function(s){ out.push(par(s,null)); });
     });
+    return out.sort(function(a,b){ return b.ref._ms-a.ref._ms; });
+  }
+  function par(s,e){
+    var ts = s ? s._tot : null, te = e ? e._tot : null;
+    var sit = !s ? "semsaida" : (te==null ? "pend" : (te>=ts ? "ok" : "dif"));
+    return { s:s, e:e, ref:s||e, ts:ts, te:te, diff:(ts!=null&&te!=null)?te-ts:null, sit:sit,
+      transf:(!s||!!s.transferencia)&&(!e||!!e.transferencia) };
+  }
+  var SIT_LBL = { ok:"OK", dif:"Com diferença", pend:"Sem retorno", semsaida:"Chegada sem saída" };
+  var SIT_CLS = { ok:"ok", dif:"pe", pend:"tr", semsaida:"dv" };
 
-    // dias ordenados (últimos ~30, ordem cronológica)
-    var diasArr=Object.keys(porDia).filter(function(k){return k!=="—";})
-      .sort(function(a,b){ var pa=a.split("/"),pb=b.split("/"); return (pa[1]+pa[0]).localeCompare(pb[1]+pb[0]); })
-      .map(function(k){ return {dia:k, e:porDia[k].e, s:porDia[k].s}; });
+  function periodo(sel){
+    var v=($(sel)||{}).value||"30", hoje=new Date(), a, b=iso(hoje), lbl;
+    if(v==="mes"){ a=iso(new Date(hoje.getFullYear(),hoje.getMonth(),1)); lbl=ymLbl(a.slice(0,7)); }
+    else if(v==="mesant"){ var p=new Date(hoje.getFullYear(),hoje.getMonth()-1,1); a=iso(p); b=iso(new Date(hoje.getFullYear(),hoje.getMonth(),0)); lbl=ymLbl(a.slice(0,7)); }
+    else { a=iso(new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()-(+v-1))); lbl="últimos "+v+" dias"; }
+    return { a:a, b:b, lbl:lbl };
+  }
+  function diasEntre(a,b){ var out=[], d=new Date(+a.slice(0,4),+a.slice(5,7)-1,+a.slice(8,10)), fim=b; while(iso(d)<=fim){ out.push(iso(d)); d.setDate(d.getDate()+1); } return out; }
+  function kpiCard(box,label,val,sub,cls){ var d=document.createElement("div"); d.className="kpi "+(cls||""); d.innerHTML='<div class="kpi-label">'+label+'</div><div class="kpi-value">'+val+'</div><div class="kpi-foot"><span>'+sub+'</span></div>'; box.appendChild(d); }
+  function dirOf(op){ return op.tipoExecucao==="SAIDA" ? "s" : "e"; }
 
-    var mesesArr=Object.keys(porMes).filter(function(k){return k!=="—";}).sort()
-      .map(function(k){ var mm=parseInt(k.split("-")[1],10)-1; return {mes:MES_LBL[mm]||k, e:porMes[k].e, s:porMes[k].s}; });
+  function chartsFluxo(ops, per, idDia, idMes, cEnv, cRec, lblEnv, lblRec){
+    var dias=diasEntre(per.a,per.b), porDia={}, porMes={};
+    ops.forEach(function(o){
+      if(!o._tot) return; var d=dirOf(o);
+      if(o._k>=per.a && o._k<=per.b){ (porDia[o._k]=porDia[o._k]||{e:0,s:0})[d]+=o._tot; }
+      var ym=o._k.slice(0,7); (porMes[ym]=porMes[ym]||{e:0,s:0})[d]+=o._tot;
+    });
+    mk(idDia,{ type:"bar", data:{ labels:dias.map(function(k){ return k.slice(8,10)+"/"+k.slice(5,7); }), datasets:[
+      { label:lblEnv, data:dias.map(function(k){ return porDia[k]?porDia[k].s:0; }), backgroundColor:cEnv, borderRadius:4, datalabels:dlc(cEnv) },
+      { label:lblRec, data:dias.map(function(k){ return porDia[k]?porDia[k].e:0; }), backgroundColor:cRec, borderRadius:4, datalabels:dlc(cRec) } ]},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:22,right:10}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
+    var mks=Object.keys(porMes).sort();
+    mk(idMes,{ type:"bar", data:{ labels:mks.map(ymLbl), datasets:[
+      { label:lblEnv, data:mks.map(function(k){ return porMes[k].s; }), backgroundColor:cEnv, borderRadius:6, datalabels:dlc(cEnv) },
+      { label:lblRec, data:mks.map(function(k){ return porMes[k].e; }), backgroundColor:cRec, borderRadius:6, datalabels:dlc(cRec) } ]},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:24,right:14}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
+  }
+  function tabelaTipos(id, ops){
+    var t={PBR:{e:0,s:0},DESCARTAVEL:{e:0,s:0},OUTROS:{e:0,s:0}}, outros={};
+    ops.forEach(function(o){ var d=dirOf(o); o._pal.forEach(function(p){ var q=parseInt(p.quantidade,10)||0, k=tipoKey(p); t[k][d]+=q; if(k==="OUTROS"){ var n=tipoLbl(p); (outros[n]=outros[n]||{e:0,s:0})[d]+=q; } }); });
+    var linhas=[["PBR","PBR"],["DESCARTAVEL","Descartável"],["OUTROS","Outros"]];
+    var tot={e:0,s:0}; linhas.forEach(function(l){ tot.e+=t[l[0]].e; tot.s+=t[l[0]].s; });
+    var row=function(nome,o,bold){ var sd=o.e-o.s; return '<tr'+(bold?' style="font-weight:700"':'')+'><td>'+nome+'</td><td style="color:'+C.env+'">'+fmt(o.s)+'</td><td style="color:'+C.rec+'">'+fmt(o.e)+'</td><td style="color:'+(sd<0?"var(--red)":"var(--green)")+'">'+(sd>0?"+":"")+fmt(sd)+'</td></tr>'; };
+    var det=Object.keys(outros).filter(function(n){ return outros[n].e||outros[n].s; }).sort();
+    document.getElementById(id).innerHTML='<thead><tr><th>Tipo</th><th>Enviados (saída)</th><th>Recebidos (entrada)</th><th>Saldo</th></tr></thead><tbody>'
+      + linhas.map(function(l){ return row(l[1],t[l[0]]); }).join("")
+      + det.map(function(n){ return row('<span style="color:var(--ink-muted)">↳ '+esc(n)+'</span>',outros[n]); }).join("")
+      + row("Total",tot,true)+'</tbody>';
+    return t;
+  }
+  function tabelaClientes(id, ops, comTransf){
+    var c={};
+    ops.forEach(function(o){ var d=dirOf(o); o._pal.forEach(function(p){ var k=String(p.destino||"").trim().toUpperCase(); if(!k) return; var x=c[k]=c[k]||{e:0,s:0,t:0}; var q=parseInt(p.quantidade,10)||0; x[d]+=q; if(o.transferencia) x.t+=q; }); });
+    var ks=Object.keys(c).sort(function(a,b){ return (c[b].s+c[b].e)-(c[a].s+c[a].e); });
+    document.getElementById(id).innerHTML = !ks.length ? '<tbody><tr><td class="dex-none">Nenhum palete com cliente de destino no período.</td></tr></tbody>'
+      : '<thead><tr><th>Cliente</th><th>Enviados</th><th>Recebidos</th><th>Saldo</th>'+(comTransf?'<th>Em transferência</th>':'')+'</tr></thead><tbody>'
+        + ks.map(function(k){ var x=c[k], sd=x.e-x.s; return '<tr><td><b>'+esc(k)+'</b></td><td>'+fmt(x.s)+'</td><td>'+fmt(x.e)+'</td><td style="color:'+(sd<0?"var(--red)":"var(--green)")+';font-weight:700">'+(sd>0?"+":"")+fmt(sd)+'</td>'+(comTransf?'<td>'+(x.t?fmt(x.t):"—")+'</td>':'')+'</tr>'; }).join("")+'</tbody>';
+  }
+  function busca(sel){ return (($(sel)||{}).value||"").trim().toLowerCase(); }
+  function hayPar(p){ var o=p.s||p.e, o2=p.e||{}; return [o.placa,o.motorista,o2.motorista,o.cliente,o.conferenteNome,o2.conferenteNome,destinos(o._pal)].join(" ").toLowerCase(); }
 
-    var cliArr=Object.keys(cliente).map(function(k){ return {nome:k, e:cliente[k].e, s:cliente[k].s, t:cliente[k].t}; })
-      .filter(function(x){return x.e||x.s;}).sort(function(a,b){return (b.e+b.s)-(a.e+a.s);});
+  // ================= ABA 19 · CONTROLE GERAL =================
+  function renderGeral(){
+    var per=periodo("#palPer");
+    var ops=OPS.filter(function(o){ return !o.transferencia; });
+    var opsPer=ops.filter(function(o){ return o._k>=per.a && o._k<=per.b; });
+    var env=0, rec=0; opsPer.forEach(function(o){ if(dirOf(o)==="s") env+=o._tot; else rec+=o._tot; });
+    // Como no admin: o pareamento começa no início do período (evita arrastar retornos
+    // não lançados de meses anteriores); retornos depois do fim do período ainda contam.
+    var pares=paresDesde(per.a).filter(function(p){ return !p.transf && p.ref._k>=per.a && p.ref._k<=per.b; });
+    var pend=pares.filter(function(p){ return p.sit==="pend"; });
+    var nPar=pares.filter(function(p){ return p.sit==="ok"||p.sit==="dif"; }).length, nOk=pares.filter(function(p){ return p.sit==="ok"; }).length;
+    var nDif=pares.filter(function(p){ return p.sit==="dif"; }).length, faltam=pares.filter(function(p){ return p.sit==="dif"; }).reduce(function(s,p){ return s-p.diff; },0);
+    var k=document.getElementById("kpi-paletes"); k.innerHTML="";
+    kpiCard(k,"Enviados",fmt(env),"saídas · "+per.lbl,"accent");
+    kpiCard(k,"Recebidos",fmt(rec),"entradas · "+per.lbl,"green");
+    kpiCard(k,"Saldo",(rec-env>0?"+":"")+fmt(rec-env),"recebidos − enviados",(rec-env)<0?"red":"green");
+    kpiCard(k,"Retornos OK",nPar?Math.round(nOk/nPar*100)+"%":"—",fmt(nOk)+" de "+fmt(nPar)+" retornos · "+fmt(nDif)+" com diferença ("+fmt(faltam)+" a menos)","purple");
+    kpiCard(k,"Sem retorno",fmt(pend.length),"saídas do período sem chegada da placa","yellow");
 
-    return { modelo:modelo, dias:diasArr, meses:mesesArr, transf:transf, cliente:cliArr,
-             totalEnv:totalEnv, totalReb:totalReb, opsComPalete:opsComPalete, saldo:totalReb-totalEnv };
+    $("#palSubDia").textContent="Paletes enviados e recebidos por dia · "+per.lbl;
+    chartsFluxo(ops, per, "chartPalDia", "chartPalMes", C.env, C.rec, "Enviados", "Recebidos");
+    var t=tabelaTipos("tablePalTipo", opsPer);
+    mk("chartPalModelo",{ type:"bar", data:{ labels:["PBR","Descartável","Outros"], datasets:[
+      { label:"Enviados", data:[t.PBR.s,t.DESCARTAVEL.s,t.OUTROS.s], backgroundColor:C.env, borderRadius:5, datalabels:dlc(C.env) },
+      { label:"Recebidos", data:[t.PBR.e,t.DESCARTAVEL.e,t.OUTROS.e], backgroundColor:C.rec, borderRadius:5, datalabels:dlc(C.rec) } ]},
+      options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false, layout:{padding:{right:36}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
+    tabelaClientes("tablePalCliente", OPS.filter(function(o){ return o._k>=per.a && o._k<=per.b; }), true);
+
+    var hoje=Date.now();
+    document.getElementById("tablePalPend").innerHTML = !pend.length ? '<tbody><tr><td class="dex-none">Nenhuma saída pendente de retorno. 👏</td></tr></tbody>'
+      : '<thead><tr><th>Saída</th><th>Placa</th><th>Motorista</th><th>Paletes</th><th>Há</th></tr></thead><tbody>'
+        + pend.slice().sort(function(a,b){ return a.s._ms-b.s._ms; }).slice(0,15).map(function(p){ var dias=Math.floor((hoje-p.s._ms)/86400000); return '<tr><td>'+br(p.s._k)+'</td><td><b>'+esc(p.s.placa)+'</b></td><td>'+esc(p.s.motorista||"—")+'</td><td>'+fmt(p.ts)+'</td><td class="'+(dias>7?"dex-hot":"")+'">'+dias+' d</td></tr>'; }).join("")+'</tbody>';
+
+    var sit=($("#palSit")||{}).value||"", q=busca("#palBusca");
+    var lista=pares.filter(function(p){ return (!sit||p.sit===sit) && (!q||hayPar(p).indexOf(q)>=0); });
+    $("#palSubGestao").textContent=fmt(lista.length)+" registro(s) · "+per.lbl+" (sem transferências)";
+    document.getElementById("tablePalGestao").innerHTML = gestaoHtml(lista, false);
+
+    var ins=document.getElementById("insight-paletes");
+    ins.className="insight"+((rec-env)<0||pend.length?" warn":"");
+    ins.innerHTML="<strong>"+esc(per.lbl.charAt(0).toUpperCase()+per.lbl.slice(1))+":</strong> "+fmt(env)+" paletes enviados e "+fmt(rec)+" recebidos (saldo "+(rec-env>0?"+":"")+fmt(rec-env)+"). "
+      +(nPar?fmt(nOk)+" de "+fmt(nPar)+" retornos vieram completos"+(nDif?", "+fmt(nDif)+" com diferença ("+fmt(faltam)+" paletes a menos)":"")+". ":"")
+      +(pend.length?"<strong>"+fmt(pend.length)+"</strong> saída(s) ainda sem retorno.":"Nenhuma saída pendente de retorno.");
+    window.__palGestao = lista;
+  }
+  function gestaoHtml(lista, sp){
+    if(!lista.length) return '<tbody><tr><td class="dex-none">Nenhum registro neste filtro.</td></tr></tbody>';
+    return '<thead><tr><th>Data saída</th><th>Placa</th><th>Motorista</th><th>Cliente</th>'+(sp?'<th>Destino dos paletes</th>':'')+'<th>Saiu PBR</th><th>Saiu Desc.</th><th>Saiu Outros</th><th>Saiu total</th><th>Retorno</th><th>Voltou</th><th>Dif.</th><th>Situação</th><th>Conferente</th></tr></thead><tbody>'
+      + lista.map(function(p){
+          var s=p.s, e=p.e, ts=s?porTipo(s._pal):null;
+          return '<tr><td>'+(s?br(s._k):'<span class="dex-none">—</span>')+'</td><td><b>'+esc((s||e).placa)+'</b></td><td>'+esc((s&&s.motorista)||(e&&e.motorista)||"—")+'</td><td style="max-width:180px">'+esc((s&&s.cliente)||(e&&e.cliente)||"—")+'</td>'
+            +(sp?'<td>'+esc(s?destinos(s._pal)||"—":"—")+'</td>':'')
+            +'<td>'+(ts&&ts.PBR?fmt(ts.PBR):"—")+'</td><td>'+(ts&&ts.DESCARTAVEL?fmt(ts.DESCARTAVEL):"—")+'</td><td>'+(ts&&ts.OUTROS?fmt(ts.OUTROS):"—")+'</td><td><b>'+(p.ts!=null?fmt(p.ts):"—")+'</b></td>'
+            +'<td>'+(e?br(e._k):"—")+'</td><td>'+(p.te!=null?fmt(p.te):"—")+'</td><td class="'+(p.diff<0?"dex-hot":"")+'">'+(p.diff!=null?(p.diff>0?"+":"")+fmt(p.diff):"—")+'</td>'
+            +'<td><span class="dex-st '+SIT_CLS[p.sit]+'">'+SIT_LBL[p.sit]+'</span></td><td>'+esc((s&&s.conferenteNome)||(e&&e.conferenteNome)||"—")+'</td></tr>';
+        }).join("")+'</tbody>';
   }
 
-  function kpi(label,value,sub){
-    return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
+  // ================= ABA 21 · TRANSFERÊNCIA SP =================
+  function renderSP(){
+    var per=periodo("#pspPer");
+    var ops=OPS.filter(function(o){ return !!o.transferencia; });
+    var opsPer=ops.filter(function(o){ return o._k>=per.a && o._k<=per.b; });
+    var saidas=opsPer.filter(function(o){ return dirOf(o)==="s" && o._tot>0; });
+    var env=saidas.reduce(function(s,o){ return s+o._tot; },0), rec=opsPer.filter(function(o){ return dirOf(o)==="e"; }).reduce(function(s,o){ return s+o._tot; },0);
+    var placas={}; saidas.forEach(function(o){ var k=String(o.placa||"?").toUpperCase(); placas[k]=placas[k]||{n:0,q:0}; placas[k].n++; placas[k].q+=o._tot; });
+    var pares=paresDesde(per.a).filter(function(p){ return p.s && p.s.transferencia && p.s._k>=per.a && p.s._k<=per.b; });
+    var pend=pares.filter(function(p){ return p.sit==="pend"; }).length;
+    var k=document.getElementById("kpi-psp"); k.innerHTML="";
+    kpiCard(k,"Enviados a SP",fmt(env),"paletes em transferência · "+per.lbl,"accent");
+    kpiCard(k,"Viagens",fmt(saidas.length),fmt(Object.keys(placas).length)+" veículo(s) diferentes","purple");
+    kpiCard(k,"Média por viagem",saidas.length?(env/saidas.length).toLocaleString("pt-BR",{maximumFractionDigits:1}):"—","paletes por veículo","yellow");
+    kpiCard(k,"Recebidos de SP",fmt(rec),"saldo "+(rec-env>0?"+":"")+fmt(rec-env)+(pend?" · "+fmt(pend)+" sem retorno":""),(rec-env)<0?"red":"green");
+
+    $("#pspSubDia").textContent="Paletes em transferência por dia · "+per.lbl;
+    chartsFluxo(ops, per, "chartPspDia", "chartPspMes", C.sp, C.spRec, "Enviados a SP", "Retornos de SP");
+    var pk=Object.keys(placas).sort(function(a,b){ return placas[b].q-placas[a].q; }).slice(0,12);
+    mk("chartPspPlaca",{ type:"bar", data:{ labels:pk.map(function(p){ return p+" ("+placas[p].n+"x)"; }), datasets:[{ label:"Enviados", data:pk.map(function(p){ return placas[p].q; }), backgroundColor:C.sp, borderRadius:6, datalabels:dlc(C.sp) }] },
+      options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}}, scales:scales, plugins:{ legend:{display:false} } } });
+    tabelaTipos("tablePspTipo", opsPer);
+    tabelaClientes("tablePspCliente", opsPer, false);
+    var q=busca("#pspBusca");
+    var lista=pares.filter(function(p){ return !q||hayPar(p).indexOf(q)>=0; });
+    document.getElementById("tablePspEnvios").innerHTML = gestaoHtml(lista, true);
+    var top=pk[0];
+    var ins=document.getElementById("insight-psp");
+    ins.className="insight"+(pend?" warn":"");
+    ins.innerHTML="<strong>Transferências SP · "+esc(per.lbl)+":</strong> "+fmt(env)+" paletes enviados em "+fmt(saidas.length)+" viagem(ns)"+(top?"; veículo com mais envios: <strong>"+esc(top)+"</strong> ("+fmt(placas[top].q)+" paletes em "+placas[top].n+" viagem(ns))":"")+". Retornos de SP: "+fmt(rec)+"."+(pend?" "+fmt(pend)+" envio(s) ainda sem retorno da placa.":"");
+    window.__pspEnvios = lista;
   }
 
-  var C_ENV="#c0392b", C_REB="#1a7a3c", C_TRANSF="#0c7c8c";
-
-  function render(a){
-    var k=$("#kpi-paletes");
-    if(k) k.innerHTML =
-      kpi("Enviados (saída)", '<span style="color:'+C_ENV+'">'+fmtInt(a.totalEnv)+'</span>', "últimos "+DIAS_JANELA+" dias") +
-      kpi("Recebidos (entrada)", '<span style="color:'+C_REB+'">'+fmtInt(a.totalReb)+'</span>', "últimos "+DIAS_JANELA+" dias") +
-      kpi("Saldo líquido", (a.saldo>=0?"+":"")+fmtInt(a.saldo), "entrada − saída") +
-      kpi("Em transferência", fmtInt(a.transf.transf), "SC×SP") +
-      kpi("Operações c/ palete", fmtInt(a.opsComPalete), "no período") +
-      kpi("Clientes", fmtInt(a.cliente.length), "controle paralelo");
-
-    if(typeof Chart==="undefined") return;
-    var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
-    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),window.portoexYoY?window.portoexYoY(cfg):cfg); }
-    var base={ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:ink}},datalabels:{display:false}},
-      scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
-
-    // Por dia (barras agrupadas enviados/recebidos)
-    mk("chartPalDia",{ type:"bar",
-      data:{ labels:a.dias.map(function(x){return x.dia;}),
-        datasets:[
-          { label:"Recebidos", data:a.dias.map(function(x){return x.e;}), backgroundColor:C_REB, borderRadius:4 },
-          { label:"Enviados",  data:a.dias.map(function(x){return x.s;}), backgroundColor:C_ENV, borderRadius:4 }
-        ] },
-      options:base });
-
-    // Por modelo (barras: entrada/saída por tipo)
-    var modK=["PBR","DESCARTAVEL","OUTROS"], modL=["PBR","Descartável","Outros"];
-    mk("chartPalModelo",{ type:"bar",
-      data:{ labels:modL,
-        datasets:[
-          { label:"Recebidos", data:modK.map(function(m){return a.modelo[m].e;}), backgroundColor:C_REB, borderRadius:4 },
-          { label:"Enviados",  data:modK.map(function(m){return a.modelo[m].s;}), backgroundColor:C_ENV, borderRadius:4 }
-        ] },
-      options:base });
-
-    // Por mês
-    mk("chartPalMes",{ type:"bar",
-      data:{ labels:a.meses.map(function(x){return x.mes;}),
-        datasets:[
-          { label:"Recebidos", data:a.meses.map(function(x){return x.e;}), backgroundColor:C_REB, borderRadius:4 },
-          { label:"Enviados",  data:a.meses.map(function(x){return x.s;}), backgroundColor:C_ENV, borderRadius:4 }
-        ] },
-      options:base });
-
-    // Transferências (doughnut normal vs transferência)
-    mk("chartPalTransf",{ type:"doughnut",
-      data:{ labels:["Operação normal","Transferência SC×SP"],
-        datasets:[{ data:[a.transf.normal,a.transf.transf], backgroundColor:["#4d9fff",C_TRANSF], borderWidth:0 }] },
-      options:{ responsive:true, maintainAspectRatio:false, cutout:"62%", plugins:{legend:{position:"right",labels:{color:ink}},datalabels:{display:false}} } });
-
-    // Tabela por cliente
-    var tb=$("#tablePalCliente");
-    if(tb){
-      var rows=a.cliente.map(function(c){
-        return "<tr><td style=\"text-align:left\">"+c.nome+"</td><td>"+fmtInt(c.e)+"</td><td>"+fmtInt(c.s)+"</td><td>"+fmtInt(c.t)+"</td></tr>";
-      }).join("");
-      if(!rows) rows='<tr><td colspan="4" style="text-align:left;color:var(--ink-muted)">Nenhum palete destinado a cliente no período</td></tr>';
-      tb.innerHTML='<thead><tr><th style="text-align:left">Cliente</th><th>Recebidos</th><th>Enviados</th><th>Em transf.</th></tr></thead><tbody>'+rows+'</tbody>';
-    }
-
-    var ins=$("#insight-paletes");
-    if(ins){
-      ins.className="insight"+(a.saldo<0?" warn":" good");
-      ins.innerHTML = "No período, entraram <b>"+fmtInt(a.totalReb)+"</b> e saíram <b>"+fmtInt(a.totalEnv)+"</b> paletes"+
-        " (saldo "+(a.saldo>=0?"+":"")+fmtInt(a.saldo)+"), com <b>"+fmtInt(a.transf.transf)+"</b> em transferência SC×SP.";
-    }
+  function exportar(lista, nome, sp){
+    var cell=function(v){ v=v==null?"":String(v); return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+    var head=["Data saída","Placa","Motorista","Cliente"].concat(sp?["Destino dos paletes"]:[]).concat(["Saiu PBR","Saiu Descartável","Saiu Outros","Saiu total","Data retorno","Voltou","Diferença","Situação","Conferente"]);
+    var linhas=(lista||[]).map(function(p){ var s=p.s, e=p.e, ts=s?porTipo(s._pal):{}; return [s?br(s._k):"", (s||e).placa, (s&&s.motorista)||(e&&e.motorista)||"", (s&&s.cliente)||(e&&e.cliente)||""].concat(sp?[s?destinos(s._pal):""]:[]).concat([ts.PBR||"", ts.DESCARTAVEL||"", ts.OUTROS||"", p.ts!=null?p.ts:"", e?br(e._k):"", p.te!=null?p.te:"", p.diff!=null?p.diff:"", SIT_LBL[p.sit], (s&&s.conferenteNome)||(e&&e.conferenteNome)||""]).map(cell).join(";"); });
+    var blob=new Blob(["﻿"+[head.join(";")].concat(linhas).join("\n")],{type:"text/csv;charset=utf-8"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nome+"_"+iso(new Date())+".csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
   }
 
+  function paresDesde(a){ return parear(OPS.filter(function(o){ return o._k>=a; })); }
+  function renderTudo(){ if(!loaded) return; renderGeral(); renderSP(); }
   function loadAll(){
-    setStatus("Carregando dados de paletes…",false);
-    fetchOperacoes().then(function(ops){
-      var a=analyze(ops);
-      render(a);
-      loaded=true;
-      if(!ops.length){ setStatus("Nenhuma operação encontrada nos últimos "+DIAS_JANELA+" dias.",true); }
-      else setStatus("",false);
-      console.log("[Paletes] operações:",ops.length);
+    if(loading) return; loading=true;
+    if(!loaded){ status("#pal-status","Carregando operações do Conferência Geral…"); status("#psp-status","Carregando operações do Conferência Geral…"); }
+    fetchOps().then(function(ops){
+      OPS=ops; loaded=true; renderTudo();
+      status("#pal-status", ops.length?"":"Nenhuma operação encontrada desde janeiro do ano passado.", !ops.length);
+      status("#psp-status", ops.some(function(o){ return o.transferencia; })?"":"Nenhum veículo marcado como transferência SC × SP desde janeiro do ano passado.", false);
+      console.log("[Paletes] operações:",ops.length,"| transferências:",ops.filter(function(o){ return o.transferencia; }).length);
     }).catch(function(e){
       console.error("[Paletes]",e);
-      if(String(e.message).indexOf("permission-denied")>=0){
-        setStatus("Acesso negado ao Firestore. Publique a regra que libera leitura pública da coleção 'operacoes' (veja instruções).",true);
-      }else{
-        setStatus("Falha ao carregar dados de paletes: "+(e.message||e),true);
-      }
-    });
+      var msg = String(e.message).indexOf("permission-denied")>=0
+        ? "<strong>Acesso negado ao Firestore.</strong> Confira se a regra de leitura pública da coleção <code>operacoes</code> está publicada no projeto conferenciaptx."
+        : "Falha ao carregar as operações de paletes: "+esc(e.message||e);
+      status("#pal-status",msg,true); status("#psp-status",msg,true);
+    }).then(function(){ loading=false; });
   }
 
+  ["#palPer","#palSit"].forEach(function(s){ $(s).addEventListener("change",function(){ if(loaded) renderGeral(); }); });
+  $("#palBusca").addEventListener("input",function(){ if(loaded) renderGeral(); });
+  $("#pspPer").addEventListener("change",function(){ if(loaded) renderSP(); });
+  $("#pspBusca").addEventListener("input",function(){ if(loaded) renderSP(); });
+  $("#palCsv").addEventListener("click",function(){ exportar(window.__palGestao,"paletes_gestao_veiculos",false); });
+  $("#pspCsv").addEventListener("click",function(){ exportar(window.__pspEnvios,"paletes_transferencia_sp",true); });
   function maybeLoad(){
-    var sec=document.querySelector('.page[data-page="paletes"]');
-    if(sec&&sec.classList.contains("active")&&!loaded) loadAll();
+    var a=document.querySelector('.page[data-page="paletes"]'), b=document.querySelector('.page[data-page="paletes_sp"]');
+    if(((a&&a.classList.contains("active"))||(b&&b.classList.contains("active"))) && !loaded) loadAll();
   }
-  document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
+  document.querySelectorAll(".nav-btn").forEach(function(btn){ btn.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
   document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
   setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
   setTimeout(maybeLoad, 300);
 })();
 </script>
-
-
-<!-- ============ ABA PALETES SP (independente) ============ -->
-<script>
-(function(){
-  "use strict";
-  var SHEET_ID="1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I";
-  var GID="1100141065";
-  var REFRESH_MS=5*60*1000;
-  var loaded=false, charts={};
-
-  function $(s,r){ return (r||document).querySelector(s); }
-  function norm(s){ return s==null?"":String(s).trim(); }
-  function up(s){ return norm(s).toUpperCase(); }
-  function fmtInt(n){ return (n||0).toLocaleString("pt-BR"); }
-  function parseNum(v){ if(v==null) return 0; var s=String(v).trim().replace(/\./g,"").replace(",","."); var n=parseFloat(s); return isNaN(n)?0:n; }
-  function setStatus(msg,err){ var el=$("#psp-status"); if(!el) return; if(!msg){el.style.display="none";return;} el.style.display="block"; el.className="insight"+(err?" warn":""); el.textContent=msg; }
-  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
-
-  var MES_LBL=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
-  function parseData(s){
-    var m=norm(s).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if(m) return {d:+m[1],mes:+m[2]-1,ano:+m[3], dia:m[1].padStart(2,"0")+"/"+m[2].padStart(2,"0"), mesKey:m[3]+"-"+m[2].padStart(2,"0")};
-    return null;
-  }
-
-  // ---- CSV via gviz + fallback JSONP (mesmo padrão da Mattel) ----
-  function csvUrl(){ return "https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:csv&gid="+GID+"&_="+Date.now(); }
-  function loadCSV(){ return loadFetch().catch(function(e){ console.warn("[PaletesSP] fetch falhou, JSONP…",e.message); return loadJSONP(); }); }
-  function loadFetch(){
-    return fetch(csvUrl()).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); })
-      .then(function(t){ return Papa.parse(t,{skipEmptyLines:false}).data; });
-  }
-  function loadJSONP(){
-    return new Promise(function(resolve,reject){
-      var cb="pspCB_"+Math.random().toString(36).slice(2);
-      var to=setTimeout(function(){cleanup();reject(new Error("Tempo esgotado ao carregar a planilha."));},15000);
-      function cleanup(){ clearTimeout(to); delete window[cb]; if(sc.parentNode) sc.parentNode.removeChild(sc); }
-      window[cb]=function(dt){
-        cleanup();
-        try{
-          var RE=/^Date\((\d+),\s*(\d+),\s*(\d+)/;
-          var rows=(dt.table.rows||[]).map(function(row){
-            return (row.c||[]).map(function(cell){
-              if(!cell) return "";
-              var v=(cell.v!==undefined&&cell.v!==null)?String(cell.v):"";
-              var dm=v.match(RE);
-              if(dm) return String(+dm[3]).padStart(2,"0")+"/"+String(+dm[2]+1).padStart(2,"0")+"/"+dm[1];
-              if(cell.f!==undefined&&cell.f!==null) return String(cell.f);
-              return v;
-            });
-          });
-          resolve(rows);
-        }catch(e){ reject(e); }
-      };
-      var sc=document.createElement("script");
-      sc.src="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?gid="+GID+"&tqx=out:json;responseHandler:"+cb+"&_="+Date.now();
-      sc.onerror=function(){ cleanup(); reject(new Error("Falha ao carregar o script da planilha.")); };
-      document.body.appendChild(sc);
-    });
-  }
-
-  // A planilha tem cabeçalho na linha 4 (idx 3). Colunas de ENVIO: 0 DATA, 1 PLACA,
-  // 2 MOTORISTA, 3 QTD, 4 RESPONSÁVEL(destino). DEVOLUÇÃO: 7 DATA, 10 QTD.
-  function analyze(rows){
-    var braftDia={}, braftMes={}, fluxoMes={}, braftLista=[];
-    var totBraft=0, totFilial=0, totDevol=0, enviosBraft=0;
-
-    for(var i=4;i<rows.length;i++){
-      var r=rows[i]; if(!r) continue;
-      // ENVIO
-      var de=norm(r[0]); var pd=parseData(de);
-      var resp=up(r[4]); var q=parseNum(r[3]);
-      if(pd && q>0 && (resp==="BRAFT"||resp==="FILIAL SP")){
-        (fluxoMes[pd.mesKey]=fluxoMes[pd.mesKey]||{env:0,dev:0}).env+=q;
-        if(resp==="BRAFT"){
-          totBraft+=q; enviosBraft++;
-          braftDia[pd.dia]=(braftDia[pd.dia]||0)+q;
-          braftMes[pd.mesKey]=(braftMes[pd.mesKey]||0)+q;
-          braftLista.push({data:de, placa:norm(r[1]), motorista:norm(r[2]), qtd:q, mesKey:pd.mesKey, ord:pd.ano*10000+(pd.mes+1)*100+pd.d});
-        }else{ totFilial+=q; }
-      }
-      // DEVOLUÇÃO (consolidada, sem destino)
-      var dd=parseData(r[7]); var qd=parseNum(r[10]);
-      if(dd && qd>0){
-        totDevol+=qd;
-        (fluxoMes[dd.mesKey]=fluxoMes[dd.mesKey]||{env:0,dev:0}).dev+=qd;
-      }
-    }
-
-    var diasArr=Object.keys(braftDia).map(function(k){
-      var p=k.split("/"); return {dia:k, qtd:braftDia[k], ord:+p[1]*100+ +p[0]};
-    }).sort(function(a,b){return a.ord-b.ord;});
-
-    var mesesArr=Object.keys(braftMes).sort().map(function(k){
-      return {mes:MES_LBL[+k.split("-")[1]-1]||k, qtd:braftMes[k]};
-    });
-
-    var fluxoArr=Object.keys(fluxoMes).sort().map(function(k){
-      return {mes:MES_LBL[+k.split("-")[1]-1]||k, env:fluxoMes[k].env, dev:fluxoMes[k].dev};
-    });
-
-    braftLista.sort(function(a,b){return b.ord-a.ord;});
-
-    return { diasBraft:diasArr, mesesBraft:mesesArr, fluxo:fluxoArr, braftLista:braftLista,
-             totBraft:totBraft, totFilial:totFilial, totDevol:totDevol, enviosBraft:enviosBraft,
-             totEnvios:totBraft+totFilial };
-  }
-
-  function kpi(label,value,sub){
-    return '<div class="kpi"><div class="kpi-label">'+label+'</div><div class="kpi-value">'+value+'</div>'+(sub?'<div class="kpi-foot"><span>'+sub+'</span></div>':'')+'</div>';
-  }
-  var C_BRAFT="#8e44ad", C_FILIAL="#2980b9", C_DEV="#1a7a3c";
-
-  function render(a){
-    var k=$("#kpi-psp");
-    if(k) k.innerHTML =
-      kpi("Enviados à BRAFT", '<span style="color:#a569bd">'+fmtInt(a.totBraft)+'</span>', a.enviosBraft+" envios") +
-      kpi("Enviados à Filial SP", fmtInt(a.totFilial), "PBR1") +
-      kpi("Total enviado", fmtInt(a.totEnvios), "Itajaí → SP") +
-      kpi("Devolvido (retorno)", fmtInt(a.totDevol), "consolidado") +
-      kpi("Saldo em SP", (a.totEnvios-a.totDevol>=0?"":"")+fmtInt(a.totEnvios-a.totDevol), "enviado − devolvido") +
-      kpi("% BRAFT", (a.totEnvios? Math.round(a.totBraft/a.totEnvios*100):0)+"%", "do total enviado");
-
-    if(typeof Chart==="undefined") return;
-    var gridC=css("--grid")||"rgba(255,255,255,.06)", ink=css("--ink-dim")||"#a4adc4";
-    function mk(id,cfg){ var c=$("#"+id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"),window.portoexYoY?window.portoexYoY(cfg):cfg); }
-    var base={ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:ink}},datalabels:{display:false}},
-      scales:{x:{ticks:{color:ink},grid:{color:gridC}},y:{beginAtZero:true,ticks:{color:ink},grid:{color:gridC}}} };
-
-    // BRAFT por dia (barras roxas)
-    mk("chartPspBraftDia",{ type:"bar",
-      data:{ labels:a.diasBraft.map(function(x){return x.dia;}),
-        datasets:[{ label:"Paletes BRAFT", data:a.diasBraft.map(function(x){return x.qtd;}),
-          backgroundColor:function(){var c=$("#chartPspBraftDia");if(!c)return C_BRAFT;var g=c.getContext("2d").createLinearGradient(0,0,0,320);g.addColorStop(0,C_BRAFT);g.addColorStop(1,"#5b2c6f");return g;}(), borderRadius:4 }] },
-      options:Object.assign({},base,{plugins:{legend:{display:false},datalabels:{display:false}}}) });
-
-    // BRAFT por mês
-    mk("chartPspBraftMes",{ type:"bar",
-      data:{ labels:a.mesesBraft.map(function(x){return x.mes;}),
-        datasets:[{ label:"Paletes BRAFT", data:a.mesesBraft.map(function(x){return x.qtd;}), backgroundColor:C_BRAFT, borderRadius:6 }] },
-      options:Object.assign({},base,{plugins:{legend:{display:false},datalabels:{display:false}}}) });
-
-    // Destino (doughnut BRAFT vs Filial)
-    mk("chartPspDestino",{ type:"doughnut",
-      data:{ labels:["BRAFT","Filial SP"], datasets:[{ data:[a.totBraft,a.totFilial], backgroundColor:[C_BRAFT,C_FILIAL], borderWidth:0 }] },
-      options:{ responsive:true, maintainAspectRatio:false, cutout:"62%", plugins:{legend:{position:"right",labels:{color:ink}},datalabels:{display:false}} } });
-
-    // Fluxo envios x devoluções por mês
-    mk("chartPspFluxo",{ type:"bar",
-      data:{ labels:a.fluxo.map(function(x){return x.mes;}),
-        datasets:[
-          { label:"Enviados", data:a.fluxo.map(function(x){return x.env;}), backgroundColor:C_FILIAL, borderRadius:4 },
-          { label:"Devolvidos", data:a.fluxo.map(function(x){return x.dev;}), backgroundColor:C_DEV, borderRadius:4 }
-        ] },
-      options:base });
-
-    // Tabela últimos envios BRAFT
-    var tb=$("#tablePspBraft");
-    if(tb){
-      var rows=a.braftLista.slice(0,20).map(function(x){
-        return "<tr><td style=\"text-align:left\">"+x.data+"</td><td style=\"text-align:left\">"+(x.placa||"—")+"</td><td style=\"text-align:left\">"+(x.motorista||"—")+"</td><td>"+fmtInt(x.qtd)+"</td></tr>";
-      }).join("");
-      if(!rows) rows='<tr><td colspan="4" style="text-align:left;color:var(--ink-muted)">Nenhum envio à BRAFT encontrado</td></tr>';
-      tb.innerHTML='<thead><tr><th style="text-align:left">Data envio</th><th style="text-align:left">Placa</th><th style="text-align:left">Motorista</th><th>Qtd PBR1</th></tr></thead><tbody>'+rows+'</tbody>';
-    }
-
-    var ins=$("#insight-psp");
-    if(ins){
-      ins.className="insight good";
-      ins.innerHTML="Foram enviados <b>"+fmtInt(a.totBraft)+" paletes PBR1</b> à BRAFT em "+a.enviosBraft+" envios ("+
-        (a.totEnvios?Math.round(a.totBraft/a.totEnvios*100):0)+"% do total). O retorno de "+fmtInt(a.totDevol)+
-        " paletes vem consolidado, sem separação por destino.";
-    }
-  }
-
-  function loadAll(){
-    setStatus("Carregando dados de Paletes SP…",false);
-    loadCSV().then(function(rows){
-      var a=analyze(rows||[]);
-      render(a);
-      loaded=true;
-      if(!a.totEnvios){ setStatus("Planilha carregada, mas nenhum envio foi reconhecido. Verifique se a aba (gid) está correta.",true); }
-      else setStatus("",false);
-      console.log("[PaletesSP] linhas:",(rows||[]).length,"| BRAFT:",a.totBraft);
-    }).catch(function(e){
-      console.error("[PaletesSP]",e);
-      setStatus("Falha ao carregar Paletes SP: "+(e.message||e),true);
-    });
-  }
-
-  function maybeLoad(){
-    var sec=document.querySelector('.page[data-page="paletes_sp"]');
-    if(sec&&sec.classList.contains("active")&&!loaded) loadAll();
-  }
-  document.querySelectorAll('.nav-btn').forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
-  document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
-  setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
-  setTimeout(maybeLoad, 300);
-})();
-</script>
-
 
 <!-- ============ ABA BRAFT (independente) ============ -->
 <script>
