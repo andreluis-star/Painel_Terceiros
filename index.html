@@ -445,8 +445,9 @@ body.locked > *:not(#loginScreen){display:none !important}
     <div class="page-head">
       <div class="eyebrow">08 · Mão de Obra</div>
       <h2>Ajudantes terceiros · Visão geral</h2>
-      <p>Quantidade de ajudantes terceiros alocados por mês, segmentados entre Rota e Expedição.</p>
+      <p>Quantidade de ajudantes terceiros alocados por mês, segmentados entre Rota e Expedição. Fonte: sistema <strong>Controle de Mão de Obra</strong> (alacosta27-png.github.io/CONTROLE-MAO-DE-OBRA) — cada pessoa escalada num dia conta 1 diária; ausentes não contam.</p>
     </div>
+    <div id="mo-fonte" class="insight" style="display:none;margin-top:0;margin-bottom:14px"></div>
     <div class="kpi-grid" id="kpi-mo_overview"></div>
     <div class="card">
       <div class="card-head"><div><h3>Total de ajudantes por mês</h3><div class="sub">Volume mensal consolidado (Rota + Expedição)</div></div><span class="card-tag">MÃO DE OBRA</span></div>
@@ -2599,6 +2600,105 @@ body.locked > *:not(#loginScreen){display:none !important}
     setInsight('colab_equipe', `<strong>Leitura do mês:</strong> equipe de ${fmt(tamanhoCurr)} pessoas em ${agg.meses[lastIdx]} (${TEAM_LABELS.filter(t=>agg.teams[t].headcount[lastIdx]).map(t=>t.charAt(0)+t.slice(1).toLowerCase()+' '+fmt(agg.teams[t].headcount[lastIdx])).join(', ')||'sem presenças'}), com ${fmt(pRealCurr)} presenças reais de ${fmt(estimadoCurr)} estimadas (${utilCurr!=null?utilCurr.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%':'—'} de utilização, ${dd.arrow} ${dd.text} vs. ${agg.meses[prevIdx]||'—'}).`);
   }
 
+  // ============ MÃO DE OBRA · SISTEMA CONTROLE-MAO-DE-OBRA (abas 08–12) ============
+  // Fonte principal: Realtime Database do sistema Controle de Mão de Obra
+  // (projeto vagas-terceirizados-portoex), nó "acompanhamento": um registro por
+  // pessoa escalada por dia, com data (AAAA-MM-DD), opNome, opCC (ROTA /
+  // EXPEDIÇÃO), empresaNome (fornecedor), funcao e status. Cada registro = 1
+  // diária; status "Ausente" e dias futuros não contam. Os meses anteriores ao
+  // início do sistema continuam vindo da planilha "ACOMP M.O.3º" (histórico).
+  const MO_DB = 'https://vagas-terceirizados-portoex-default-rtdb.firebaseio.com';
+  async function loadMOSistema(){
+    const r = await fetch(MO_DB + '/acompanhamento.json', { cache:'no-store' });
+    if(!r.ok) throw new Error('HTTP '+r.status+' ao ler o sistema Controle de Mão de Obra');
+    const raw = await r.json() || {};
+    const hoje = absIso(new Date());
+    const regs = Object.values(raw).filter(a => a && /^\d{4}-\d{2}-\d{2}$/.test(String(a.data||'')) && a.data <= hoje
+      && String(a.status||'').trim().toLowerCase() !== 'ausente');
+    if(!regs.length) throw new Error('nenhum registro de acompanhamento no sistema Controle de Mão de Obra');
+    const first = regs.reduce((m,a) => a.data < m ? a.data : m, '9999');
+    // Se o sistema começou no meio do mês, esse mês fica com a planilha (mês incompleto no sistema).
+    const cutover = +first.slice(8,10) <= 5 ? first.slice(0,7) : absIso(new Date(+first.slice(0,4), +first.slice(5,7), 1)).slice(0,7);
+    const byMonth = new Map();
+    regs.forEach(a => {
+      const ym = a.data.slice(0,7);
+      if(!byMonth.has(ym)) byMonth.set(ym, { ops:new Map(), forn:new Map() });
+      const b = byMonth.get(ym);
+      const cc = String(a.opCC||'').trim().toUpperCase();
+      const type = cc==='ROTA' ? 'ROTA' : 'EXPEDIÇÃO';
+      const op = String(a.opNome||a.opCC||'SEM OPERAÇÃO').trim().toUpperCase();
+      const o = b.ops.get(op) || { type, n:0 }; o.n++; if(cc==='ROTA') o.type='ROTA'; b.ops.set(op, o);
+      const f = String(a.empresaNome||'SEM FORNECEDOR').trim().toUpperCase();
+      b.forn.set(f, (b.forn.get(f)||0) + 1);
+    });
+    return { byMonth, cutover, first, total: regs.length };
+  }
+  // Junta histórico da planilha (meses antes do corte) + sistema (do corte em diante)
+  // na mesma estrutura que buildMO / buildMOFornecedor produziam.
+  function mergeMO(sheet, sys){
+    const ymOfLabel = l => { const k = monthKey(l); return k==null ? null : Math.floor(k/12)+'-'+String(k%12+1).padStart(2,'0'); };
+    const cut = sys ? sys.cutover : '9999-99';
+    const months = new Set();
+    const sheetMo = sheet && sheet.mo, sheetForn = sheet && sheet.forn;
+    const sheetIdx = new Map(), sheetFornIdx = new Map();
+    if(sheetMo) sheetMo.meses.forEach((l,i) => { const ym=ymOfLabel(l); if(ym && ym<cut){ months.add(ym); sheetIdx.set(ym,i); } });
+    if(sheetForn) sheetForn.meses.forEach((l,i) => { const ym=ymOfLabel(l); if(ym && ym<cut){ months.add(ym); sheetFornIdx.set(ym,i); } });
+    if(sys) sys.byMonth.forEach((_,ym) => { if(ym>=cut) months.add(ym); });
+    const keys = [...months].sort();
+    const meses = keys.map(absYmLabel);
+    const opMap = new Map();
+    const getOp = (name,type) => { const k=String(name).trim().toUpperCase(); if(!opMap.has(k)) opMap.set(k,{ name:k, type, monthly:new Array(keys.length).fill(0) }); const o=opMap.get(k); if(type==='ROTA') o.type='ROTA'; return o; };
+    keys.forEach((ym,i) => {
+      if(ym < cut){
+        const si = sheetIdx.get(ym);
+        if(sheetMo && si!=null) sheetMo.ops.forEach(o => { if(o.monthly[si]) getOp(o.name,o.type).monthly[i] += o.monthly[si]; });
+      }else if(sys && sys.byMonth.has(ym)){
+        sys.byMonth.get(ym).ops.forEach((v,name) => { getOp(name,v.type).monthly[i] += v.n; });
+      }
+    });
+    const ops = [...opMap.values()];
+    const rota = keys.map((_,i)=>ops.reduce((s,o)=>s+(o.type==='ROTA'?o.monthly[i]:0),0));
+    const exp = keys.map((_,i)=>ops.reduce((s,o)=>s+(o.type!=='ROTA'?o.monthly[i]:0),0));
+    const grand = rota.map((v,i)=>v+exp[i]);
+    const active = []; grand.forEach((v,i)=>{ if(v>0) active.push(i); });
+    const opTotals = {}, opType = {};
+    ops.forEach(o => { opTotals[o.name]=o.monthly.reduce((a,b)=>a+b,0); opType[o.name]=o.type; });
+    const fMap = new Map();
+    const getF = name => { const k=String(name).trim().toUpperCase(); if(!fMap.has(k)) fMap.set(k,{ name:k, monthly:new Array(keys.length).fill(0) }); return fMap.get(k); };
+    keys.forEach((ym,i) => {
+      if(ym < cut){
+        const si = sheetFornIdx.get(ym);
+        if(sheetForn && si!=null) sheetForn.suppliers.forEach(s => { if(s.monthly[si]) getF(s.name).monthly[i] += s.monthly[si]; });
+      }else if(sys && sys.byMonth.has(ym)){
+        sys.byMonth.get(ym).forn.forEach((n,name) => { getF(name).monthly[i] += n; });
+      }
+    });
+    return { mo:{ ops, meses, rota, exp, grand, active, opTotals, opType }, forn:{ suppliers:[...fMap.values()], meses } };
+  }
+  async function loadMaoDeObra(){
+    const [sh, sy] = await Promise.allSettled([
+      loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
+      loadMOSistema()
+    ]);
+    if(sy.status==='rejected' && sh.status==='rejected') throw new Error('sistema Controle de Mão de Obra: '+sy.reason.message+' | planilha: '+sh.reason.message);
+    const sys = sy.status==='fulfilled' ? sy.value : null, sheet = sh.status==='fulfilled' ? sh.value : null;
+    const out = mergeMO(sheet, sys);
+    const el = document.getElementById('mo-fonte');
+    if(el){
+      let html, warn = false;
+      if(sys){
+        html = `Fonte: sistema <strong>Controle de Mão de Obra</strong> a partir de <strong>${absYmLabel(sys.cutover)}</strong> (${fmt(sys.total)} diárias desde ${sys.first.split('-').reverse().join('/')})`
+          + (sheet ? '; meses anteriores vêm do histórico da planilha "ACOMP M.O.3º".' : '. <strong>Histórico da planilha indisponível</strong> — meses anteriores não aparecem.');
+        warn = !sheet;
+      }else{
+        html = `<strong>Sistema Controle de Mão de Obra indisponível</strong> (${escHtml(sy.reason.message)}) — exibindo só a planilha "ACOMP M.O.3º".`;
+        warn = true;
+      }
+      el.className = 'insight'+(warn?' warn':''); el.style.display=''; el.innerHTML = html;
+    }
+    return out;
+  }
+
   // ============ BASE ABSENTEÍSMO (abas 02, 13, 14, 15 e 16) ============
   // Fonte: sistema "Frequência da equipe" (andreluis-star.github.io/ABSENTEISMO),
   // que grava no Realtime Database do Firebase (projeto absenteismo-fc544, nó
@@ -2860,7 +2960,7 @@ body.locked > *:not(#loginScreen){display:none !important}
     loadOcorrExp(); // aba 18 · Dash Expedição (base NaoConformidades.html)
     const [jemResult, moResult, colabResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
-      loadRows(SHEET_NAME_MO).then(rows => ({ mo: buildMO(rows), forn: buildMOFornecedor(rows) })),
+      loadMaoDeObra(), // abas 08–12 · sistema Controle de Mão de Obra (+ histórico da planilha)
       loadAbsenteismo() // abas 02, 13–16 · base ABSENTEÍSMO (Firebase)
     ]);
     const errors = [];
@@ -2878,7 +2978,7 @@ body.locked > *:not(#loginScreen){display:none !important}
       renderMOFiltered();
     }else{
       console.error(moResult.reason);
-      errors.push('aba "'+SHEET_NAME_MO+'": '+moResult.reason.message);
+      errors.push('Mão de Obra: '+moResult.reason.message);
     }
     if(colabResult.status==='fulfilled'){
       colabFullData = colabResult.value;
