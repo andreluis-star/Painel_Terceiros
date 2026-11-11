@@ -737,10 +737,43 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-paletes"></div>
   </section>
-  <!-- 20 · PALETES SP (planilha CONTROLE PBR1 · ITJ → SP) -->
+  <!-- 20 · CONSUMO DE INSUMOS / STRETCH (sistema Conferência Geral — coleção movimentacoes) -->
+  <section class="page" data-page="consumo">
+    <div class="page-head">
+      <div class="eyebrow">20 · Consumo</div>
+      <h2>Consumo de insumos · Stretch</h2>
+      <p>Envios (saídas/consumo) e recebimentos (entradas) de insumos lançados no sistema <strong>Conferência Geral</strong>, por mês e por dia. Abre no stretch; troque o produto no seletor. Inventário e ajustes avulsos não entram nos totais. Dados ao vivo do Firestore.</p>
+    </div>
+    <div class="dex-toolbar">
+      <label class="dex-mes">Produto <select id="conProd"></select></label>
+      <label class="dex-mes">Dias <select id="conDias"><option value="31" selected>Últimos 31 dias</option><option value="60">Últimos 60 dias</option><option value="90">Últimos 90 dias</option></select></label>
+      <div style="flex:1"></div>
+      <button class="toggle-btn" id="conCsv">Exportar CSV</button>
+    </div>
+    <div id="con-status" class="insight" style="display:none"></div>
+    <div class="kpi-grid" id="kpi-consumo"></div>
+    <div class="card">
+      <div class="card-head"><div><h3>Envio × recebimento por mês</h3><div class="sub" id="conSubMes">Saídas (consumo) e entradas por mês</div></div><span class="card-tag">MENSAL</span></div>
+      <div class="chart-wrap tall"><canvas id="chartConMes"></canvas></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Envio × recebimento por dia</h3><div class="sub" id="conSubDia">Saídas e entradas por dia</div></div><span class="card-tag" style="border-color:#f0a500;color:#f0a500">DIÁRIO</span></div>
+      <div class="chart-wrap tall"><canvas id="chartConDia"></canvas></div>
+    </div>
+    <div class="row cols-2" style="margin-top:14px">
+      <div class="card"><div class="card-head"><div><h3>Consumo por veículo</h3><div class="sub" id="conSubPlaca">Saídas por placa no mês atual</div></div><span class="card-tag">PLACA</span></div><div class="chart-wrap tall"><canvas id="chartConPlaca"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Resumo por produto</h3><div class="sub" id="conSubProd">Mês atual × mês anterior</div></div><span class="card-tag">INSUMOS</span></div><div class="table-wrap"><table class="data dex-table" id="tableConProd"></table></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Movimento diário</h3><div class="sub">Entradas, saídas e saldo do período diário</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="table-wrap"><table class="data dex-table" id="tableConDia"></table></div>
+    </div>
+    <div class="insight" id="insight-consumo"></div>
+  </section>
+  <!-- 21 · PALETES SP (planilha CONTROLE PBR1 · ITJ → SP) -->
   <section class="page" data-page="paletes_sp">
     <div class="page-head">
-      <div class="eyebrow">20 · Paletes SP</div>
+      <div class="eyebrow">21 · Paletes SP</div>
       <h2>Paletes PBR1 · Itajaí &rarr; São Paulo</h2>
       <p>Controle de envios de paletes PBR1 de Itajaí para São Paulo, com destaque para os <strong>envios à BRAFT</strong> por dia e por mês. O retorno de paletes vem consolidado (sem separação por destino), então é exibido como total geral.</p>
       <a class="psp-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=1100141065#gid=1100141065" target="_blank" rel="noopener">
@@ -782,10 +815,10 @@ body.locked > *:not(#loginScreen){display:none !important}
     </div>
     <div class="insight" id="insight-psp"></div>
   </section>
-  <!-- 21 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
+  <!-- 22 · BRAFT (planilha CONTROLE PBR1 · aba BRAFT · A:M) -->
   <section class="page" data-page="braft">
     <div class="page-head">
-      <div class="eyebrow">21 · BRAFT</div>
+      <div class="eyebrow">22 · BRAFT</div>
       <h2>Fluxo de paletes BRAFT</h2>
       <p>Checklist completo da BRAFT: paletes enviados (por destino), o que <strong>ficou lá</strong>, stretch, e o resumo de NFs, volumes e peso atualizados pelo grupo. Dados ao vivo da aba BRAFT da planilha.</p>
       <a class="braft-btn-base" href="https://docs.google.com/spreadsheets/d/1Q5-bKh6ivmoO36QpiPfkKoQvWl0nbvPuZcZaCW7vA7I/edit?gid=574891819#gid=574891819" target="_blank" rel="noopener">
@@ -1552,8 +1585,9 @@ body.locked > *:not(#loginScreen){display:none !important}
     {id:'ocorr_exp', label:'Dash Expedição', num:'17'},
     {id:'mattel', label:'Mattel', num:'18'},
     {id:'paletes', label:'Paletes', num:'19'},
-    {id:'paletes_sp', label:'Paletes SP', num:'20'},
-    {id:'braft', label:'BRAFT', num:'21'},
+    {id:'consumo', label:'Consumo', num:'20'},
+    {id:'paletes_sp', label:'Paletes SP', num:'21'},
+    {id:'braft', label:'BRAFT', num:'22'},
   ];
   const raf = (typeof requestAnimationFrame === 'function') ? requestAnimationFrame : (fn => setTimeout(fn, 16));
   let currentPageIdx = 0;
@@ -3657,6 +3691,214 @@ body.locked > *:not(#loginScreen){display:none !important}
 })();
 </script>
 
+
+<!-- ============ ABA CONSUMO / STRETCH (independente) ============ -->
+<script>
+(function(){
+  "use strict";
+  // Fonte: sistema Conferência Geral (Firestore conferenciaptx), coleção
+  // "movimentacoes": {timestamp, tipo: ENTRADA|SAIDA|INVENTARIO|AVULSO,
+  // insumoId, insumoNome, quantidade, placa, conferenteNome, observacao}.
+  // Unidade vem da coleção "insumos". Mesma regra da tela Consumos do admin:
+  // ENTRADA = recebimento, SAIDA = envio/consumo; inventário e avulso fora dos totais.
+  var FS = "https://firestore.googleapis.com/v1/projects/conferenciaptx/databases/(default)/documents";
+  var REFRESH_MS = 5*60*1000;
+  var MES = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
+  var C = { sai:"#ff8a3d", ent:"#4d9fff", saldo:"#3ddc97" };
+  var loaded=false, loading=false, charts={}, MOVS=[], UNID={}, PROD="", DIAS=31;
+  var STRETCH = "__stretch__", TODOS = "__todos__";
+
+  function $(s){ return document.querySelector(s); }
+  function fmtN(n){ return (n||0).toLocaleString("pt-BR",{maximumFractionDigits:2}); }
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function iso(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function ymLbl(ym){ return MES[+ym.slice(5,7)-1]+"/"+ym.slice(2,4); }
+  function setStatus(html,err){ var el=$("#con-status"); if(!el) return; if(!html){ el.style.display="none"; return; } el.style.display="block"; el.className="insight"+(err?" warn":""); el.innerHTML=html; }
+  function mk(id,cfg){ var c=document.getElementById(id); if(!c) return; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(c.getContext("2d"), window.portoexYoY?window.portoexYoY(cfg):cfg); }
+  function dlc(color){ return { color:color, anchor:"end", align:"end", font:{family:"'JetBrains Mono', monospace", weight:"700", size:10}, formatter:function(v){ return v ? fmtN(v) : ""; } }; }
+  var scales = { x:{ grid:{color:"rgba(255,255,255,.05)"}, ticks:{color:"#8b95ab",font:{size:11}} }, y:{ beginAtZero:true, grid:{color:"rgba(255,255,255,.05)"}, ticks:{color:"#8b95ab",font:{size:11}} } };
+
+  function fsVal(v){
+    if(v==null) return null;
+    if("stringValue" in v) return v.stringValue; if("integerValue" in v) return parseInt(v.integerValue,10);
+    if("doubleValue" in v) return v.doubleValue; if("booleanValue" in v) return v.booleanValue;
+    if("timestampValue" in v) return v.timestampValue; if("nullValue" in v) return null;
+    if("mapValue" in v){ var o={}, f=(v.mapValue&&v.mapValue.fields)||{}; Object.keys(f).forEach(function(k){ o[k]=fsVal(f[k]); }); return o; }
+    if("arrayValue" in v) return ((v.arrayValue&&v.arrayValue.values)||[]).map(fsVal);
+    return null;
+  }
+  function fields(doc){ var o={}, f=(doc&&doc.fields)||{}; Object.keys(f).forEach(function(k){ o[k]=fsVal(f[k]); }); return o; }
+  function check(r, col){ if(r.status===403) throw new Error("permission-denied:"+col); if(!r.ok) throw new Error("HTTP "+r.status+" ("+col+")"); return r.json(); }
+
+  // Movimentações desde 1º de janeiro do ano anterior (para o comparativo ano × ano).
+  function fetchMovs(){
+    var desde = new Date(new Date().getFullYear()-1, 0, 1);
+    var body = { structuredQuery:{ from:[{collectionId:"movimentacoes"}],
+      where:{ fieldFilter:{ field:{fieldPath:"timestamp"}, op:"GREATER_THAN_OR_EQUAL", value:{ timestampValue: desde.toISOString() } } },
+      orderBy:[{ field:{fieldPath:"timestamp"}, direction:"ASCENDING" }] } };
+    return fetch(FS+":runQuery",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body) })
+      .then(function(r){ return check(r,"movimentacoes"); })
+      .then(function(arr){ return (arr||[]).filter(function(x){ return x.document; }).map(function(x){ return fields(x.document); }); });
+  }
+  function fetchInsumos(){
+    var out=[], go=function(tok){
+      return fetch(FS+"/insumos?pageSize=300"+(tok?"&pageToken="+encodeURIComponent(tok):""))
+        .then(function(r){ return check(r,"insumos"); })
+        .then(function(j){ (j.documents||[]).forEach(function(d){ var o=fields(d); o._id=d.name.split("/").pop(); out.push(o); }); return j.nextPageToken ? go(j.nextPageToken) : out; });
+    };
+    return go(null);
+  }
+
+  function isStretch(n){ return /stret|strech/i.test(String(n||"")); }
+  function nomeDe(m){ return String(m.insumoNome||"—").trim(); }
+  function unidadeDe(nome){ return UNID[nome] || "un"; }
+  function filtrar(){
+    return MOVS.filter(function(m){
+      if(PROD===TODOS) return true;
+      if(PROD===STRETCH) return isStretch(m.insumoNome);
+      return nomeDe(m)===PROD;
+    });
+  }
+  function unidadeSel(){
+    var ns = {};
+    filtrar().forEach(function(m){ ns[unidadeDe(nomeDe(m))]=1; });
+    var us = Object.keys(ns);
+    return us.length===1 ? us[0] : (us.length ? "unidades mistas" : "");
+  }
+
+  function fillProdutos(){
+    var sel=$("#conProd"); if(!sel) return;
+    var saidas={}; MOVS.forEach(function(m){ if(m.tipo==="SAIDA"){ var n=nomeDe(m); saidas[n]=(saidas[n]||0)+(Number(m.quantidade)||0); } });
+    var nomes={}; MOVS.forEach(function(m){ nomes[nomeDe(m)]=1; }); Object.keys(UNID).forEach(function(n){ nomes[n]=1; });
+    var lista=Object.keys(nomes).filter(function(n){ return n && n!=="—"; }).sort(function(a,b){ return (saidas[b]||0)-(saidas[a]||0) || a.localeCompare(b,"pt-BR"); });
+    var temStretch = lista.some(isStretch);
+    var opts = (temStretch?'<option value="'+STRETCH+'">Stretch (todos os tipos)</option>':'')
+      + lista.map(function(n){ return '<option value="'+esc(n)+'">'+esc(n)+(UNID[n]?' ('+esc(UNID[n])+')':'')+'</option>'; }).join("")
+      + '<option value="'+TODOS+'">Todos os insumos (unidades somadas)</option>';
+    sel.innerHTML = opts;
+    if(!PROD || (PROD!==TODOS && PROD!==STRETCH && lista.indexOf(PROD)<0) || (PROD===STRETCH && !temStretch)) PROD = temStretch ? STRETCH : (lista[0]||TODOS);
+    sel.value = PROD;
+  }
+
+  function render(){
+    var rows = filtrar(), un = unidadeSel();
+    var hoje = new Date(), ymAtual = iso(hoje).slice(0,7);
+    var dAnt = new Date(hoje.getFullYear(), hoje.getMonth()-1, 1), ymAnt = iso(dAnt).slice(0,7);
+    var porMes={}, porDia={}, porPlaca={};
+    rows.forEach(function(m){
+      if(!m.timestamp) return;
+      var d = new Date(m.timestamp); if(isNaN(d)) return;
+      var q = Number(m.quantidade)||0, k = iso(d), ym = k.slice(0,7);
+      if(m.tipo!=="ENTRADA" && m.tipo!=="SAIDA") return;
+      var f = m.tipo==="ENTRADA" ? "e" : "s";
+      (porMes[ym]=porMes[ym]||{e:0,s:0,n:0})[f]+=q; porMes[ym].n++;
+      (porDia[k]=porDia[k]||{e:0,s:0})[f]+=q;
+      if(f==="s" && ym===ymAtual){ var pl=String(m.placa||"").trim().toUpperCase(); if(pl && pl!=="—"){ porPlaca[pl]=(porPlaca[pl]||0)+q; } }
+    });
+    var cur = porMes[ymAtual]||{e:0,s:0,n:0}, ant = porMes[ymAnt]||{e:0,s:0,n:0};
+    var diasMes = hoje.getDate(), diasComSaida = Object.keys(porDia).filter(function(k){ return k.slice(0,7)===ymAtual && porDia[k].s>0; }).length;
+    var mediaDia = diasComSaida ? cur.s/diasComSaida : 0;
+    var mesmoAnoAnt = porMes[(hoje.getFullYear()-1)+"-"+pad(hoje.getMonth()+1)];
+    var unTxt = un ? " "+un : "";
+    var kpi = document.getElementById("kpi-consumo"); kpi.innerHTML="";
+    function card(label, val, sub, delta, cls){
+      var d=document.createElement("div"); d.className="kpi "+(cls||"");
+      d.innerHTML='<div class="kpi-label">'+label+'</div><div class="kpi-value">'+val+'</div><div class="kpi-foot"><span>'+sub+'</span>'+(delta?'<span class="delta '+delta.cls+'">'+delta.txt+'</span>':'')+'</div>';
+      kpi.appendChild(d);
+    }
+    function dlt(a,b,maiorMelhor){ if(!b) return {cls:"flat",txt:"—"}; var p=(a-b)/b*100, up=p>0; return {cls: p===0?"flat":((up===maiorMelhor)?"up":"down"), txt:(up?"▲ ":"▼ ")+Math.abs(p).toLocaleString("pt-BR",{maximumFractionDigits:1})+"%"}; }
+    card("Envio (consumo) "+ymLbl(ymAtual), fmtN(cur.s)+'<small>'+esc(unTxt)+'</small>', "vs. "+ymLbl(ymAnt)+": "+fmtN(ant.s)+(mesmoAnoAnt?" · "+ymLbl((hoje.getFullYear()-1)+"-"+pad(hoje.getMonth()+1))+": "+fmtN(mesmoAnoAnt.s):""), dlt(cur.s, ant.s, false), "accent");
+    card("Recebimento "+ymLbl(ymAtual), fmtN(cur.e)+'<small>'+esc(unTxt)+'</small>', "vs. "+ymLbl(ymAnt)+": "+fmtN(ant.e), dlt(cur.e, ant.e, true), "");
+    card("Saldo do mês", (cur.e-cur.s>0?"+":"")+fmtN(cur.e-cur.s)+'<small>'+esc(unTxt)+'</small>', "recebido − enviado", null, (cur.e-cur.s)<0?"red":"green");
+    card("Média diária de envio", fmtN(mediaDia)+'<small>'+esc(unTxt)+'</small>', diasComSaida+" dia(s) com envio em "+ymLbl(ymAtual)+" (até dia "+diasMes+")", null, "yellow");
+
+    // Mensal (comparativo ano × ano automático quando o mês se repete)
+    var mks = Object.keys(porMes).sort();
+    $("#conSubMes").textContent = "Saídas (consumo) e entradas por mês"+(un?" · em "+un:"");
+    mk("chartConMes",{ type:"bar", data:{ labels:mks.map(ymLbl), datasets:[
+        { label:"Envio (saída)", data:mks.map(function(k){ return porMes[k].s; }), backgroundColor:C.sai, borderRadius:6, datalabels:dlc(C.sai) },
+        { label:"Recebimento (entrada)", data:mks.map(function(k){ return porMes[k].e; }), backgroundColor:C.ent, borderRadius:6, datalabels:dlc(C.ent) } ]},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:24,right:14}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
+
+    // Diário (últimos N dias, inclusive dias sem movimento)
+    var dias=[]; for(var i=DIAS-1;i>=0;i--){ var dd=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()-i); dias.push(iso(dd)); }
+    $("#conSubDia").textContent = "Últimos "+DIAS+" dias"+(un?" · em "+un:"");
+    mk("chartConDia",{ type:"bar", data:{ labels:dias.map(function(k){ return k.slice(8,10)+"/"+k.slice(5,7); }), datasets:[
+        { label:"Envio (saída)", data:dias.map(function(k){ return porDia[k]?porDia[k].s:0; }), backgroundColor:C.sai, borderRadius:4, datalabels:dlc(C.sai) },
+        { label:"Recebimento (entrada)", data:dias.map(function(k){ return porDia[k]?porDia[k].e:0; }), backgroundColor:C.ent, borderRadius:4, datalabels:dlc(C.ent) } ]},
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:22,right:10}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
+
+    // Por placa (mês atual)
+    var pls = Object.keys(porPlaca).sort(function(a,b){ return porPlaca[b]-porPlaca[a]; }).slice(0,12);
+    $("#conSubPlaca").textContent = "Envios por placa em "+ymLbl(ymAtual)+(un?" · em "+un:"")+(pls.length?"":" — sem placa informada");
+    mk("chartConPlaca",{ type:"bar", data:{ labels:pls, datasets:[{ label:"Envio", data:pls.map(function(p){ return porPlaca[p]; }), backgroundColor:C.sai, borderRadius:6, datalabels:dlc(C.sai) }] },
+      options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}}, scales:scales, plugins:{ legend:{display:false} } } });
+
+    // Resumo por produto: mês atual × anterior (todos os insumos, cada um na sua unidade)
+    var pr={};
+    MOVS.forEach(function(m){
+      if(m.tipo!=="ENTRADA" && m.tipo!=="SAIDA") return;
+      var d=new Date(m.timestamp); if(isNaN(d)) return; var ym=iso(d).slice(0,7); if(ym!==ymAtual && ym!==ymAnt) return;
+      var n=nomeDe(m), o=pr[n]=pr[n]||{ce:0,cs:0,as:0}, q=Number(m.quantidade)||0;
+      if(ym===ymAtual){ if(m.tipo==="ENTRADA") o.ce+=q; else o.cs+=q; } else if(m.tipo==="SAIDA") o.as+=q;
+    });
+    var pn=Object.keys(pr).sort(function(a,b){ return pr[b].cs-pr[a].cs || a.localeCompare(b,"pt-BR"); });
+    $("#conSubProd").textContent = ymLbl(ymAtual)+" × "+ymLbl(ymAnt)+" — cada produto na sua unidade";
+    document.getElementById("tableConProd").innerHTML = !pn.length ? '<tbody><tr><td class="dex-none">Sem movimentações nestes meses.</td></tr></tbody>'
+      : '<thead><tr><th>Produto</th><th>Un.</th><th>Envio '+ymLbl(ymAtual)+'</th><th>Receb. '+ymLbl(ymAtual)+'</th><th>Envio '+ymLbl(ymAnt)+'</th><th>Var.</th></tr></thead><tbody>'
+        + pn.map(function(n){ var o=pr[n], d=dlt(o.cs,o.as,false); return '<tr'+(isStretch(n)?' style="background:rgba(255,138,61,.06)"':'')+'><td><b>'+esc(n)+'</b></td><td>'+esc(unidadeDe(n))+'</td><td>'+(o.cs?fmtN(o.cs):"—")+'</td><td>'+(o.ce?fmtN(o.ce):"—")+'</td><td>'+(o.as?fmtN(o.as):"—")+'</td><td><span class="delta '+d.cls+'">'+d.txt+'</span></td></tr>'; }).join("") + '</tbody>';
+
+    // Tabela diária
+    var dd2 = dias.slice().reverse().filter(function(k){ return porDia[k]; });
+    document.getElementById("tableConDia").innerHTML = !dd2.length ? '<tbody><tr><td class="dex-none">Sem movimentações no período.</td></tr></tbody>'
+      : '<thead><tr><th>Data</th><th>Envio (saída)</th><th>Recebimento (entrada)</th><th>Saldo do dia</th></tr></thead><tbody>'
+        + dd2.map(function(k){ var o=porDia[k], s=o.e-o.s; return '<tr><td>'+k.split("-").reverse().join("/")+'</td><td>'+(o.s?fmtN(o.s):"—")+'</td><td>'+(o.e?fmtN(o.e):"—")+'</td><td style="color:'+(s<0?"var(--red)":"var(--green)")+';font-weight:700">'+(s>0?"+":"")+fmtN(s)+'</td></tr>'; }).join("") + '</tbody>';
+
+    var nomeSel = PROD===STRETCH ? "stretch" : PROD===TODOS ? "insumos" : PROD;
+    var ins = document.getElementById("insight-consumo");
+    var dv = dlt(cur.s, ant.s, false);
+    ins.className = "insight"+((cur.e-cur.s)<0?" warn":"");
+    ins.innerHTML = "<strong>"+esc(ymLbl(ymAtual))+":</strong> envio de "+fmtN(cur.s)+esc(unTxt)+" de "+esc(nomeSel)+" ("+dv.txt+" vs. "+ymLbl(ymAnt)+") e recebimento de "+fmtN(cur.e)+esc(unTxt)+
+      ". Média de "+fmtN(mediaDia)+esc(unTxt)+" por dia com envio"+(pls.length?"; veículo com maior consumo: <strong>"+esc(pls[0])+"</strong> ("+fmtN(porPlaca[pls[0]])+esc(unTxt)+")":"")+"."+(un==="unidades mistas"?" <strong>Atenção:</strong> a seleção soma produtos com unidades diferentes.":"");
+  }
+
+  function exportCSV(){
+    var rows = filtrar().slice().sort(function(a,b){ return String(b.timestamp).localeCompare(String(a.timestamp)); });
+    var cell=function(v){ v=v==null?"":String(v); return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; };
+    var head=["Data/Hora","Produto","Tipo","Quantidade","Unidade","Placa","Conferente","Observação"];
+    var lines=rows.map(function(m){ var d=new Date(m.timestamp); return [isNaN(d)?"":d.toLocaleString("pt-BR"), nomeDe(m), m.tipo, m.quantidade, unidadeDe(nomeDe(m)), m.placa, m.conferenteNome, m.observacao].map(cell).join(";"); });
+    var blob=new Blob(["﻿"+[head.join(";")].concat(lines).join("\n")],{type:"text/csv;charset=utf-8"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="consumo_insumos_"+iso(new Date())+".csv"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500);
+  }
+
+  function loadAll(){
+    if(loading) return; loading=true;
+    if(!loaded) setStatus("Carregando movimentações de insumos…",false);
+    Promise.all([fetchMovs(), fetchInsumos().catch(function(e){ console.warn("[Consumo] insumos:",e.message); return []; })]).then(function(res){
+      MOVS = res[0]; UNID = {};
+      res[1].forEach(function(i){ if(i.nome) UNID[String(i.nome).trim()] = i.unidade || "un"; });
+      fillProdutos(); render(); loaded=true;
+      setStatus(MOVS.length ? "" : "Nenhuma movimentação de insumos encontrada desde 1º de janeiro do ano passado.", !MOVS.length);
+      console.log("[Consumo] movimentações:",MOVS.length);
+    }).catch(function(e){
+      console.error("[Consumo]",e);
+      if(String(e.message).indexOf("permission-denied")>=0){
+        setStatus("<strong>Acesso negado ao Firestore.</strong> Publique, nas regras do projeto <em>conferenciaptx</em>, a leitura pública das coleções <code>movimentacoes</code> e <code>insumos</code> (como já foi feito para <code>operacoes</code> na aba Paletes).",true);
+      }else setStatus("Falha ao carregar o consumo de insumos: "+esc(e.message||e),true);
+    }).then(function(){ loading=false; });
+  }
+
+  $("#conProd").addEventListener("change",function(e){ PROD=e.target.value; render(); });
+  $("#conDias").addEventListener("change",function(e){ DIAS=+e.target.value; if(loaded) render(); });
+  $("#conCsv").addEventListener("click",exportCSV);
+  function maybeLoad(){ var sec=document.querySelector('.page[data-page="consumo"]'); if(sec&&sec.classList.contains("active")&&!loaded) loadAll(); }
+  document.querySelectorAll(".nav-btn").forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
+  document.addEventListener("keydown",function(){ setTimeout(maybeLoad,60); });
+  setInterval(function(){ if(loaded) loadAll(); }, REFRESH_MS);
+  setTimeout(maybeLoad, 350);
+})();
+</script>
 
 <!-- ============ ABA PALETES (independente) ============ -->
 <script>
