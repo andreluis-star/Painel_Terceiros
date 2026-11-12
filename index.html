@@ -1056,11 +1056,11 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     <div class="page-head">
       <div class="eyebrow">22 · Consumo</div>
       <h2>Consumo de insumos · Stretch</h2>
-      <p>Envios (saídas/consumo) e recebimentos (entradas) de insumos lançados no sistema <strong>Conferência Geral</strong>, por mês e por dia. Abre no stretch; troque o produto no seletor. Inventário e ajustes avulsos não entram nos totais. Dados ao vivo do Firestore.</p>
+      <p>Envios (saídas/consumo) e recebimentos (entradas) de insumos lançados no sistema <strong>Conferência Geral</strong>, com corte mensal: escolha o mês no seletor (abre no mês atual). Abre no stretch; troque o produto no seletor. Inventário e ajustes avulsos não entram nos totais. Dados ao vivo do Firestore.</p>
     </div>
     <div class="dex-toolbar">
       <label class="dex-mes">Produto <select id="conProd"></select></label>
-      <label class="dex-mes">Dias <select id="conDias"><option value="31" selected>Últimos 31 dias</option><option value="60">Últimos 60 dias</option><option value="90">Últimos 90 dias</option></select></label>
+      <label class="dex-mes">Mês <select id="conMes"></select></label>
       <div style="flex:1"></div>
       <button class="toggle-btn" id="conCsv">Exportar CSV</button>
     </div>
@@ -1079,7 +1079,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
       <div class="card"><div class="card-head"><div><h3>Resumo por produto</h3><div class="sub" id="conSubProd">Mês atual × mês anterior</div></div><span class="card-tag">INSUMOS</span></div><div class="table-wrap"><table class="data dex-table" id="tableConProd"></table></div></div>
     </div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Movimento diário</h3><div class="sub">Entradas, saídas e saldo do período diário</div></div><span class="card-tag">DADOS BRUTOS</span></div>
+      <div class="card-head"><div><h3>Movimento diário</h3><div class="sub">Entradas, saídas e saldo de cada dia do mês escolhido</div></div><span class="card-tag">DADOS BRUTOS</span></div>
       <div class="table-wrap"><table class="data dex-table" id="tableConDia"></table></div>
     </div>
     <div class="insight" id="insight-consumo"></div>
@@ -4011,7 +4011,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
   var REFRESH_MS = 5*60*1000;
   var MES = ["JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"];
   var C = { sai:"#ff8a3d", ent:"#4d9fff", saldo:"#3ddc97" };
-  var loaded=false, loading=false, charts={}, MOVS=[], UNID={}, PROD="", DIAS=31;
+  var loaded=false, loading=false, charts={}, MOVS=[], UNID={}, PROD="", MESSEL="";
   var STRETCH = "__stretch__", TODOS = "__todos__";
 
   function $(s){ return document.querySelector(s); }
@@ -4087,10 +4087,22 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     sel.value = PROD;
   }
 
+  function fillMeses(){
+    var sel=$("#conMes"); if(!sel) return;
+    var set={}; set[iso(new Date()).slice(0,7)]=1;
+    MOVS.forEach(function(m){ var d=new Date(m.timestamp); if(!isNaN(d)) set[iso(d).slice(0,7)]=1; });
+    var ks=Object.keys(set).sort().reverse();
+    sel.innerHTML=ks.map(function(k){ return '<option value="'+k+'">'+ymLbl(k)+'</option>'; }).join("");
+    if(!MESSEL || ks.indexOf(MESSEL)<0) MESSEL=ks[0];
+    sel.value=MESSEL;
+  }
   function render(){
     var rows = filtrar(), un = unidadeSel();
-    var hoje = new Date(), ymAtual = iso(hoje).slice(0,7);
-    var dAnt = new Date(hoje.getFullYear(), hoje.getMonth()-1, 1), ymAnt = iso(dAnt).slice(0,7);
+    // Corte mensal: tudo (exceto o gráfico mensal) olha o mês escolhido no seletor.
+    var hoje = new Date(), ymHoje = iso(hoje).slice(0,7), ymAtual = MESSEL || ymHoje;
+    var yA = +ymAtual.slice(0,4), mA = +ymAtual.slice(5,7);
+    var dAnt = new Date(yA, mA-2, 1), ymAnt = iso(dAnt).slice(0,7);
+    var fimMes = new Date(yA, mA, 0), mesAberto = ymAtual===ymHoje;
     var porMes={}, porDia={}, porPlaca={};
     rows.forEach(function(m){
       if(!m.timestamp) return;
@@ -4103,9 +4115,9 @@ html[data-tema="portoex"] .footer{color:#7a879e}
       if(f==="s" && ym===ymAtual){ var pl=String(m.placa||"").trim().toUpperCase(); if(pl && pl!=="—"){ porPlaca[pl]=(porPlaca[pl]||0)+q; } }
     });
     var cur = porMes[ymAtual]||{e:0,s:0,n:0}, ant = porMes[ymAnt]||{e:0,s:0,n:0};
-    var diasMes = hoje.getDate(), diasComSaida = Object.keys(porDia).filter(function(k){ return k.slice(0,7)===ymAtual && porDia[k].s>0; }).length;
+    var diasMes = mesAberto ? hoje.getDate() : fimMes.getDate(), diasComSaida = Object.keys(porDia).filter(function(k){ return k.slice(0,7)===ymAtual && porDia[k].s>0; }).length;
     var mediaDia = diasComSaida ? cur.s/diasComSaida : 0;
-    var mesmoAnoAnt = porMes[(hoje.getFullYear()-1)+"-"+pad(hoje.getMonth()+1)];
+    var ymAnoAnt = (yA-1)+"-"+pad(mA), mesmoAnoAnt = porMes[ymAnoAnt];
     var unTxt = un ? " "+un : "";
     var kpi = document.getElementById("kpi-consumo"); kpi.innerHTML="";
     function card(label, val, sub, delta, cls){
@@ -4114,10 +4126,10 @@ html[data-tema="portoex"] .footer{color:#7a879e}
       kpi.appendChild(d);
     }
     function dlt(a,b,maiorMelhor){ if(!b) return {cls:"flat",txt:"—"}; var p=(a-b)/b*100, up=p>0; return {cls: p===0?"flat":((up===maiorMelhor)?"up":"down"), txt:(up?"▲ ":"▼ ")+Math.abs(p).toLocaleString("pt-BR",{maximumFractionDigits:1})+"%"}; }
-    card("Envio (consumo) "+ymLbl(ymAtual), fmtN(cur.s)+'<small>'+esc(unTxt)+'</small>', "vs. "+ymLbl(ymAnt)+": "+fmtN(ant.s)+(mesmoAnoAnt?" · "+ymLbl((hoje.getFullYear()-1)+"-"+pad(hoje.getMonth()+1))+": "+fmtN(mesmoAnoAnt.s):""), dlt(cur.s, ant.s, false), "accent");
+    card("Envio (consumo) "+ymLbl(ymAtual), fmtN(cur.s)+'<small>'+esc(unTxt)+'</small>', "vs. "+ymLbl(ymAnt)+": "+fmtN(ant.s)+(mesmoAnoAnt?" · "+ymLbl(ymAnoAnt)+": "+fmtN(mesmoAnoAnt.s):""), dlt(cur.s, ant.s, false), "accent");
     card("Recebimento "+ymLbl(ymAtual), fmtN(cur.e)+'<small>'+esc(unTxt)+'</small>', "vs. "+ymLbl(ymAnt)+": "+fmtN(ant.e), dlt(cur.e, ant.e, true), "");
     card("Saldo do mês", (cur.e-cur.s>0?"+":"")+fmtN(cur.e-cur.s)+'<small>'+esc(unTxt)+'</small>', "recebido − enviado", null, (cur.e-cur.s)<0?"red":"green");
-    card("Média diária de envio", fmtN(mediaDia)+'<small>'+esc(unTxt)+'</small>', diasComSaida+" dia(s) com envio em "+ymLbl(ymAtual)+" (até dia "+diasMes+")", null, "yellow");
+    card("Média diária de envio", fmtN(mediaDia)+'<small>'+esc(unTxt)+'</small>', diasComSaida+" dia(s) com envio em "+ymLbl(ymAtual)+(mesAberto?" (até dia "+diasMes+")":""), null, "yellow");
 
     // Mensal (comparativo ano × ano automático quando o mês se repete)
     var mks = Object.keys(porMes).sort();
@@ -4127,9 +4139,9 @@ html[data-tema="portoex"] .footer{color:#7a879e}
         { label:"Recebimento (entrada)", data:mks.map(function(k){ return porMes[k].e; }), backgroundColor:C.ent, borderRadius:6, datalabels:dlc(C.ent) } ]},
       options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:24,right:14}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
 
-    // Diário (últimos N dias, inclusive dias sem movimento)
-    var dias=[]; for(var i=DIAS-1;i>=0;i--){ var dd=new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()-i); dias.push(iso(dd)); }
-    $("#conSubDia").textContent = "Últimos "+DIAS+" dias"+(un?" · em "+un:"");
+    // Diário: todos os dias do mês escolhido (até hoje, se for o mês corrente)
+    var dias=[]; for(var di=1; di<=diasMes; di++){ dias.push(ymAtual+"-"+pad(di)); }
+    $("#conSubDia").textContent = "Dias de "+ymLbl(ymAtual)+(un?" · em "+un:"");
     mk("chartConDia",{ type:"bar", data:{ labels:dias.map(function(k){ return k.slice(8,10)+"/"+k.slice(5,7); }), datasets:[
         { label:"Envio (saída)", data:dias.map(function(k){ return porDia[k]?porDia[k].s:0; }), backgroundColor:C.sai, borderRadius:4, datalabels:dlc(C.sai) },
         { label:"Recebimento (entrada)", data:dias.map(function(k){ return porDia[k]?porDia[k].e:0; }), backgroundColor:C.ent, borderRadius:4, datalabels:dlc(C.ent) } ]},
@@ -4157,7 +4169,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
 
     // Tabela diária
     var dd2 = dias.slice().reverse().filter(function(k){ return porDia[k]; });
-    document.getElementById("tableConDia").innerHTML = !dd2.length ? '<tbody><tr><td class="dex-none">Sem movimentações no período.</td></tr></tbody>'
+    document.getElementById("tableConDia").innerHTML = !dd2.length ? '<tbody><tr><td class="dex-none">Sem movimentações em '+ymLbl(ymAtual)+'.</td></tr></tbody>'
       : '<thead><tr><th>Data</th><th>Envio (saída)</th><th>Recebimento (entrada)</th><th>Saldo do dia</th></tr></thead><tbody>'
         + dd2.map(function(k){ var o=porDia[k], s=o.e-o.s; return '<tr><td>'+k.split("-").reverse().join("/")+'</td><td>'+(o.s?fmtN(o.s):"—")+'</td><td>'+(o.e?fmtN(o.e):"—")+'</td><td style="color:'+(s<0?"var(--red)":"var(--green)")+';font-weight:700">'+(s>0?"+":"")+fmtN(s)+'</td></tr>'; }).join("") + '</tbody>';
 
@@ -4184,7 +4196,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     Promise.all([fetchMovs(), fetchInsumos().catch(function(e){ console.warn("[Consumo] insumos:",e.message); return []; })]).then(function(res){
       MOVS = res[0]; UNID = {};
       res[1].forEach(function(i){ if(i.nome) UNID[String(i.nome).trim()] = i.unidade || "un"; });
-      fillProdutos(); render(); loaded=true;
+      fillProdutos(); fillMeses(); render(); loaded=true;
       setStatus(MOVS.length ? "" : "Nenhuma movimentação de insumos encontrada desde 1º de janeiro do ano passado.", !MOVS.length);
       console.log("[Consumo] movimentações:",MOVS.length);
     }).catch(function(e){
@@ -4196,7 +4208,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
   }
 
   $("#conProd").addEventListener("change",function(e){ PROD=e.target.value; render(); });
-  $("#conDias").addEventListener("change",function(e){ DIAS=+e.target.value; if(loaded) render(); });
+  $("#conMes").addEventListener("change",function(e){ MESSEL=e.target.value; if(loaded) render(); });
   $("#conCsv").addEventListener("click",exportCSV);
   function maybeLoad(){ var sec=document.querySelector('.page[data-page="consumo"]'); if(sec&&sec.classList.contains("active")&&!loaded) loadAll(); }
   document.querySelectorAll(".nav-btn").forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
