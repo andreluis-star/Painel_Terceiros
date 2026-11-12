@@ -567,6 +567,17 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     <div class="kpi-grid" id="kpi-atraso_expresso"></div>
     <div class="card"><div class="card-head"><div><h3>Atraso expresso × Dias excedidos</h3><div class="sub">Comparativo combinado</div></div><span class="card-tag">COMBINADO</span></div><div class="chart-wrap tall"><canvas id="chartExpressoCombo"></canvas></div></div>
     <div class="insight" id="insight-atraso_expresso"></div>
+    <div id="causa-status" class="insight" style="display:none"></div>
+    <div class="row cols-2" style="margin-top:14px">
+      <div class="card"><div class="card-head"><div><h3>Motivos do atraso</h3><div class="sub" id="causaSubMot">Dias com atraso no período, por motivo</div></div><span class="card-tag">CAUSAS</span></div><div class="chart-wrap tall"><canvas id="chartCausaMotivo"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Motivos por mês</h3><div class="sub">Dias com atraso por motivo, mês a mês</div></div><span class="card-tag">MENSAL</span></div><div class="chart-wrap tall"><canvas id="chartCausaMes"></canvas></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-head"><div><h3>Causas do atraso — dia a dia</h3><div class="sub" id="causaSubTab">Planilha de dados, aba DADOS OP (data na coluna A, causa na coluna J)</div></div>
+        <label class="dex-mes"><input type="checkbox" id="causaSoAtraso" checked style="accent-color:var(--accent);width:15px;height:15px"> Só dias com atraso</label></div>
+      <div class="table-wrap" style="max-height:560px;overflow-y:auto"><table class="data dex-table" id="tableCausas"></table></div>
+    </div>
+    <div class="insight" id="insight-causas"></div>
   </section>
 
   <!-- 03 · SAÍDA A+ -->
@@ -3096,6 +3107,105 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     setInsight(pid, `<strong>Leitura do mês:</strong> ${fmt(cur.quadro)} ${nomePlural.toLowerCase()} em ${cur.label}, com absenteísmo de ${absPctFmt(pctCur)}${prev?` (${d.arrow} ${d.text} vs. ${prev.label})`:''} — ${fmt(cur.codes.FA||0)} falta(s), ${fmt(cur.codes.AT||0)} dia(s) de atestado e ${fmt(cur.codes.FE||0)} dia(s) de férias.${cur.adm||cur.dem?` Movimentação: ${fmt(cur.adm)} admissão(ões) e ${fmt(cur.dem)} desligamento(s).`:''}`, pctCur!=null && pctCur>3 ? 'warn' : '');
   }
 
+  // ============ 02 · CAUSAS DO ATRASO EXPRESSO (aba "DADOS OP" da planilha principal) ============
+  // Colunas: A=data, H=final expresso, I=início de viagem, J=causa do atraso, W=target (20:30).
+  // Atraso do dia = final expresso − target (após a meia-noite conta como o dia seguinte).
+  // O motivo é classificado por palavras-chave do texto da coluna J (um dia pode ter mais de um).
+  const SHEET_NAME_DADOSOP = 'DADOS OP';
+  const CAUSA_CATS = [
+    ['Chegada tardia de carga', /CHEG\w*\s.*TARD|TARDIA|CHEGARAM AP[OÓ]S|CHEGANDO TARDE|N[AÃ]O ESTAVA.*BASE|EM TR[AÂ]NSITO|NO LA[CÇ]O|N[AÃ]O CHEGARAM|CHEGOU COM.*AS \d|CHEGOU.*\d{2}[:H]\d{2}/],
+    ['Carga incluída tarde / alteração', /ADICION\w*|ADICONAD\w*|INCLU[IÍ]D\w*\s.*TARDE|SURGIRAM|DIVIDIDO|VIROU EXPRESSO|DEFINIDO QUE|ALTERA[CÇ][AÃ]O/],
+    ['Documentação / emissão', /DOCUMENT|DOCUMET|EMISS[AÃ]O|BRUDAM|MINUTA/],
+    ['Sexta-feira / saída no domingo', /SEXTA|DOMINGO/],
+    ['Montagem / remanejamento de carga', /REMANEJ|REMAGEN|REMONTAR|COMPACT|MONTAGEM|ORGANI[ZS]|ACOMODAR|AJUSTAR|DESCARREG|CUBAGEM|FORA D[OE] PADR|MISTURAD|SEPARA|COMPLEXA|PALLETE|PALETE/],
+    ['Equipe / mão de obra', /M[AÃ]O DE OBRA|AJUDANTE|BAIXAS NA EQUIPE|DESFALQUE|CONFERENTE|MOROSIDADE|SOBRECARREGADO/],
+    ['Trânsito / BR-101', /TR[AÂ]NS[IÍ]TO|TRANSINTO|BR.?101|ACIDENTE/],
+    ['Veículo / motorista', /MOTORISTA|CANCEL|RASTREADOR|MANUTEN|CHAVE|CHECKLIST|INICIAR VIAGEM/],
+    ['Prioridade / alta demanda', /TERCEIRO|DEMANDA|PRIORIDADE|EXCESSO|ALTA QUANTIDADE|ULTRAPASSOU|MUITA CARGA|MUITAS DESCARGAS/],
+    ['Decisão da gestão', /CELIO|A PEDIDO|AUTORIZADO|SEGURAR|SEGURAMOS|CI[EÊ]NTE/],
+    ['Falta de alinhamento', /ALINHAMENTO/]
+  ];
+  const CAUSA_CORES = ['#ff5b3a','#ffa552','#4d9fff','#a78bfa','#3ddc97','#ff4d6d','#5eead4','#ffd23f','#e056fd','#2d6fd1','#8b95ab','#6b7691'];
+  const SEM_OCORR = /^(OK|N[AÃ]O TEVE|FERIADO|SEM OCORR[EÊ]NCIAS?\.?|0)$/i;
+  let CAUSAS = null;
+  function hhmm(v){ const m=String(v||'').trim().match(/^(-?)(\d{1,2}):(\d{2})/); if(!m) return null; const t=(+m[2])*60+(+m[3]); return m[1]?-t:t; }
+  function categoriasDe(txt){
+    const T=String(txt||'').toUpperCase().normalize('NFC');
+    if(!T.trim() || SEM_OCORR.test(T.trim())) return [];
+    const cats=CAUSA_CATS.filter(c=>c[1].test(T)).map(c=>c[0]);
+    return cats.length?cats:['Outros'];
+  }
+  function buildCausas(rows){
+    const out=[];
+    rows.forEach(r=>{
+      if(!r) return;
+      const m=String(r[0]||'').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if(!m || +m[3]<2020) return;
+      const k=m[3]+'-'+String(+m[2]).padStart(2,'0')+'-'+String(+m[1]).padStart(2,'0');
+      const causa=String(r[9]||'').replace(/\s+/g,' ').trim();
+      const fim=hhmm(r[7]); const alvo=hhmm(r[22])!=null && hhmm(r[22])>=17*60 ? hhmm(r[22]) : 20*60+30;
+      let atraso=null;
+      if(fim!=null){ let f=fim; if(f<6*60) f+=24*60; if(f>=17*60) atraso=f-alvo; }
+      out.push({ k, data:m[1].padStart(2,'0')+'/'+m[2].padStart(2,'0')+'/'+m[3], fim:String(r[7]||'').trim(), atraso, causa, cats:categoriasDe(causa),
+                 domingo:/DOMINGO|SEXTA/i.test(causa) });
+    });
+    out.sort((a,b)=>a.k.localeCompare(b.k));
+    if(!out.length) throw new Error('nenhuma linha com data na aba "'+SHEET_NAME_DADOSOP+'"');
+    return out;
+  }
+  const fmtMin = v => v==null ? '—' : (v<0?'−':'')+Math.floor(Math.abs(v)/60)+':'+String(Math.abs(v)%60).padStart(2,'0')+'h';
+  function renderCausas(){
+    if(!CAUSAS) return;
+    const range=getSelectedPeriodRange();
+    const noPer=CAUSAS.filter(c=>{ const lbl=MES_ABBR[+c.k.slice(5,7)-1]+'/'+c.k.slice(2,4); const mk=monthKey(lbl); return !range || (mk>=range.start && mk<=range.end); });
+    const atrasados=noPer.filter(c=>c.atraso!=null && c.atraso>0);
+    const cont=new Map(), minutos=new Map();
+    atrasados.forEach(c=>{ (c.cats.length?c.cats:['Sem causa informada']).forEach(cat=>{ cont.set(cat,(cont.get(cat)||0)+1); minutos.set(cat,(minutos.get(cat)||0)+c.atraso); }); });
+    const ent=[...cont.entries()].sort((a,b)=>b[1]-a[1]);
+    const corDe=cat=>{ const i=CAUSA_CATS.findIndex(c=>c[0]===cat); return i>=0?CAUSA_CORES[i]:(cat==='Outros'?'#8b95ab':'#3f4760'); };
+    document.getElementById('causaSubMot').textContent=fmt(atrasados.length)+' dia(s) com atraso no período — um dia pode ter mais de um motivo';
+    mkChart('chartCausaMotivo',{ type:'bar', data:{ labels:ent.map(e=>e[0]), datasets:[{ label:'Dias com atraso', data:ent.map(e=>e[1]), backgroundColor:ent.map(e=>corDe(e[0])), borderRadius:6, datalabels:dl('#e8ecf5','end','end') }] },
+      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}}, scales:baseScales, plugins:{ legend:{display:false},
+        tooltip:{ callbacks:{ afterLabel:ctx=>'atraso médio: '+fmtMin(Math.round(minutos.get(ctx.label)/cont.get(ctx.label))) } } } } });
+    // por mês, empilhado pelos 6 motivos mais frequentes (+ demais)
+    const top=ent.slice(0,6).map(e=>e[0]);
+    const meses=[...new Set(atrasados.map(c=>c.k.slice(0,7)))].sort();
+    const ds=top.concat(ent.length>6?['Demais motivos']:[]).map(cat=>({
+      label:cat, backgroundColor:cat==='Demais motivos'?'#9aa3b5':corDe(cat), borderRadius:3,
+      datalabels:{ color:'#0b0f1a', font:{size:10,weight:'700'}, formatter:v=>v?v:'' },
+      data:meses.map(m=>atrasados.filter(c=>{ const cs=c.cats.length?c.cats:['Sem causa informada']; return c.k.slice(0,7)===m && (cat==='Demais motivos' ? cs.some(x=>!top.includes(x)) : cs.includes(cat)); }).length)
+    }));
+    // linha do tempo contínua (sem o comparativo ano × ano: aqui o empilhado por motivo já ocupa as cores)
+    mkChart('chartCausaMes',{ yoy:false, type:'bar', data:{ labels:meses.map(m=>MES_ABBR[+m.slice(5,7)-1]+'/'+m.slice(2,4)), datasets:ds },
+      options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:16,right:10}}, scales:{x:{...baseScales.x,stacked:true},y:{...baseScales.y,stacked:true}}, plugins:{ legend:{position:'top',align:'end'} } } });
+    // tabela
+    const so=document.getElementById('causaSoAtraso').checked;
+    const lista=(so?atrasados:noPer.filter(c=>c.causa)).slice().reverse();
+    const esc2=t=>String(t==null?'':t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    document.getElementById('tableCausas').innerHTML = !lista.length ? '<tbody><tr><td class="dex-none">Nenhum dia neste filtro.</td></tr></tbody>'
+      : '<thead><tr><th>Data</th><th>Final expresso</th><th>Atraso</th><th>Motivo</th><th>Causa informada (coluna J)</th></tr></thead><tbody>'
+        + lista.map(c=>'<tr><td>'+c.data+'</td><td>'+esc2(c.fim||'—')+'</td><td style="font-weight:700;color:'+(c.atraso>0?'var(--red)':'var(--green)')+'">'+(c.atraso!=null?(c.atraso>0?'+':'')+fmtMin(c.atraso):'—')+'</td><td>'
+          + (c.cats.length?c.cats.map(x=>'<span class="dex-st" style="background:'+corDe(x)+'22;color:'+corDe(x)+';margin:1px 3px 1px 0">'+esc2(x)+'</span>').join(''):'<span class="dex-none">sem causa</span>')
+          + '</td><td style="max-width:520px;white-space:normal">'+(c.causa?esc2(c.causa):'<span class="dex-none">não informada</span>')+'</td></tr>').join('') + '</tbody>';
+    const semCausa=atrasados.filter(c=>!c.cats.length).length;
+    const top1=ent[0];
+    setInsight('causas', atrasados.length
+      ? `<strong>Causas do atraso:</strong> ${fmt(atrasados.length)} dia(s) com saída do expresso depois do horário no período. Motivo mais frequente: <strong>${top1?top1[0]:'—'}</strong>${top1?` (${fmt(top1[1])} dia(s), atraso médio de ${fmtMin(Math.round(minutos.get(top1[0])/top1[1]))})`:''}.${semCausa?` ${fmt(semCausa)} dia(s) com atraso sem causa preenchida na coluna J.`:''}`
+      : 'Nenhum dia com atraso do expresso no período selecionado.', semCausa?'warn':'');
+  }
+  async function loadCausas(){
+    const st=document.getElementById('causa-status');
+    try{
+      CAUSAS=buildCausas(await loadRows(SHEET_NAME_DADOSOP, 'A1:Y3000'));
+      if(st) st.style.display='none';
+      renderCausas();
+    }catch(err){
+      console.error('[Causas atraso]',err);
+      if(st){ st.style.display=''; st.className='insight warn'; st.innerHTML='<strong>Não foi possível ler as causas do atraso</strong> (aba "'+SHEET_NAME_DADOSOP+'"): '+String(err.message||err).replace(/</g,'&lt;'); }
+    }
+  }
+  document.getElementById('causaSoAtraso').addEventListener('change', renderCausas);
+
   // ============ PERÍODO CONFIGURÁVEL (compartilhado por todas as abas) ============
   let fullData = null;   // { D, meses } · dados JEM sem filtro de período
   let moFullData = null; // { mo, forn } · dados de Mão de Obra sem filtro de período
@@ -3176,6 +3286,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     renderAll(D, meses);
     renderMOFiltered();
     renderColabFiltered();
+    renderCausas();
   }
   document.getElementById('periodStart').addEventListener('change', onPeriodChange);
   document.getElementById('periodEnd').addEventListener('change', onPeriodChange);
@@ -3189,6 +3300,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
   async function init(){
     setStatus('Carregando dados da planilha…', false);
     loadOcorrExp(); // aba 17 · Dash Expedição (base NaoConformidades.html)
+    loadCausas();   // aba 02 · causas do atraso expresso (aba DADOS OP)
     const [jemResult, moResult, colabResult] = await Promise.allSettled([
       loadRows(SHEET_NAME).then(buildMonthly),
       loadMaoDeObra(), // abas 07–11 · sistema Controle de Mão de Obra (+ histórico da planilha)
@@ -3200,6 +3312,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
       fullData = { D, meses };
       populatePeriodSelectors(meses);
       renderAll(D, meses);
+      renderCausas(); // reaplica o período escolhido às causas do atraso
     }else{
       console.error(jemResult.reason);
       errors.push('aba "'+SHEET_NAME+'": '+jemResult.reason.message);
