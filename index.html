@@ -6,10 +6,59 @@
 <title>Portoex · Expedição & Logística Interna</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+/* ============ TEMA: "escuro" (padrão atual) ou "portoex" (identidade Portoex) ============
+   A escolha fica salva neste navegador. O tema Portoex usa fundo claro, azul-marinho
+   #1A3A6E, laranja #E8611A e as fontes Barlow Condensed / Inter. Os gráficos recebem as
+   cores do tema no momento em que são criados (troca de tema recarrega a página). */
+(function(){
+  var tema = "escuro";
+  try{ tema = localStorage.getItem("portoex_tema") || "escuro"; }catch(e){}
+  // link direto: ...?tema=portoex ou ?tema=escuro (útil para TV/apresentação) — fica salvo
+  try{ var q = new URLSearchParams(location.search).get("tema"); if(q==="portoex"||q==="escuro"){ tema=q; localStorage.setItem("portoex_tema", q); } }catch(e){}
+  document.documentElement.setAttribute("data-tema", tema);
+  window.portoexTema = tema;
+  if(tema !== "portoex" || typeof Chart === "undefined") return;
+  var MAPA = {
+    "#ff5b3a":"#E8611A", "#ffa552":"#F39A4A", "#4d9fff":"#1A3A6E", "#3ddc97":"#1F9D57",
+    "#ffd23f":"#E0A100", "#ff4d6d":"#D63A3A", "#a78bfa":"#6C4BB4", "#5eead4":"#0C7C8C",
+    "#ff8a3d":"#E8611A", "#2d6fd1":"#2E6BC6",
+    "#e8ecf5":"#1A3A6E", "#a4adc4":"#4A5A75", "#8b95ab":"#5B6B85", "#6b7691":"#6B7A93", "#6b7489":"#8A96AB"
+  };
+  var GRADE = "rgba(26,58,110,.09)";
+  function cor(v){
+    if(typeof v !== "string") return v;
+    var k = v.trim().toLowerCase();
+    if(MAPA[k]) return MAPA[k];
+    if(/^rgba\(\s*255\s*,\s*255\s*,\s*255\s*,\s*0?\.0\d+\s*\)$/.test(k)) return GRADE;   // linhas de grade claras do tema escuro
+    return v;
+  }
+  function tingir(o, chave){
+    if(Array.isArray(o)){
+      if(chave === "data") return o;                      // valores numéricos dos gráficos
+      return o.map(function(x){ return tingir(x); });
+    }
+    if(o && typeof o === "object" && Object.getPrototypeOf(o) === Object.prototype){
+      var r = {}; Object.keys(o).forEach(function(k){ r[k] = tingir(o[k], k); }); return r;
+    }
+    return cor(o);
+  }
+  var Orig = Chart;
+  function aplicarPadroes(){ Orig.defaults.color = "#4A5A75"; Orig.defaults.borderColor = GRADE; Orig.defaults.font.family = "'Inter', 'Inter Tight', sans-serif"; try{ Orig.defaults.plugins.legend.labels.color = "#33445f"; }catch(e){} }
+  // os scripts do painel redefinem Chart.defaults depois; reaplicamos a cada gráfico criado
+  function ChartPortoex(ctx, cfg){ aplicarPadroes(); return new Orig(ctx, cfg ? tingir(cfg) : cfg); }
+  Object.setPrototypeOf(ChartPortoex, Orig);
+  ChartPortoex.prototype = Orig.prototype;
+  Orig.defaults.color = "#4A5A75";
+  Orig.defaults.borderColor = GRADE;
+  Orig.defaults.font.family = "'Inter', 'Inter Tight', sans-serif";
+  window.Chart = ChartPortoex;
+})();
+</script>
 <style>
 :root{
   --bg:#0b0f1a; --bg-2:#0f1524; --surface:#141b2e; --surface-2:#1a2238;
@@ -221,6 +270,55 @@ body.presentation .card > .card-head .sub{ display:none; }
 .login-remember input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex:none;}
 .login-remember label{font-size:12px;color:var(--ink-dim);cursor:pointer;letter-spacing:0;text-transform:none;font-weight:500;margin:0;}
 body.locked > *:not(#loginScreen){display:none !important}
+
+/* ============ TEMA PORTOEX (claro · azul-marinho #1A3A6E · laranja #E8611A) ============ */
+html[data-tema="portoex"]{
+  --bg:#f3f5f9; --bg-2:#eef2f8; --surface:#ffffff; --surface-2:#f1f4f9;
+  --border:#dde3ee; --border-strong:#c9d2e2; --ink:#10233f; --ink-dim:#43546f; --ink-muted:#7a879e;
+  --accent:#E8611A; --accent-2:#F39A4A; --blue:#1A3A6E; --blue-deep:#13294f;
+  --green:#1F9D57; --yellow:#E0A100; --red:#D63A3A; --purple:#6C4BB4; --teal:#0C7C8C;
+  --grid:rgba(26,58,110,.09); --navy:#1A3A6E; --card:#ffffff; --line:#dde3ee;
+}
+html[data-tema="portoex"],html[data-tema="portoex"] body{font-family:'Inter','Inter Tight',sans-serif}
+html[data-tema="portoex"] body{background:var(--bg)}
+html[data-tema="portoex"] .header{background:#1A3A6E;border-bottom:3px solid #E8611A;backdrop-filter:none}
+html[data-tema="portoex"] .brand-text h1{color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;letter-spacing:.01em;text-transform:uppercase}
+html[data-tema="portoex"] .brand-text p{color:rgba(255,255,255,.72)}
+html[data-tema="portoex"] .brand-mark{background:#E8611A;color:#fff;font-family:'Barlow Condensed',sans-serif;box-shadow:none}
+html[data-tema="portoex"] .header .btn,html[data-tema="portoex"] .period-pill{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#fff}
+html[data-tema="portoex"] .header .btn:hover{background:rgba(255,255,255,.18)}
+html[data-tema="portoex"] .period-pill strong{color:#fff}
+html[data-tema="portoex"] .period-select{background:#fff;color:#1A3A6E;border-color:transparent}
+html[data-tema="portoex"] .nav-btn{background:#fff;color:#1A3A6E;border-color:#d4dbe8;font-weight:600}
+html[data-tema="portoex"] .nav-btn:hover{border-color:#1A3A6E;color:#1A3A6E}
+html[data-tema="portoex"] .nav-btn .num{background:rgba(26,58,110,.08)}
+html[data-tema="portoex"] .nav-btn.active{background:#1A3A6E;color:#fff;box-shadow:0 6px 16px -8px rgba(26,58,110,.6)}
+html[data-tema="portoex"] .nav-btn.active .num{background:#E8611A;color:#fff;opacity:1}
+html[data-tema="portoex"] .toggle-btn.active{background:#1A3A6E;color:#fff}
+html[data-tema="portoex"] .page-head .eyebrow{color:#E8611A;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em}
+html[data-tema="portoex"] .page-head h2{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:700;color:#1A3A6E;letter-spacing:0;text-transform:uppercase}
+html[data-tema="portoex"] .card h3,html[data-tema="portoex"] .card-head h3{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;color:#1A3A6E;letter-spacing:.01em}
+html[data-tema="portoex"] .kpi,html[data-tema="portoex"] .card{box-shadow:0 1px 2px rgba(16,35,63,.06),0 4px 14px -8px rgba(16,35,63,.12)}
+html[data-tema="portoex"] .kpi-value{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:700;color:#1A3A6E}
+html[data-tema="portoex"] .kpi-label{color:#5b6b85;font-weight:600}
+html[data-tema="portoex"] .card-tag{border-color:#c9d2e2;color:#1A3A6E}
+html[data-tema="portoex"] table.data th{background:#1A3A6E;color:#fff;border-bottom:none}
+html[data-tema="portoex"] table.data tr:hover td{background:rgba(26,58,110,.04)}
+html[data-tema="portoex"] .insight{background:#eef3fb;border-color:#cfdcf0;color:#33445f}
+html[data-tema="portoex"] .insight.warn{background:#fff4ec;border-color:#f5cfb3}
+html[data-tema="portoex"] .insight strong{color:#1A3A6E}
+html[data-tema="portoex"] .op-bar-fill span,html[data-tema="portoex"] .colab-name-chip{color:#fff}
+html[data-tema="portoex"] .op-yoy-prev .op-bar-fill span{color:#10233f}
+html[data-tema="portoex"] .dex-note{background:#eef3fb;border-color:#cfdcf0;color:#33445f}
+html[data-tema="portoex"] .dex-quem{background:#fff1e8;color:#b4470c;border-color:#f5c7a8}
+html[data-tema="portoex"] .pres-bar{background:rgba(255,255,255,.95)}
+html[data-tema="portoex"] body.presentation{background:#f3f5f9}
+html[data-tema="portoex"] #loginScreen{background:#1A3A6E}
+html[data-tema="portoex"] .login-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;color:#1A3A6E;text-transform:uppercase}
+html[data-tema="portoex"] .login-btn{background:#E8611A;color:#fff}
+html[data-tema="portoex"] .login-error{background:#fdecec;color:#b02a2a;border-color:#f3c2c2}
+html[data-tema="portoex"] .footer{color:#7a879e}
+.btn-tema{display:inline-flex;align-items:center;gap:6px}
 </style>
 </head>
 <body class="locked">
@@ -278,6 +376,7 @@ body.locked > *:not(#loginScreen){display:none !important}
       </div>
       <button class="btn" id="refreshBtn">Atualizar agora</button>
       <button class="btn" id="presentBtn">⛶ Tela cheia</button>
+      <button class="btn btn-tema" id="temaBtn" title="Alterna entre o layout atual (escuro) e o padrão Portoex (claro)"></button>
     </div>
   </div>
 </header>
@@ -923,7 +1022,7 @@ body.locked > *:not(#loginScreen){display:none !important}
   function mute(c, age){
     if(Array.isArray(c)) return c.map(function(x){ return mute(x,age); });
     var rgb=hexToRgb(c); if(!rgb) return c;
-    var k=Math.min(0.85, 0.6+0.15*(age-1)), g=[92,101,122];
+    var k=Math.min(0.85, 0.6+0.15*(age-1)), g=(window.portoexTema==='portoex')?[176,186,204]:[92,101,122];
     var r=rgb.map(function(v,i){ return i<3 ? Math.round(v*(1-k)+g[i]*k) : v; });
     return 'rgba('+r[0]+','+r[1]+','+r[2]+','+(rgb[3]*0.95).toFixed(2)+')';
   }
@@ -4825,5 +4924,17 @@ body.locked > *:not(#loginScreen){display:none !important}
 })();
 </script>
 
+<script>
+(function(){
+  var b = document.getElementById("temaBtn"); if(!b) return;
+  var t = window.portoexTema || "escuro";
+  b.textContent = t === "portoex" ? "🌙 Layout escuro" : "🎨 Layout Portoex";
+  b.addEventListener("click", function(){
+    var novo = t === "portoex" ? "escuro" : "portoex";
+    try{ localStorage.setItem("portoex_tema", novo); }catch(e){}
+    location.reload();
+  });
+})();
+</script>
 </body>
 </html>
