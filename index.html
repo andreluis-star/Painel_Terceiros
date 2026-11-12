@@ -59,6 +59,80 @@
   window.Chart = ChartPortoex;
 })();
 </script>
+<script>
+/* ============ LEGENDA NO CABEÇALHO DO CARD ============
+   Gráficos de barra/linha com legenda no topo: a legenda sai de dentro do gráfico
+   (onde ficava colada nos números) e vai para o canto superior direito do card,
+   no lugar da etiqueta (ex.: "PERSONALIZADOS"). Clicar num item esconde/mostra a série. */
+(function(){
+  if(typeof Chart === "undefined") return;
+  var Base = window.Chart;
+  function canvasDe(ctx){
+    if(!ctx) return null;
+    if(typeof ctx === "string") return document.getElementById(ctx);
+    if(ctx.canvas) return ctx.canvas;
+    if(ctx.tagName === "CANVAS") return ctx;
+    return null;
+  }
+  function headDe(canvas){
+    if(!canvas || !canvas.closest) return null;
+    var card = canvas.closest(".card"); if(!card) return null;
+    if(card.querySelectorAll("canvas").length !== 1) return null;   // card com mais de um gráfico: mantém como está
+    return card.querySelector(":scope > .card-head");
+  }
+  function usaLegendaTopo(cfg){
+    if(!cfg || (cfg.type !== "bar" && cfg.type !== "line")) return false;
+    var lg = (cfg.options && cfg.options.plugins && cfg.options.plugins.legend) || {};
+    var disp = lg.display !== undefined ? lg.display : Base.defaults.plugins.legend.display;
+    if(disp === false) return false;
+    var pos = lg.position || "top";
+    return pos === "top";
+  }
+  function swatch(it){
+    var bg = typeof it.fillStyle === "string" ? it.fillStyle : "#888";
+    var bd = typeof it.strokeStyle === "string" ? it.strokeStyle : bg;
+    var dash = it.lineDash && it.lineDash.length;
+    return '<i style="background:'+bg+';border:1.5px '+(dash?'dashed':'solid')+' '+bd+'"></i>';
+  }
+  function desenhar(chart, head, lgOpts){
+    var box = head.querySelector(".chart-legend");
+    if(!box){ box = document.createElement("div"); box.className = "chart-legend"; head.appendChild(box); }
+    head.classList.add("tem-legenda");
+    var gen = (lgOpts && lgOpts.labels && typeof lgOpts.labels.generateLabels === "function") ? lgOpts.labels.generateLabels
+      : Base.defaults.plugins.legend.labels.generateLabels;
+    var itens = []; try{ itens = gen(chart) || []; }catch(e){ itens = []; }
+    box.innerHTML = itens.map(function(it){
+      var i = it.datasetIndex != null ? it.datasetIndex : it.index;
+      return '<button type="button" class="cl-item'+(it.hidden?' off':'')+'" data-i="'+i+'">'+swatch(it)+'<span>'+String(it.text||"").replace(/</g,"&lt;")+'</span></button>';
+    }).join("");
+    box.onclick = function(ev){
+      var b = ev.target.closest(".cl-item"); if(!b) return;
+      var i = +b.getAttribute("data-i");
+      chart.setDatasetVisibility(i, !chart.isDatasetVisible(i)); chart.update();
+      desenhar(chart, head, lgOpts);
+    };
+  }
+  function ChartPainel(ctx, cfg){
+    var canvas = canvasDe(ctx), head = headDe(canvas), lgOpts = null;
+    if(head){
+      var velha = head.querySelector(".chart-legend"); if(velha) velha.remove();
+      head.classList.remove("tem-legenda");
+    }
+    if(head && usaLegendaTopo(cfg)){
+      lgOpts = (cfg.options && cfg.options.plugins && cfg.options.plugins.legend) || {};
+      var opts = Object.assign({}, cfg.options);
+      opts.plugins = Object.assign({}, opts.plugins, { legend: Object.assign({}, lgOpts, { display:false }) });
+      cfg = Object.assign({}, cfg, { options: opts });
+    }else lgOpts = null;
+    var chart = new Base(ctx, cfg);
+    if(head && lgOpts) desenhar(chart, head, lgOpts);
+    return chart;
+  }
+  Object.setPrototypeOf(ChartPainel, Base);
+  ChartPainel.prototype = Base.prototype;
+  window.Chart = ChartPainel;
+})();
+</script>
 <style>
 :root{
   --bg:#0b0f1a; --bg-2:#0f1524; --surface:#141b2e; --surface-2:#1a2238;
@@ -270,6 +344,15 @@ body.presentation .card > .card-head .sub{ display:none; }
 .login-remember input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex:none;}
 .login-remember label{font-size:12px;color:var(--ink-dim);cursor:pointer;letter-spacing:0;text-transform:none;font-weight:500;margin:0;}
 body.locked > *:not(#loginScreen){display:none !important}
+
+/* Legenda dos gráficos no cabeçalho do card (substitui a etiqueta do canto) */
+.card-head.tem-legenda > .card-tag{display:none}
+.chart-legend{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 14px;max-width:62%;}
+.chart-legend .cl-item{appearance:none;border:none;background:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12px;color:var(--ink-dim);padding:2px 0;white-space:nowrap}
+.chart-legend .cl-item i{display:inline-block;width:12px;height:10px;border-radius:2px;flex:none}
+.chart-legend .cl-item.off{opacity:.38;text-decoration:line-through}
+.chart-legend .cl-item:hover{color:var(--ink)}
+@media (max-width:720px){.card-head.tem-legenda{flex-wrap:wrap}.chart-legend{max-width:100%;justify-content:flex-start}}
 
 /* ============ TEMA PORTOEX (claro · azul-marinho #1A3A6E · laranja #E8611A) ============ */
 html[data-tema="portoex"]{
@@ -713,11 +796,10 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     <div class="kpi-grid" id="kpi-ocorr_exp"></div>
     <div class="row cols-2">
       <div class="card"><div class="card-head"><div><h3>Por categoria</h3><div class="sub">O que mais acontece na Expedição</div></div><span class="card-tag">CATEGORIA</span></div><div class="chart-wrap tall"><canvas id="chDexTipo"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Por responsável</h3><div class="sub">Responsável pelo plano de ação</div></div><span class="card-tag">RESPONSÁVEL</span></div><div class="chart-wrap tall"><canvas id="chDexResp"></canvas></div></div>
+      <div class="card"><div class="card-head"><div><h3>Causa raiz</h3><div class="sub">Motivo apontado na análise</div></div><span class="card-tag">CAUSA RAIZ</span></div><div class="chart-wrap tall"><canvas id="chDexCausa"></canvas></div></div>
     </div>
-    <div class="row cols-3" style="margin-top:14px">
+    <div class="row cols-2" style="margin-top:14px">
       <div class="card"><div class="card-head"><div><h3>Situação</h3><div class="sub">Abertas × finalizadas</div></div></div><div class="chart-wrap"><canvas id="chDexStatus"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Causa raiz</h3><div class="sub">Motivo apontado na análise</div></div></div><div class="chart-wrap"><canvas id="chDexCausa"></canvas></div></div>
       <div class="card"><div class="card-head"><div><h3>Idade das abertas</h3><div class="sub">Há quantos dias estão em aberto</div></div></div><div class="chart-wrap"><canvas id="chDexAge"></canvas></div></div>
     </div>
     <div class="card" style="margin-top:14px"><div class="card-head"><div><h3>Evolução mensal</h3><div class="sub">Ocorrências por mês e situação atual</div></div><span class="card-tag">MÊS</span></div><div class="chart-wrap"><canvas id="chDexMes"></canvas></div></div>
@@ -2304,8 +2386,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
       options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,layout:{padding:{right:40}},scales:baseScales,plugins:{legend:{display:false}}}});
     const tipoEntries=countBy(regs,r=>r.categoria);
     hBar('chDexTipo',tipoEntries.slice(0,12),DEX_C.blue);
-    hBar('chDexResp',countBy(regs,r=>r.responsavel).slice(0,12),DEX_C.orange);
-    hBar('chDexCausa',countBy(regs,r=>r.causa||'Não definida').slice(0,8),DEX_C.purple);
+    hBar('chDexCausa',countBy(regs,r=>r.causa||'Não definida').slice(0,12),DEX_C.purple);
 
     const stL=['Em aberto','Finalizadas'], stV=[ab.length,fin], stC=[DEX_C.red,DEX_C.green];
     if(canc){ stL.push('Canceladas'); stV.push(canc); stC.push(DEX_C.gray); }
