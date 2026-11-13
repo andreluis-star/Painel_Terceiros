@@ -1071,12 +1071,11 @@ html[data-tema="portoex"] .footer{color:#7a879e}
       <div class="chart-wrap tall"><canvas id="chartConMes"></canvas></div>
     </div>
     <div class="card" style="margin-top:14px">
-      <div class="card-head"><div><h3>Envio × recebimento por dia</h3><div class="sub" id="conSubDia">Saídas e entradas por dia</div></div><span class="card-tag" style="border-color:#f0a500;color:#f0a500">DIÁRIO</span></div>
+      <div class="card-head"><div><h3>Envio × recebimento por dia</h3><div class="sub" id="conSubDia">Saídas e entradas por dia</div><label class="dex-mes" style="margin-top:8px">Mês <select id="conMesDia"></select></label></div><span class="card-tag" style="border-color:#f0a500;color:#f0a500">DIÁRIO</span></div>
       <div class="chart-wrap tall"><canvas id="chartConDia"></canvas></div>
     </div>
-    <div class="row cols-2" style="margin-top:14px">
-      <div class="card"><div class="card-head"><div><h3>Consumo por veículo</h3><div class="sub" id="conSubPlaca">Saídas por placa no mês atual</div></div><span class="card-tag">PLACA</span></div><div class="chart-wrap tall"><canvas id="chartConPlaca"></canvas></div></div>
-      <div class="card"><div class="card-head"><div><h3>Resumo por produto</h3><div class="sub" id="conSubProd">Mês atual × mês anterior</div></div><span class="card-tag">INSUMOS</span></div><div class="table-wrap"><table class="data dex-table" id="tableConProd"></table></div></div>
+    <div class="row" style="grid-template-columns:1fr;margin-top:14px">
+      <div class="card"><div class="card-head"><div><h3>Resumo por produto</h3><div class="sub" id="conSubProd">Mês escolhido × mês anterior</div></div><span class="card-tag">INSUMOS</span></div><div class="table-wrap"><table class="data dex-table" id="tableConProd"></table></div></div>
     </div>
     <div class="card" style="margin-top:14px">
       <div class="card-head"><div><h3>Movimento diário</h3><div class="sub">Entradas, saídas e saldo de cada dia do mês escolhido</div></div><span class="card-tag">DADOS BRUTOS</span></div>
@@ -4092,9 +4091,9 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     var set={}; set[iso(new Date()).slice(0,7)]=1;
     MOVS.forEach(function(m){ var d=new Date(m.timestamp); if(!isNaN(d)) set[iso(d).slice(0,7)]=1; });
     var ks=Object.keys(set).sort().reverse();
-    sel.innerHTML=ks.map(function(k){ return '<option value="'+k+'">'+ymLbl(k)+'</option>'; }).join("");
+    var opts=ks.map(function(k){ return '<option value="'+k+'">'+ymLbl(k)+'</option>'; }).join("");
     if(!MESSEL || ks.indexOf(MESSEL)<0) MESSEL=ks[0];
-    sel.value=MESSEL;
+    [sel, $("#conMesDia")].forEach(function(x){ if(x){ x.innerHTML=opts; x.value=MESSEL; } });
   }
   function render(){
     var rows = filtrar(), un = unidadeSel();
@@ -4147,12 +4146,6 @@ html[data-tema="portoex"] .footer{color:#7a879e}
         { label:"Recebimento (entrada)", data:dias.map(function(k){ return porDia[k]?porDia[k].e:0; }), backgroundColor:C.ent, borderRadius:4, datalabels:dlc(C.ent) } ]},
       options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:22,right:10}}, scales:scales, plugins:{ legend:{position:"top",align:"end"} } } });
 
-    // Por placa (mês atual)
-    var pls = Object.keys(porPlaca).sort(function(a,b){ return porPlaca[b]-porPlaca[a]; }).slice(0,12);
-    $("#conSubPlaca").textContent = "Envios por placa em "+ymLbl(ymAtual)+(un?" · em "+un:"")+(pls.length?"":" — sem placa informada");
-    mk("chartConPlaca",{ type:"bar", data:{ labels:pls, datasets:[{ label:"Envio", data:pls.map(function(p){ return porPlaca[p]; }), backgroundColor:C.sai, borderRadius:6, datalabels:dlc(C.sai) }] },
-      options:{ indexAxis:"y", responsive:true, maintainAspectRatio:false, layout:{padding:{right:40}}, scales:scales, plugins:{ legend:{display:false} } } });
-
     // Resumo por produto: mês atual × anterior (todos os insumos, cada um na sua unidade)
     var pr={};
     MOVS.forEach(function(m){
@@ -4178,7 +4171,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     var dv = dlt(cur.s, ant.s, false);
     ins.className = "insight"+((cur.e-cur.s)<0?" warn":"");
     ins.innerHTML = "<strong>"+esc(ymLbl(ymAtual))+":</strong> envio de "+fmtN(cur.s)+esc(unTxt)+" de "+esc(nomeSel)+" ("+dv.txt+" vs. "+ymLbl(ymAnt)+") e recebimento de "+fmtN(cur.e)+esc(unTxt)+
-      ". Média de "+fmtN(mediaDia)+esc(unTxt)+" por dia com envio"+(pls.length?"; veículo com maior consumo: <strong>"+esc(pls[0])+"</strong> ("+fmtN(porPlaca[pls[0]])+esc(unTxt)+")":"")+"."+(un==="unidades mistas"?" <strong>Atenção:</strong> a seleção soma produtos com unidades diferentes.":"");
+      ". Média de "+fmtN(mediaDia)+esc(unTxt)+" por dia com envio"+"."+(un==="unidades mistas"?" <strong>Atenção:</strong> a seleção soma produtos com unidades diferentes.":"");
   }
 
   function exportCSV(){
@@ -4208,7 +4201,8 @@ html[data-tema="portoex"] .footer{color:#7a879e}
   }
 
   $("#conProd").addEventListener("change",function(e){ PROD=e.target.value; render(); });
-  $("#conMes").addEventListener("change",function(e){ MESSEL=e.target.value; if(loaded) render(); });
+  ["#conMes","#conMesDia"].forEach(function(id){ $(id).addEventListener("change",function(e){
+    MESSEL=e.target.value; ["#conMes","#conMesDia"].forEach(function(o){ $(o).value=MESSEL; }); if(loaded) render(); }); });
   $("#conCsv").addEventListener("click",exportCSV);
   function maybeLoad(){ var sec=document.querySelector('.page[data-page="consumo"]'); if(sec&&sec.classList.contains("active")&&!loaded) loadAll(); }
   document.querySelectorAll(".nav-btn").forEach(function(b){ b.addEventListener("click",function(){ setTimeout(maybeLoad,60); }); });
