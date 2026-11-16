@@ -3241,8 +3241,13 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     let e = parseInt(document.getElementById('periodEnd').value, 10);
     if(isNaN(s) || isNaN(e)) return null;
     if(s > e){ const tmp = s; s = e; e = tmp; }
-    const start = monthKey(fullData.meses[s]), end = monthKey(fullData.meses[e]);
+    const start = monthKey(fullData.meses[s]);
+    let end = monthKey(fullData.meses[e]);
     if(start==null || end==null) return null;
+    // Se o fim do período é o último mês da planilha JEM, deixa o fim em aberto: as
+    // abas com fonte própria (Mão de Obra, Colaboradores, causas do atraso) mostram
+    // também os meses que a JEM ainda não fechou (ex.: mês corrente).
+    if(e === fullData.meses.length-1) end = Infinity;
     return { start, end };
   }
   function filterMOForPeriod(mo, range){
