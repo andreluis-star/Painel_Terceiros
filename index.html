@@ -2519,9 +2519,16 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     const grid = document.getElementById('kpi-mo_overview'); grid.innerHTML='';
     const t = last2(total), r = last2(rota), e = last2(exp);
     const peak = peakInfo(total, meses);
-    grid.appendChild(kpiCard(`Total ${meses[meses.length-1]||'—'}`, fmt(t.curr), `vs. ${meses[meses.length-2]||'—'}: ${fmt(t.prev)}`, delta(t.curr,t.prev,true), 'accent'));
-    grid.appendChild(kpiCard('Rota', fmt(r.curr), `vs. mês anterior: ${fmt(r.prev)}`, delta(r.curr,r.prev,true)));
-    grid.appendChild(kpiCard('Expedição', fmt(e.curr), `vs. mês anterior: ${fmt(e.prev)}`, delta(e.curr,e.prev,true), 'green'));
+    // mesmo mês do ano anterior (se houver dado)
+    const lastIdx = mo.active[mo.active.length-1];
+    const pj = (lastIdx!=null && mo.prevIdx) ? mo.prevIdx(lastIdx) : -1;
+    const yoyTxt = (v) => pj>=0 ? ` · ${mo.meses[pj]}: ${fmt(v)}` : '';
+    const yoyR = pj>=0 && (mo.rota[pj]||mo.exp[pj]);
+    grid.appendChild(kpiCard(`Total ${meses[meses.length-1]||'—'}`, fmt(t.curr), `vs. ${meses[meses.length-2]||'—'}: ${fmt(t.prev)}`+yoyTxt(pj>=0?mo.grand[pj]:0), delta(t.curr,t.prev,true), 'accent'));
+    grid.appendChild(kpiCard('Rota', fmt(r.curr), `vs. mês anterior: ${fmt(r.prev)}`+(yoyR?yoyTxt(mo.rota[pj]):''), delta(r.curr,r.prev,true)));
+    grid.appendChild(kpiCard('Expedição', fmt(e.curr), `vs. mês anterior: ${fmt(e.prev)}`+(yoyR?yoyTxt(mo.exp[pj]):''), delta(e.curr,e.prev,true), 'green'));
+    if(pj>=0){ const dy = delta(t.curr, mo.grand[pj], true);
+      grid.appendChild(kpiCard(`vs. ${mo.meses[pj]}`, dy.arrow+' '+dy.text, `mesmo mês do ano anterior: ${fmt(mo.grand[pj])} → ${fmt(t.curr)}`, {cls:dy.cls,arrow:'',text:'ano × ano'}, 'purple')); }
     grid.appendChild(kpiCard('Pico no período', fmt(peak.value), peak.mes, {cls:'flat',arrow:'',text:'recorde'}, 'yellow'));
 
     mkChart('chartMOTotal', {
@@ -2901,7 +2908,15 @@ html[data-tema="portoex"] .footer{color:#7a879e}
     const ops = [...opMap.values()];
     const rota = keys.map((_,i)=>ops.reduce((s,o)=>s+(o.type==='ROTA'?o.monthly[i]:0),0));
     const exp = keys.map((_,i)=>ops.reduce((s,o)=>s+(o.type!=='ROTA'?o.monthly[i]:0),0));
-    const grand = rota.map((v,i)=>v+exp[i]);
+    // Quando o bloco de operações da planilha está zerado/quebrado (#REF!) num mês do
+    // histórico, o total do mês vem da soma dos fornecedores (mesma aba). Assim o
+    // comparativo com o ano anterior funciona no total, mesmo sem a divisão Rota/Expedição.
+    const semTipo = keys.map((ym,i) => {
+      if(ym >= cut || rota[i]+exp[i] > 0 || !sheetForn) return 0;
+      const si = sheetFornIdx.get(ym); if(si==null) return 0;
+      return sheetForn.suppliers.reduce((a,sp)=>a+(sp.monthly[si]||0),0);
+    });
+    const grand = rota.map((v,i)=>v+exp[i]+semTipo[i]);
     const active = []; grand.forEach((v,i)=>{ if(v>0) active.push(i); });
     const opTotals = {}, opType = {};
     ops.forEach(o => { opTotals[o.name]=o.monthly.reduce((a,b)=>a+b,0); opType[o.name]=o.type; });
@@ -2915,7 +2930,7 @@ html[data-tema="portoex"] .footer{color:#7a879e}
         sys.byMonth.get(ym).forn.forEach((n,name) => { getF(name).monthly[i] += n; });
       }
     });
-    return { mo:{ ops, meses, rota, exp, grand, active, opTotals, opType }, forn:{ suppliers:[...fMap.values()], meses } };
+    return { mo:{ ops, meses, rota, exp, grand, semTipo, active, opTotals, opType }, forn:{ suppliers:[...fMap.values()], meses } };
   }
   async function loadMaoDeObra(){
     const [sh, sy] = await Promise.allSettled([
